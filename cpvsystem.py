@@ -659,9 +659,14 @@ class StaticCPVSystem(CPVSystem):
                                         m_low = aoi_uf_m_low,
                                         m_high = aoi_uf_m_high)
         
-        if aoi_uf < 0:
-            return 0
-        
+        if isinstance(aoi_uf, (int, float)):
+            if aoi_uf < 0:
+                aoi_uf = 0
+        else:
+        # if aoi_uf < 0:
+        #     return 0
+            aoi_uf[aoi_uf<0] = 0
+
         return aoi_uf
     
     def localize(self, location=None, latitude=None, longitude=None,
