@@ -4,6 +4,7 @@ performance of CPV modules.
 """
 
 import numpy as np
+import pandas as pd
 
 from pvlib import pvsystem
 from pvlib import atmosphere, irradiance
@@ -734,40 +735,49 @@ class LocalizedStaticCPVSystem(CPVSystem, Location):
 def get_simple_util_factor(x, thld, m_low, m_high):
     """
     Retrieves the utilization factor for a variable.
-    
+
     Parameters
     ----------
-    x : numeric / array-like
+    x : numeric / pd.Series
         variable value(s) for the utilization factor calc.
-    
+
     thld : numeric
         limit between the two regression lines of the utilization factor.
-    
+
     m_low : numeric
         inclination of the first regression line of the utilization factor.
-    
+
     m_high : numeric
         inclination of the second regression line of the utilization factor.
-    
+
     Returns
     -------
     single_uf : numeric
         utilization factor for the x variable.
     """
-    if not isinstance(x, np.ndarray):
-        x = np.array(x, ndmin=1)
+    simple_uf = pd.Series()
     
-    suf = []
-    
-    for i in range(len(x)):
-        if x[i] <= thld:
-            simple_uf = 1 + (x[i] - thld) * m_low
-        else:
-            simple_uf = 1 + (x[i] - thld) * m_high
+    if isinstance(x, (int, float)):
+        simple_uf = 1 + (x - thld) * m_low
+#
+#    else:
+#        for index, value in x.items():
+#            if value <= thld:
+#                simple_uf.index = 1 + (value - thld) * m_low
+#            else:
+#                simple_uf.index = 1 + (value - thld) * m_high
+    else:
+        def f(value):
+            if value <= thld:   
+                s = 1 + (value - thld) * m_low
+            else:
+                s = 1 + (value - thld) * m_high
+            return s
         
-        suf.append(simple_uf)
+        simple_uf = x.apply(f)
     
-    return suf
+    return simple_uf
+
 
 
 
