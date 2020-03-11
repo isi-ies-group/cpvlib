@@ -4,16 +4,11 @@ performance of CPV modules.
 """
 
 import numpy as np
-from collections import OrderedDict
 
 from pvlib import pvsystem
 from pvlib import atmosphere, irradiance
 from pvlib.tools import _build_kwargs
 from pvlib.location import Location
-
-import math
-from sklearn import linear_model
-from sklearn.metrics import mean_squared_error
 
 
 class CPVSystem(object):
