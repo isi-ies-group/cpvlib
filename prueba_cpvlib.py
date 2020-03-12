@@ -84,19 +84,9 @@ diode_parameters = static_cpv_sys.calcparams_pvsyst(
    
 dc = static_cpv_sys.singlediode(*diode_parameters)
 
-uf_am = static_cpv_sys.get_am_util_factor(
-    airmass=location.get_airmass(meteo.index).airmass_absolute,
-    # am_thld=module_params['am_thld'], 
-    # am_uf_m_low=module_params['am_uf_m_low']/module_params['IscDNI_top'],
-    # am_uf_m_high=module_params['am_uf_m_high']/module_params['IscDNI_top']
-    )
+uf_am = static_cpv_sys.get_am_util_factor(airmass=location.get_airmass(meteo.index).airmass_absolute)
 
-uf_ta = static_cpv_sys.get_tempair_util_factor(
-temp_air=meteo['Temp. Ai 1'],
-# ta_thld=module_params['ta_thld'] , 
-# ta_uf_m_low=module_params['ta_uf_m_low']/module_params['IscDNI_top'],
-# ta_uf_m_high=module_params['ta_uf_m_high']/module_params['IscDNI_top']
-)
+uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=meteo['Temp. Ai 1'])
 
 uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_temp']
 
@@ -106,17 +96,11 @@ uf_aoi = static_cpv_sys.get_aoi_util_factor(
     aoi=static_cpv_sys.get_aoi(
             solar_zenith=location.get_solarposition(meteo.index).zenith,
             solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-            ),
-    # aoi_thld=module_params['aoi_thld'], 
-    # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
-    # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
+            )
 )
 
 uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
     aoi=0,
-    # aoi_thld=module_params['aoi_thld'], 
-    # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
-    # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
 )
 
 uf_aoi_norm = uf_aoi / uf_aoi_ast

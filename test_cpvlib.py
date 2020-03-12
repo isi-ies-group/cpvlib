@@ -125,5 +125,4 @@ def test_daily_energy():
     
     uf_global = uf_am_at * uf_aoi_norm
     
-    # (dc['p_mp'] * uf_global).plot()
     assert (dc['p_mp'] * uf_global).sum() == 6377.265283689235
