@@ -227,7 +227,7 @@ class CPVSystem(object):
                                     resistance_series, resistance_shunt, 
                                     nNsVth, ivcurve_pnts=ivcurve_pnts)
 
-    def get_am_util_factor(self, airmass, am_thld, am_uf_m_low, am_uf_m_high):
+    def get_am_util_factor(self, airmass, am_thld=None, am_uf_m_low=None, am_uf_m_high=None):
         """
         Retrieves the utilization factor for airmass.
         
@@ -252,13 +252,17 @@ class CPVSystem(object):
         am_uf : numeric
             the utilization factor for airmass.
         """
-        
-        return get_simple_util_factor(x = airmass, thld = am_thld, 
-                                      m_low = am_uf_m_low,
-                                      m_high = am_uf_m_high)
+        if am_thld is not None:
+            return get_simple_util_factor(x = airmass, thld = am_thld, 
+                              m_low = am_uf_m_low,
+                              m_high = am_uf_m_high)
+        else:
+            return get_simple_util_factor(x = airmass, thld = self.module_parameters['am_thld'], 
+                                       m_low = self.module_parameters['am_uf_m_low'],
+                                       m_high = self.module_parameters['am_uf_m_high'])
     
-    def get_tempair_util_factor(self, temp_air, ta_thld, ta_uf_m_low, 
-                                ta_uf_m_high):
+    def get_tempair_util_factor(self, temp_air, ta_thld=None, ta_uf_m_low=None, 
+                                ta_uf_m_high=None):
         """
         Retrieves the utilization factor for ambient temperature. 
         
@@ -283,10 +287,14 @@ class CPVSystem(object):
         ta_uf : numeric
             the utilization factor for ambient temperature.
         """
-        
-        return get_simple_util_factor(x = temp_air, thld = ta_thld, 
+        if ta_thld is not None:
+            return get_simple_util_factor(x = temp_air, thld = ta_thld, 
                                       m_low = ta_uf_m_low,
                                       m_high = ta_uf_m_high)
+        else:
+            return get_simple_util_factor(x = temp_air, thld = self.module_parameters['ta_thld'], 
+                                       m_low = self.module_parameters['ta_uf_m_low'],
+                                       m_high = self.module_parameters['ta_uf_m_high'])
     
     def get_dni_util_factor(self, dni, dni_thld, dni_uf_m_low, dni_uf_m_high):
         """
@@ -629,7 +637,7 @@ class StaticCPVSystem(CPVSystem):
                                                albedo=self.albedo,
                                                **kwargs)
 
-    def get_aoi_util_factor(self, aoi, aoi_thld, aoi_uf_m_low, aoi_uf_m_high):
+    def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
         Retrieves the utilization factor for the Angle of Incidence.
         
@@ -654,10 +662,14 @@ class StaticCPVSystem(CPVSystem):
         aoi_uf : numeric
             the utilization factor for AOI.
         """
-                
-        aoi_uf = get_simple_util_factor(x = aoi, thld = aoi_thld, 
+        if aoi_thld is not None:
+            aoi_uf = get_simple_util_factor(x = aoi, thld = aoi_thld, 
                                         m_low = aoi_uf_m_low,
                                         m_high = aoi_uf_m_high)
+        else:
+            aoi_uf = get_simple_util_factor(x = aoi, thld = self.module_parameters['aoi_thld'], 
+                                       m_low = self.module_parameters['aoi_uf_m_low'],
+                                       m_high = self.module_parameters['aoi_uf_m_high'])
         
         if isinstance(aoi_uf, (int, float)):
             if aoi_uf < 0:
