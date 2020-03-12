@@ -99,7 +99,9 @@ uf_aoi = static_cpv_sys.get_aoi_util_factor(
             )
 )
 
-uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(aoi=0)
+uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
+    aoi=0,
+)
 
 uf_aoi_norm = uf_aoi / uf_aoi_ast
 
