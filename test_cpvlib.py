@@ -33,15 +33,15 @@ module_params = {
 
 UF_parameters = {
     "IscDNI_top": 0.96 / 1000,
-    "thld_aoi": 61.978505569631494,
-    "m_low_aoi": -2.716773886925838e-07,
-    "m_high_aoi": -1.781998474992582e-05,
-    "thld_am": 4.574231933073185,
-    "m_low_am": 3.906372068620377e-06,
-    "m_high_am": -3.0335768119184845e-05,
-    "thld_temp": 50,
-    "m_low_temp": 4.6781224141650075e-06,
-    "m_high_temp": 0,
+    "aoi_thld": 61.978505569631494,
+    "aoi_uf_m_low": -2.716773886925838e-07,
+    "aoi_uf_m_high": -1.781998474992582e-05,
+    "am_thld": 4.574231933073185,
+    "am_uf_m_low": 3.906372068620377e-06,
+    "am_uf_m_high": -3.0335768119184845e-05,
+    "ta_thld": 50,
+    "ta_uf_m_low": 4.6781224141650075e-06,
+    "ta_uf_m_high": 0,
     "weight_am": 0.2,
     "weight_temp": 0.8,
 }
@@ -88,16 +88,16 @@ def test_daily_energy():
     
     uf_am = static_cpv_sys.get_am_util_factor(
         airmass=location.get_airmass(meteo.index).airmass_absolute,
-        am_thld=module_params['thld_am'], 
-        am_uf_m_low=module_params['m_low_am']/module_params['IscDNI_top'],
-        am_uf_m_high=module_params['m_high_am']/module_params['IscDNI_top']
+        # am_thld=module_params['am_thld'], 
+        # am_uf_m_low=module_params['am_uf_m_low']/module_params['IscDNI_top'],
+        # am_uf_m_high=module_params['am_uf_m_high']/module_params['IscDNI_top']
         )
     
     uf_ta = static_cpv_sys.get_tempair_util_factor(
     temp_air=meteo['Temp. Ai 1'],
-    ta_thld=module_params['thld_temp'] , 
-    ta_uf_m_low=module_params['m_low_temp']/module_params['IscDNI_top'],
-    ta_uf_m_high=module_params['m_high_temp']/module_params['IscDNI_top']
+    # ta_thld=module_params['ta_thld'] , 
+    # ta_uf_m_low=module_params['ta_uf_m_low']/module_params['IscDNI_top'],
+    # ta_uf_m_high=module_params['ta_uf_m_high']/module_params['IscDNI_top']
     )
     
     uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_temp']
@@ -109,16 +109,16 @@ def test_daily_energy():
                 solar_zenith=location.get_solarposition(meteo.index).zenith,
                 solar_azimuth=location.get_solarposition(meteo.index).azimuth,
                 ),
-        aoi_thld=module_params['thld_aoi'], 
-        aoi_uf_m_low=module_params['m_low_aoi']/module_params['IscDNI_top'],
-        aoi_uf_m_high=module_params['m_high_aoi']/module_params['IscDNI_top']
+        # aoi_thld=module_params['aoi_thld'], 
+        # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
+        # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
     )
     
     uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
         aoi=0,
-        aoi_thld=module_params['thld_aoi'], 
-        aoi_uf_m_low=module_params['m_low_aoi']/module_params['IscDNI_top'],
-        aoi_uf_m_high=module_params['m_high_aoi']/module_params['IscDNI_top']
+        # aoi_thld=module_params['aoi_thld'], 
+        # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
+        # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
     )
     
     uf_aoi_norm = uf_aoi / uf_aoi_ast

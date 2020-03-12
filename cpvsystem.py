@@ -258,8 +258,8 @@ class CPVSystem(object):
                               m_high = am_uf_m_high)
         else:
             return get_simple_util_factor(x = airmass, thld = self.module_parameters['am_thld'], 
-                                       m_low = self.module_parameters['am_uf_m_low'],
-                                       m_high = self.module_parameters['am_uf_m_high'])
+                                       m_low = self.module_parameters['am_uf_m_low']/self.module_parameters['IscDNI_top'],
+                                       m_high = self.module_parameters['am_uf_m_high']/self.module_parameters['IscDNI_top'])
     
     def get_tempair_util_factor(self, temp_air, ta_thld=None, ta_uf_m_low=None, 
                                 ta_uf_m_high=None):
@@ -293,8 +293,8 @@ class CPVSystem(object):
                                       m_high = ta_uf_m_high)
         else:
             return get_simple_util_factor(x = temp_air, thld = self.module_parameters['ta_thld'], 
-                                       m_low = self.module_parameters['ta_uf_m_low'],
-                                       m_high = self.module_parameters['ta_uf_m_high'])
+                                       m_low = self.module_parameters['ta_uf_m_low']/self.module_parameters['IscDNI_top'],
+                                       m_high = self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
     
     def get_dni_util_factor(self, dni, dni_thld, dni_uf_m_low, dni_uf_m_high):
         """
@@ -668,8 +668,8 @@ class StaticCPVSystem(CPVSystem):
                                         m_high = aoi_uf_m_high)
         else:
             aoi_uf = get_simple_util_factor(x = aoi, thld = self.module_parameters['aoi_thld'], 
-                                       m_low = self.module_parameters['aoi_uf_m_low'],
-                                       m_high = self.module_parameters['aoi_uf_m_high'])
+                                       m_low = self.module_parameters['aoi_uf_m_low']/self.module_parameters['IscDNI_top'],
+                                       m_high = self.module_parameters['aoi_uf_m_high']/self.module_parameters['IscDNI_top'])
         
         if isinstance(aoi_uf, (int, float)):
             if aoi_uf < 0:
