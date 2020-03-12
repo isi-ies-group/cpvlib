@@ -48,7 +48,7 @@ UF_parameters = {
 
 module_params.update(UF_parameters)
 
-def test_pmp():
+def test_daily_energy():
     
     meteo = pd.read_csv('meteo2020_03_04.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
     meteo.index = meteo.index.tz_localize('Europe/Madrid')
@@ -68,13 +68,6 @@ def test_pmp():
         losses_parameters=None,
         name=None,
     )
-    
-    aoi = pvlib.irradiance.aoi(
-        static_cpv_sys.surface_tilt,
-        static_cpv_sys.surface_azimuth,
-        solar_zenith=location.get_solarposition(meteo.index).zenith,
-        solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-        )
     
     meteo['dii'] = pvlib.irradiance.beam_component(
         static_cpv_sys.surface_tilt,
