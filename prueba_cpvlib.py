@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar  3 19:09:17 2020
-
 @author: Ruben
 """
+
 import pandas as pd
 
 import pvlib
