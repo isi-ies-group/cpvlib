@@ -53,6 +53,10 @@ meteo.index = meteo.index.tz_localize('Europe/Madrid')
 
 location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
+solar_zenith = location.get_solarposition(meteo.index).zenith
+solar_azimuth = location.get_solarposition(meteo.index).azimuth
+
+#%% StaticCPVSystem
 static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_tilt=30,
     surface_azimuth=180,
@@ -90,12 +94,7 @@ uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=meteo['Temp. Ai 1'])
 
 uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_temp']
 
-# ax=meteo['dii'].plot();meteo['Bn'].plot(ax=ax)
-
-aoi = static_cpv_sys.get_aoi(
-            solar_zenith=location.get_solarposition(meteo.index).zenith,
-            solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-            )
+aoi = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
 uf_aoi = static_cpv_sys.get_aoi_util_factor(aoi=aoi)
 
@@ -105,4 +104,25 @@ uf_aoi_norm = uf_aoi / uf_aoi_ast
 
 uf_global = uf_am_at * uf_aoi_norm
 
-(dc['p_mp'] * uf_global).plot()
+# (dc['p_mp'] * uf_global).plot()
+
+#%% DiffuseHybridSystem
+diffuse_hybrid_sys = cpvlib.DiffuseHybridSystem(
+    surface_tilt=30,
+    surface_azimuth=180,
+    module=None,
+    module_parameters=module_params,
+    modules_per_string=1,
+    strings_per_inverter=1,
+    inverter=None,
+    inverter_parameters=None,
+    racking_model="insulated",
+    losses_parameters=None,
+    name=None,
+)
+
+aoi = diffuse_hybrid_sys.get_aoi(solar_zenith, solar_azimuth)
+
+irr_hybrid = diffuse_hybrid_sys.get_irradiance(solar_zenith, solar_azimuth, dni=meteo['Bn'],
+                                  ghi=meteo['Gh'], dhi=meteo['Dh'], aoi=aoi,
+                                  aoi_limit=55)

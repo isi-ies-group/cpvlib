@@ -747,8 +747,77 @@ class LocalizedStaticCPVSystem(CPVSystem, Location):
         return ('LocalizedStaticCPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
+class DiffuseHybridSystem(pvsystem.PVSystem):
+    
+    def __repr__(self):
+        attrs = ['name', 'module', 'inverter', 'racking_model']
+        return ('DiffuseHybridSystem: \n  ' + '\n  '.join(
+            ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
+    def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
+                       aoi, aoi_limit, dni_extra=None, airmass=None,
+                       model='haydavies', **kwargs):
+        """
+        Uses the :py:func:`irradiance.get_total_irradiance` function to
+        calculate the plane of array irradiance components on a Dual axis 
+        tracker.
 
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+        dni : float or Series
+            Direct Normal Irradiance
+        ghi : float or Series
+            Global horizontal irradiance
+        dhi : float or Series
+            Diffuse horizontal irradiance
+        dni_extra : None, float or Series, default None
+            Extraterrestrial direct normal irradiance
+        airmass : None, float or Series, default None
+            Airmass
+        model : String, default 'haydavies'
+            Irradiance model.
+
+        **kwargs
+            Passed to :func:`irradiance.total_irrad`.
+
+        Returns
+        -------
+        irradiation : DataFrame
+        """
+
+        # not needed for all models, but this is easier
+        if dni_extra is None:
+            dni_extra = irradiance.get_extra_radiation(solar_zenith.index)
+
+        if airmass is None:
+            airmass = atmosphere.get_relative_airmass(solar_zenith)
+        
+        irr = irradiance.get_total_irradiance(self.surface_tilt,
+                                               self.surface_azimuth,
+                                               solar_zenith, solar_azimuth,
+                                               dni, ghi, dhi,
+                                               dni_extra=dni_extra,
+                                               airmass=airmass,
+                                               model=model,
+                                               albedo=self.albedo,
+                                               **kwargs)
+        
+        poa_diffuse = irr['poa_sky_diffuse'] + irr['poa_ground_diffuse']
+        
+        dii = irradiance.beam_component(
+            self.surface_tilt,
+            self.surface_azimuth,
+            solar_zenith,
+            solar_azimuth,
+            dni)
+        
+        return pd.concat([poa_diffuse[aoi<aoi_limit],
+                          poa_diffuse[aoi>aoi_limit] + dii[aoi>aoi_limit]]).sort_index()
+    
 def get_simple_util_factor(x, thld, m_low, m_high):
     """
     Retrieves the utilization factor for a variable.

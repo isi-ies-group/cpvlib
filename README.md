@@ -7,3 +7,5 @@ Parte del trabajo de Marcos
 
 TO DO:
 * Auto rellenar los parámetros de UF desde self.xxx para UF_DNI
+* Generar dii directamente desde el método StaticCPVSystem.get_irradiance()
+* Contar efecto desuniformidad en células de base cuando DNI se suma a difusa
