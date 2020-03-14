@@ -92,12 +92,12 @@ uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_te
 
 # ax=meteo['dii'].plot();meteo['Bn'].plot(ax=ax)
 
-uf_aoi = static_cpv_sys.get_aoi_util_factor(
-    aoi=static_cpv_sys.get_aoi(
+aoi = static_cpv_sys.get_aoi(
             solar_zenith=location.get_solarposition(meteo.index).zenith,
             solar_azimuth=location.get_solarposition(meteo.index).azimuth,
             )
-)
+
+uf_aoi = static_cpv_sys.get_aoi_util_factor(aoi=aoi)
 
 uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(aoi=0)
 
