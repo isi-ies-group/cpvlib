@@ -126,3 +126,5 @@ aoi = diffuse_hybrid_sys.get_aoi(solar_zenith, solar_azimuth)
 irr_hybrid = diffuse_hybrid_sys.get_irradiance(solar_zenith, solar_azimuth, dni=meteo['Bn'],
                                   ghi=meteo['Gh'], dhi=meteo['Dh'], aoi=aoi,
                                   aoi_limit=55)
+
+irr_hybrid.plot()
