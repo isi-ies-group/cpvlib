@@ -5,6 +5,7 @@ Created on Wed Mar 11 18:18:09 2020
 @author: Ruben
 """
 import pandas as pd
+import pytest
 
 import pvlib
 import cpvsystem as cpvlib
@@ -48,9 +49,15 @@ UF_parameters = {
 
 module_params.update(UF_parameters)
 
-def test_daily_energy():
+test_data = [
+    ('meteo2020_03_04.txt', 6377.265283689235),
+    ('meteo2020_03_14.txt', 8494.147901845981),
+    ]
+
+@pytest.mark.parametrize("dia, p_mp", test_data)
+def test_StaticCPVSystem_daily_energy(dia, p_mp):
     
-    meteo = pd.read_csv('meteo2020_03_04.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
+    meteo = pd.read_csv(dia, sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
     meteo.index = meteo.index.tz_localize('Europe/Madrid')
     
     location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
@@ -125,4 +132,4 @@ def test_daily_energy():
     
     uf_global = uf_am_at * uf_aoi_norm
     
-    assert (dc['p_mp'] * uf_global).sum() == 6377.265283689235
+    assert (dc['p_mp'] * uf_global).sum() == p_mp
