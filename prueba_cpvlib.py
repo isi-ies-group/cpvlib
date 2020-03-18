@@ -5,11 +5,13 @@ Created on Tue Mar  3 19:09:17 2020
 """
 
 import pandas as pd
+import numpy as np
+# import matplotlib.pyplot as plt
 
 import pvlib
 import cpvsystem as cpvlib
 
-module_params = {
+module_params_cpv = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
     "I_L_ref": 0.96,
@@ -31,7 +33,7 @@ module_params = {
     "Vmpo": 43.9,
 }
 
-UF_parameters = {
+UF_parameters_cpv = {
     "IscDNI_top": 0.96 / 1000,
     "aoi_thld": 61.978505569631494,
     "aoi_uf_m_low": -2.716773886925838e-07,
@@ -46,9 +48,9 @@ UF_parameters = {
     "weight_temp": 0.8,
 }
 
-module_params.update(UF_parameters)
+module_params_cpv.update(UF_parameters_cpv)
 
-meteo = pd.read_csv('meteo2020_03_04.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
+meteo = pd.read_csv('meteo2020_03_14.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
 meteo.index = meteo.index.tz_localize('Europe/Madrid')
 
 location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
@@ -56,12 +58,15 @@ location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, 
 solar_zenith = location.get_solarposition(meteo.index).zenith
 solar_azimuth = location.get_solarposition(meteo.index).azimuth
 
+# en fichero 'meteo2020_03_14.txt', el pira de difusa está sin bola sombreado (comparación piras)
+meteo['Dh'] = meteo['Gh'] - (meteo['Bn'] * np.cos(np.radians(solar_zenith)))
+
 #%% StaticCPVSystem
 static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_tilt=30,
     surface_azimuth=180,
     module=None,
-    module_parameters=module_params,
+    module_parameters=module_params_cpv,
     modules_per_string=1,
     strings_per_inverter=1,
     inverter=None,
@@ -79,20 +84,22 @@ meteo['dii'] = pvlib.irradiance.beam_component(
     dni=meteo['Bn']
     )
 
-celltemp = static_cpv_sys.pvsyst_celltemp(
+celltemp_cpv = static_cpv_sys.pvsyst_celltemp(
     meteo['dii'], meteo['Temp. Ai 1'], meteo['V.Vien.1']
 )
 
-diode_parameters = static_cpv_sys.calcparams_pvsyst(
-    meteo['dii'], celltemp)
+diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
+    meteo['dii'], celltemp_cpv)
    
-dc = static_cpv_sys.singlediode(*diode_parameters)
+dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
 
-uf_am = static_cpv_sys.get_am_util_factor(airmass=location.get_airmass(meteo.index).airmass_absolute)
+# TO DO: Ejecutar los UFs internamente en StaticCPVSystem
+uf_am = static_cpv_sys.get_am_util_factor(airmass=
+                                          location.get_airmass(meteo.index).airmass_absolute)
 
 uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=meteo['Temp. Ai 1'])
 
-uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_temp']
+uf_am_at = uf_am * module_params_cpv['weight_am'] + uf_ta * module_params_cpv['weight_temp']
 
 aoi = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
@@ -103,15 +110,38 @@ uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(aoi=0)
 uf_aoi_norm = uf_aoi / uf_aoi_ast
 
 uf_global = uf_am_at * uf_aoi_norm
+# TO DO
 
-(dc['p_mp'] * uf_global).plot()
+(dc_cpv['p_mp'] * uf_global).plot()
 
 #%% DiffuseHybridSystem
+module_params_diffuse = {
+    "gamma_ref": 5.524,
+    "mu_gamma": 0.003,
+    "I_L_ref": 0.96,
+    "I_o_ref": 0.00000000017,
+    "R_sh_ref": 5226,
+    "R_sh_0": 21000,
+    "R_sh_exp": 5.50,
+    "R_s": 0.01,
+    "alpha_sc": 0.00,
+    "EgRef": 3.91,
+    "irrad_ref": 1000,
+    "temp_ref": 25,
+    "cells_in_series": 12,
+    "cells_in_parallel": 48,
+    "eta_m": 0.32,
+    "alpha_absorption": 0.9,
+    "Area": 1.2688,
+    "Impo": 8.3,
+    "Vmpo": 43.9,
+}
+
 diffuse_hybrid_sys = cpvlib.DiffuseHybridSystem(
     surface_tilt=30,
     surface_azimuth=180,
     module=None,
-    module_parameters=module_params,
+    module_parameters=module_params_diffuse,
     modules_per_string=1,
     strings_per_inverter=1,
     inverter=None,
@@ -121,10 +151,28 @@ diffuse_hybrid_sys = cpvlib.DiffuseHybridSystem(
     name=None,
 )
 
-aoi = diffuse_hybrid_sys.get_aoi(solar_zenith, solar_azimuth)
+# el aoi de hybrid debe ser el mismo que cpv
+# aoi = diffuse_hybrid_sys.get_aoi(solar_zenith, solar_azimuth)
 
-irr_hybrid = diffuse_hybrid_sys.get_irradiance(solar_zenith, solar_azimuth, dni=meteo['Bn'],
-                                  ghi=meteo['Gh'], dhi=meteo['Dh'], aoi=aoi,
-                                  aoi_limit=55)
+meteo['diffuse_hybrid'] = diffuse_hybrid_sys.get_irradiance(solar_zenith, 
+                                                            solar_azimuth,
+                                                            dni=meteo['Bn'],
+                                                            ghi=meteo['Gh'],
+                                                            dhi=meteo['Dh'],
+                                                            aoi=aoi,
+                                                            aoi_limit=55
+                                                            )
 
-irr_hybrid.plot()
+celltemp_diffuse = diffuse_hybrid_sys.pvsyst_celltemp(
+    meteo['diffuse_hybrid'], meteo['Temp. Ai 1'], meteo['V.Vien.1']
+)
+
+diode_parameters_diffuse = diffuse_hybrid_sys.calcparams_pvsyst(
+    meteo['diffuse_hybrid'], celltemp_diffuse)
+
+dc_diffuse = diffuse_hybrid_sys.singlediode(*diode_parameters_diffuse)
+
+dc_diffuse['p_mp'].plot()
+
+#%% Irradiancias
+meteo[['Gh', 'Bn', 'Dh', 'dii', 'diffuse_hybrid']].plot()
