@@ -104,7 +104,7 @@ uf_aoi_norm = uf_aoi / uf_aoi_ast
 
 uf_global = uf_am_at * uf_aoi_norm
 
-# (dc['p_mp'] * uf_global).plot()
+(dc['p_mp'] * uf_global).plot()
 
 #%% DiffuseHybridSystem
 diffuse_hybrid_sys = cpvlib.DiffuseHybridSystem(
