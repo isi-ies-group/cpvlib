@@ -76,13 +76,7 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     name=None,
 )
 
-meteo['dii'] = pvlib.irradiance.beam_component(
-    static_cpv_sys.surface_tilt,
-    static_cpv_sys.surface_azimuth,
-    solar_zenith=location.get_solarposition(meteo.index).zenith,
-    solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-    dni=meteo['Bn']
-    )
+meteo['dii'] = static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, meteo['Bn'])
 
 celltemp_cpv = static_cpv_sys.pvsyst_celltemp(
     meteo['dii'], meteo['Temp. Ai 1'], meteo['V.Vien.1']

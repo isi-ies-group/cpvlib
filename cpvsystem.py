@@ -585,9 +585,7 @@ class StaticCPVSystem(CPVSystem):
                              solar_zenith, solar_azimuth)
         return aoi
 
-    def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
-                       dni_extra=None, airmass=None, model='haydavies',
-                       **kwargs):
+    def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Fixed panel.
@@ -600,17 +598,8 @@ class StaticCPVSystem(CPVSystem):
             Solar azimuth angle.
         dni : float or Series
             Direct Normal Irradiance
-        ghi : float or Series
-            Global horizontal irradiance
         dhi : float or Series
             Diffuse horizontal irradiance
-        dni_extra : None, float or Series, default None
-            Extraterrestrial direct normal irradiance
-        airmass : None, float or Series, default None
-            Airmass
-        model : String, default 'haydavies'
-            Irradiance model.
-
         **kwargs
             Passed to :func:`irradiance.total_irrad`.
 
@@ -620,22 +609,13 @@ class StaticCPVSystem(CPVSystem):
             Column names are: ``total, beam, sky, ground``.
         """
 
-        # not needed for all models, but this is easier
-        if dni_extra is None:
-            dni_extra = irradiance.get_extra_radiation(solar_zenith.index)
-
-        if airmass is None:
-            airmass = atmosphere.get_relative_airmass(solar_zenith)
-
-        return irradiance.get_total_irradiance(self.surface_tilt,
-                                               self.surface_azimuth,
-                                               solar_zenith, solar_azimuth,
-                                               dni, ghi, dhi,
-                                               dni_extra=dni_extra,
-                                               airmass=airmass,
-                                               model=model,
-                                               albedo=self.albedo,
-                                               **kwargs)
+        return irradiance.beam_component(
+            self.surface_tilt,
+            self.surface_azimuth,
+            solar_zenith,
+            solar_azimuth,
+            dni,
+            **kwargs)
 
     def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
