@@ -34,7 +34,7 @@ class CPVSystem(object):
 
     Parameters
     ----------
-    module : None or string, default None.
+    module : None or string, default None
         The model name of the modules.
         May be used to look up the module_parameters dictionary
         via some other method.
