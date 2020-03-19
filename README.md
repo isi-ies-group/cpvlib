@@ -10,3 +10,4 @@ TO DO:
 * Ejecutar los UFs internamente en StaticCPVSystem
 * Contar efecto desuniformidad en células de base cuando DNI se suma a difusa
 * Modelo térmico. Más allá de pvsyst_celltemp() ¿?
+* juguetear con Ashrae
