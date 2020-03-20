@@ -103,26 +103,14 @@ diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
    
 dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
 
-# TO DO: Ejecutar los UFs internamente en StaticCPVSystem
-uf_am = static_cpv_sys.get_am_util_factor(airmass=
-                                          location.get_airmass(data.index).airmass_absolute)
-
-uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=data['temp_air'])
-
-uf_am_at = uf_am * module_params_cpv['weight_am'] + uf_ta * module_params_cpv['weight_temp']
-
+airmass_absolute = location.get_airmass(data.index).airmass_absolute
 aoi = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
-uf_aoi = static_cpv_sys.get_aoi_util_factor(aoi=aoi)
+# OJO uf_global incluye uf_aoi!!
+uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
+                                                         aoi, solar_zenith, solar_azimuth)
 
-uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(aoi=0)
-
-uf_aoi_norm = uf_aoi / uf_aoi_ast
-
-uf_global = uf_am_at * uf_aoi_norm
-# TO DO
-
-(dc_cpv['p_mp'] * uf_global).plot()
+(dc_cpv['p_mp'] * uf_global).plot(ylim=[0, 30])
 
 #%% DiffuseHybridSystem
 module_params_diffuse = {

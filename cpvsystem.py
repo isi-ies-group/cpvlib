@@ -158,7 +158,29 @@ class CPVSystem(object):
                                                model=model,
                                                albedo=self.albedo,
                                                **kwargs)
+    
+    def get_aoi(self, solar_zenith, solar_azimuth):
+        """
+        Get the angle of incidence on the Static CPV System.
 
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+            
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+
+        Returns
+        -------
+        aoi : Series
+            The angle of incidence
+        """
+
+        aoi = irradiance.aoi(self.surface_tilt, self.surface_azimuth,
+                             solar_zenith, solar_azimuth)
+        return aoi
+    
     def calcparams_pvsyst(self, effective_irradiance, temp_cell):
         """
         Use the :py:func:`pvsystem.calcparams_pvsyst` function, the input
@@ -410,6 +432,26 @@ class CPVSystem(object):
             + np.multiply(dni_uf, dni_weight))
         
         return uf
+    
+    def get_global_utilization_factor(self, airmass_absolute, temp_air,
+                                      aoi, solar_zenith, solar_azimuth):
+        
+        uf_am = self.get_am_util_factor(airmass=airmass_absolute)
+
+        uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
+        
+        uf_am_at = (uf_am * self.module_parameters['weight_am'] +
+                    uf_ta * self.module_parameters['weight_temp'])
+        
+        uf_aoi = self.get_aoi_util_factor(aoi=aoi)
+        
+        uf_aoi_ast = self.get_aoi_util_factor(aoi=0)
+        
+        uf_aoi_norm = uf_aoi / uf_aoi_ast
+        
+        uf_global = uf_am_at * uf_aoi_norm
+        
+        return uf_global
 
     def localize(self, location=None, latitude=None, longitude=None,
                  **kwargs):
