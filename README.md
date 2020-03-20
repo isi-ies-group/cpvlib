@@ -11,3 +11,6 @@ TO DO:
 * Contar efecto desuniformidad en células de base cuando DNI se suma a difusa
 * Modelo térmico. Más allá de pvsyst_celltemp() ¿?
 * Usar nombre "hybrid" para el sistema entero, no para el sistema de difusa
+* Obtener funcion IAM
+* Cambiar UF_AOI por IAM
+* Meter aoi_limit=55 en parametros del módulo

@@ -679,11 +679,11 @@ class LocalizedStaticCPVSystem(CPVSystem, Location):
         return ('LocalizedStaticCPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-class DiffuseHybridSystem(pvsystem.PVSystem):
+class DiffuseStaticSystem(pvsystem.PVSystem):
     
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
-        return ('DiffuseHybridSystem: \n  ' + '\n  '.join(
+        return ('DiffuseStaticSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
     def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
