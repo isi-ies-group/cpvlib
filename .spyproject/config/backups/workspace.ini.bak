@@ -6,5 +6,5 @@ save_non_project_files = False
 
 [main]
 version = 0.2.0
-recent_files = ['prueba_cpvlib.py', 'cpvsystem.py', 'test_cpvlib.py']
+recent_files = ['prueba_cpvlib.py', 'test_cpvlib.py', 'README.md', 'cpvsystem.py']
 
