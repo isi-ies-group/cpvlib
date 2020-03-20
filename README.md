@@ -8,9 +8,6 @@ Parte del trabajo de Marcos
 Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
 
 TO DO:
-* Auto rellenar los parámetros de UF desde self.xxx para UF_DNI
-* Ejecutar los UFs internamente en StaticCPVSystem
 * Contar efecto desuniformidad en células de base cuando DNI se suma a difusa
 * Modelo térmico. Más allá de pvsyst_celltemp() ¿?
 * Usar nombre "hybrid" para el sistema entero, no para el sistema de difusa
-* StaticCPVSystem debe heredar de verdad de CPVSystem

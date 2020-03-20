@@ -12,7 +12,7 @@ from pvlib.tools import _build_kwargs
 from pvlib.location import Location
 
 
-class CPVSystem(object):
+class CPVSystem(pvsystem.PVSystem):
     """
     The CPVSystem class defines a set of CPV system attributes and modeling 
     functions. This class describes the collection and interactions of CPV 
@@ -159,57 +159,6 @@ class CPVSystem(object):
                                                albedo=self.albedo,
                                                **kwargs)
     
-    def get_aoi(self, solar_zenith, solar_azimuth):
-        """
-        Get the angle of incidence on the Static CPV System.
-
-        Parameters
-        ----------
-        solar_zenith : float or Series.
-            Solar zenith angle.
-            
-        solar_azimuth : float or Series.
-            Solar azimuth angle.
-
-        Returns
-        -------
-        aoi : Series
-            The angle of incidence
-        """
-
-        aoi = irradiance.aoi(self.surface_tilt, self.surface_azimuth,
-                             solar_zenith, solar_azimuth)
-        return aoi
-    
-    def calcparams_pvsyst(self, effective_irradiance, temp_cell):
-        """
-        Use the :py:func:`pvsystem.calcparams_pvsyst` function, the input
-        parameters and ``self.module_parameters`` to calculate the
-        module currents and resistances.
-
-        Parameters
-        ----------
-        effective_irradiance : numeric
-            The irradiance (W/m2) that is converted to photocurrent.
-
-        temp_cell : float or Series
-            The average cell temperature of cells within a module in C.
-
-        Returns
-        -------
-        See pvsystem.calcparams_pvsyst for details
-        """
-
-        kwargs = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
-                                'R_sh_ref', 'R_sh_0', 'R_sh_exp',
-                                'R_s', 'alpha_sc', 'EgRef',
-                                'irrad_ref', 'temp_ref',
-                                'cells_in_series'],
-                               self.module_parameters)
-
-        return pvsystem.calcparams_pvsyst(effective_irradiance, 
-                                          temp_cell, **kwargs)
-
     def pvsyst_celltemp(self, poa_global, temp_air, wind_speed=1.0):
         """
         Uses :py:func:`pvsystem.pvsyst_celltemp` to calculate module 
@@ -231,24 +180,6 @@ class CPVSystem(object):
                                         model_params=self.racking_model, 
                                         **kwargs)
  
-    def singlediode(self, photocurrent, saturation_current,
-                    resistance_series, resistance_shunt, nNsVth,
-                    ivcurve_pnts=None):
-        """Wrapper around the :py:func:`pvsystem.singlediode` function.
-
-        Parameters
-        ----------
-        See pvsystem.singlediode for details
-
-        Returns
-        -------
-        See pvsystem.singlediode for details
-        """
-        
-        return pvsystem.singlediode(photocurrent, saturation_current, 
-                                    resistance_series, resistance_shunt, 
-                                    nNsVth, ivcurve_pnts=ivcurve_pnts)
-
     def get_am_util_factor(self, airmass, am_thld=None, am_uf_m_low=None, am_uf_m_high=None):
         """
         Retrieves the utilization factor for airmass.
@@ -604,28 +535,7 @@ class StaticCPVSystem(CPVSystem):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('StaticCPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
-    
-    def get_aoi(self, solar_zenith, solar_azimuth):
-        """
-        Get the angle of incidence on the Static CPV System.
 
-        Parameters
-        ----------
-        solar_zenith : float or Series.
-            Solar zenith angle.
-            
-        solar_azimuth : float or Series.
-            Solar azimuth angle.
-
-        Returns
-        -------
-        aoi : Series
-            The angle of incidence
-        """
-
-        aoi = irradiance.aoi(self.surface_tilt, self.surface_azimuth,
-                             solar_zenith, solar_azimuth)
-        return aoi
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
         """
