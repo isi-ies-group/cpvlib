@@ -5,7 +5,7 @@ Created on Tue Mar  3 19:09:17 2020
 """
 
 import pandas as pd
-import numpy as np
+# import numpy as np
 # import matplotlib.pyplot as plt
 
 import pvlib
@@ -50,16 +50,32 @@ UF_parameters_cpv = {
 
 module_params_cpv.update(UF_parameters_cpv)
 
-meteo = pd.read_csv('meteo2020_03_14.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
-meteo.index = meteo.index.tz_localize('Europe/Madrid')
+# data = pd.read_csv('data2020_03_14.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
+
+data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time', parse_dates=True, encoding='latin1')
+data.index = data.index.tz_localize('Europe/Madrid')
+
+data = data.rename(columns={
+    'DNI (W/m2)':'dni',
+    'DII (W/m2)':'dii',
+    'GII (W/m2)':'gii',
+    'T_Amb (°C)':'temp_air',
+    'Wind Speed (m/s)':'wind_speed',
+    'T_Backplane (°C)':'temp_cell',
+    })
+
+# GII (W/m2): The Global Inclined (plane of array) Irradiance is calculated by 
+# first calculating the DII(41°), that is the DII corresponding to the G(41°) measurement, 
+# and finding the Diffuse Inclined Irradiance Diff(41°) = G(41°) – DII(41°). It is 
+# assumed that the Diffuse Inclined Irradiance at 41° and 30° is equal, so GII = DII + Diff(41°).
 
 location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
-solar_zenith = location.get_solarposition(meteo.index).zenith
-solar_azimuth = location.get_solarposition(meteo.index).azimuth
+solar_zenith = location.get_solarposition(data.index).zenith
+solar_azimuth = location.get_solarposition(data.index).azimuth
 
-# en fichero 'meteo2020_03_14.txt', el pira de difusa está sin bola sombreado (comparación piras)
-meteo['Dh'] = meteo['Gh'] - (meteo['Bn'] * np.cos(np.radians(solar_zenith)))
+# en fichero 'data2020_03_14.txt', el pira de difusa está sin bola sombreado (comparación piras)
+# data['Dh'] = data['Gh'] - (data['Bn'] * np.cos(np.radians(solar_zenith)))
 
 #%% StaticCPVSystem
 static_cpv_sys = cpvlib.StaticCPVSystem(
@@ -76,22 +92,22 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     name=None,
 )
 
-meteo['dii'] = static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, meteo['Bn'])
+# data['dii'] = static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, data['dni'])
 
-celltemp_cpv = static_cpv_sys.pvsyst_celltemp(
-    meteo['dii'], meteo['Temp. Ai 1'], meteo['V.Vien.1']
-)
+# temp_cell = static_cpv_sys.pvsyst_celltemp(
+#     data['dii'], data[temp_air'], data['wind_speed']
+# )
 
 diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
-    meteo['dii'], celltemp_cpv)
+    data['dii'], data['temp_cell'])
    
 dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
 
 # TO DO: Ejecutar los UFs internamente en StaticCPVSystem
 uf_am = static_cpv_sys.get_am_util_factor(airmass=
-                                          location.get_airmass(meteo.index).airmass_absolute)
+                                          location.get_airmass(data.index).airmass_absolute)
 
-uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=meteo['Temp. Ai 1'])
+uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=data['temp_air'])
 
 uf_am_at = uf_am * module_params_cpv['weight_am'] + uf_ta * module_params_cpv['weight_temp']
 
@@ -148,25 +164,24 @@ diffuse_hybrid_sys = cpvlib.DiffuseHybridSystem(
 # el aoi de hybrid debe ser el mismo que cpv
 # aoi = diffuse_hybrid_sys.get_aoi(solar_zenith, solar_azimuth)
 
-meteo['diffuse_hybrid'] = diffuse_hybrid_sys.get_irradiance(solar_zenith, 
+data['poa_diffuse_static'] = diffuse_hybrid_sys.get_irradiance(solar_zenith, 
                                                             solar_azimuth,
-                                                            dni=meteo['Bn'],
-                                                            ghi=meteo['Gh'],
-                                                            dhi=meteo['Dh'],
                                                             aoi=aoi,
-                                                            aoi_limit=55
+                                                            aoi_limit=55,
+                                                            dii=data['dii'],
+                                                            gii=data['gii']
                                                             )
 
 celltemp_diffuse = diffuse_hybrid_sys.pvsyst_celltemp(
-    meteo['diffuse_hybrid'], meteo['Temp. Ai 1'], meteo['V.Vien.1']
+    data['poa_diffuse_static'], data['temp_air'], data['wind_speed']
 )
 
 diode_parameters_diffuse = diffuse_hybrid_sys.calcparams_pvsyst(
-    meteo['diffuse_hybrid'], celltemp_diffuse)
+    data['poa_diffuse_static'], celltemp_diffuse)
 
 dc_diffuse = diffuse_hybrid_sys.singlediode(*diode_parameters_diffuse)
 
 dc_diffuse['p_mp'].plot()
 
 #%% Irradiancias
-meteo[['Gh', 'Bn', 'Dh', 'dii', 'diffuse_hybrid']].plot()
+data[['dni', 'dii', 'gii', 'poa_diffuse_static']].plot()
