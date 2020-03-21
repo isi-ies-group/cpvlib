@@ -408,47 +408,6 @@ class CPVSystem(pvsystem.PVSystem):
 
         return LocalizedCPVSystem(cpvsystem=self, location=location)
 
-
-class LocalizedCPVSystem(CPVSystem, Location):
-    """
-    The LocalizedCPVSystem class defines a standard set of installed CPV
-    system attributes and modeling functions. This class combines the
-    attributes and methods of the CPVSystem and Location classes.
-
-    The LocalizedCPVSystem may have bugs due to the difficulty of
-    robustly implementing multiple inheritance. See
-    :py:class:`~pvlib.modelchain.ModelChain` for an alternative paradigm
-    for modeling PV systems at specific locations.
-    """
-    def __init__(self, cpvsystem=None, location=None, **kwargs):
-
-        # get and combine attributes from the cpvsystem and/or location
-        # with the rest of the kwargs
-
-        if cpvsystem is not None:
-            cpv_dict = cpvsystem.__dict__
-        else:
-            cpv_dict = {}
-
-        if location is not None:
-            loc_dict = location.__dict__
-        else:
-            loc_dict = {}
-
-        new_kwargs = dict(list(cpv_dict.items()) +
-                          list(loc_dict.items()) +
-                          list(kwargs.items()))
-
-        CPVSystem.__init__(self, **new_kwargs)
-        Location.__init__(self, **new_kwargs)
-
-    def __repr__(self):
-        attrs = ['name', 'latitude', 'longitude', 'altitude', 'tz', 'module', 
-                 'inverter', 'albedo', 'racking_model']
-        return ('LocalizedCPVSystem: \n  ' + '\n  '.join(
-            ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
-
-
 class StaticCPVSystem(CPVSystem):
     """
     The StaticCPVSystem class defines a set of CPV system attributes and 
@@ -637,47 +596,6 @@ class StaticCPVSystem(CPVSystem):
 
         return LocalizedStaticCPVSystem(staticcpvsystem=self, 
                                         location=location)
-
-
-class LocalizedStaticCPVSystem(CPVSystem, Location):
-    """
-    The LocalizedStaticCPVSystem class defines a standard set of installed 
-    Static CPV system attributes and modeling functions. This class combines 
-    the attributes and methods of the StaticCPVSystem and Location classes.
-
-    The LocalizedStaticCPVSystem may have bugs due to the difficulty of
-    robustly implementing multiple inheritance. See
-    :py:class:`~pvlib.modelchain.ModelChain` for an alternative paradigm
-    for modeling PV systems at specific locations.
-    """
-    def __init__(self, staticcpvsystem=None, location=None, **kwargs):
-
-        # get and combine attributes from the staticcpvsystem and/or location
-        # with the rest of the kwargs
-
-        if staticcpvsystem is not None:
-            staticcpv_dict = staticcpvsystem.__dict__
-        else:
-            staticcpv_dict = {}
-
-        if location is not None:
-            loc_dict = location.__dict__
-        else:
-            loc_dict = {}
-
-        new_kwargs = dict(list(staticcpv_dict.items()) +
-                          list(loc_dict.items()) +
-                          list(kwargs.items()))
-
-        StaticCPVSystem.__init__(self, **new_kwargs)
-        Location.__init__(self, **new_kwargs)
-
-    def __repr__(self):
-        attrs = ['name', 'latitude', 'longitude', 'altitude', 'tz',
-                 'surface_tilt', 'surface_azimuth', 'module', 'inverter',
-                 'albedo', 'racking_model']
-        return ('LocalizedStaticCPVSystem: \n  ' + '\n  '.join(
-            ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
 class DiffuseStaticSystem(pvsystem.PVSystem):
     
