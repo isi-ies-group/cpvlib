@@ -48,10 +48,12 @@ UF_parameters = {
 
 module_params.update(UF_parameters)
 
-meteo = pd.read_csv('meteo2020_03_04.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
+meteo = pd.read_csv('meteo2020_03_04.txt', sep='\t',
+                    index_col='yyyy/mm/dd hh:mm', parse_dates=True)
 meteo.index = meteo.index.tz_localize('Europe/Madrid')
 
-location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
+location = pvlib.location.Location(
+    latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
 static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_tilt=30,
@@ -73,7 +75,7 @@ meteo['dii'] = pvlib.irradiance.beam_component(
     solar_zenith=location.get_solarposition(meteo.index).zenith,
     solar_azimuth=location.get_solarposition(meteo.index).azimuth,
     dni=meteo['Bn']
-    )
+)
 
 celltemp = static_cpv_sys.pvsyst_celltemp(
     meteo['dii'], meteo['Temp. Ai 1'], meteo['V.Vien.1']
@@ -81,21 +83,23 @@ celltemp = static_cpv_sys.pvsyst_celltemp(
 
 diode_parameters = static_cpv_sys.calcparams_pvsyst(
     meteo['dii'], celltemp)
-   
+
 dc = static_cpv_sys.singlediode(*diode_parameters)
 
-uf_am = static_cpv_sys.get_am_util_factor(airmass=location.get_airmass(meteo.index).airmass_absolute)
+uf_am = static_cpv_sys.get_am_util_factor(
+    airmass=location.get_airmass(meteo.index).airmass_absolute)
 
 uf_ta = static_cpv_sys.get_tempair_util_factor(temp_air=meteo['Temp. Ai 1'])
 
-uf_am_at = uf_am * module_params['weight_am'] + uf_ta * module_params['weight_temp']
+uf_am_at = uf_am * module_params['weight_am'] + \
+    uf_ta * module_params['weight_temp']
 
 # ax=meteo['dii'].plot();meteo['Bn'].plot(ax=ax)
 
 aoi = static_cpv_sys.get_aoi(
-            solar_zenith=location.get_solarposition(meteo.index).zenith,
-            solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-            )
+    solar_zenith=location.get_solarposition(meteo.index).zenith,
+    solar_azimuth=location.get_solarposition(meteo.index).azimuth,
+)
 
 uf_aoi = static_cpv_sys.get_aoi_util_factor(aoi=aoi)
 

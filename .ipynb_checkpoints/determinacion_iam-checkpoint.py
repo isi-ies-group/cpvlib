@@ -8,24 +8,26 @@ import pandas as pd
 
 import pvlib
 
-data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time', parse_dates=True, encoding='latin1')
+data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time',
+                   parse_dates=True, encoding='latin1')
 data.index = data.index.tz_localize('Europe/Madrid')
 
 data = data.rename(columns={
-    'DNI (W/m2)':'dni',
-    'DII (W/m2)':'dii',
-    'GII (W/m2)':'gii',
-    'T_Amb (°C)':'temp_air',
-    'Wind Speed (m/s)':'wind_speed',
-    'T_Backplane (°C)':'temp_cell',
-    'ISC_measured_IIIV (A)':'isc_35',
-    'ISC_measured_Si (A)':'isc_si',
-    })
+    'DNI (W/m2)': 'dni',
+    'DII (W/m2)': 'dii',
+    'GII (W/m2)': 'gii',
+    'T_Amb (°C)': 'temp_air',
+    'Wind Speed (m/s)': 'wind_speed',
+    'T_Backplane (°C)': 'temp_cell',
+    'ISC_measured_IIIV (A)': 'isc_35',
+    'ISC_measured_Si (A)': 'isc_si',
+})
 
 data['isc35/dii'] = data['isc_35'] / data['dii']
 data['isc_si/dii'] = data['isc_si'] / data['dii']
 
-location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
+location = pvlib.location.Location(
+    latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
 solar_zenith = location.get_solarposition(data.index).zenith
 solar_azimuth = location.get_solarposition(data.index).azimuth

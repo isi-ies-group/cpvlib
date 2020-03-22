@@ -52,24 +52,26 @@ module_params_cpv.update(UF_parameters_cpv)
 
 # data = pd.read_csv('data2020_03_14.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
 
-data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time', parse_dates=True, encoding='latin1')
+data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time',
+                   parse_dates=True, encoding='latin1')
 data.index = data.index.tz_localize('Europe/Madrid')
 
 data = data.rename(columns={
-    'DNI (W/m2)':'dni',
-    'DII (W/m2)':'dii',
-    'GII (W/m2)':'gii',
-    'T_Amb (°C)':'temp_air',
-    'Wind Speed (m/s)':'wind_speed',
-    'T_Backplane (°C)':'temp_cell',
-    })
+    'DNI (W/m2)': 'dni',
+    'DII (W/m2)': 'dii',
+    'GII (W/m2)': 'gii',
+    'T_Amb (°C)': 'temp_air',
+    'Wind Speed (m/s)': 'wind_speed',
+    'T_Backplane (°C)': 'temp_cell',
+})
 
-# GII (W/m2): The Global Inclined (plane of array) Irradiance is calculated by 
-# first calculating the DII(41°), that is the DII corresponding to the G(41°) measurement, 
-# and finding the Diffuse Inclined Irradiance Diff(41°) = G(41°) – DII(41°). It is 
+# GII (W/m2): The Global Inclined (plane of array) Irradiance is calculated by
+# first calculating the DII(41°), that is the DII corresponding to the G(41°) measurement,
+# and finding the Diffuse Inclined Irradiance Diff(41°) = G(41°) – DII(41°). It is
 # assumed that the Diffuse Inclined Irradiance at 41° and 30° is equal, so GII = DII + Diff(41°).
 
-location = pvlib.location.Location(latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
+location = pvlib.location.Location(
+    latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
 solar_zenith = location.get_solarposition(data.index).zenith
 solar_azimuth = location.get_solarposition(data.index).azimuth
@@ -77,7 +79,7 @@ solar_azimuth = location.get_solarposition(data.index).azimuth
 # en fichero 'data2020_03_14.txt', el pira de difusa está sin bola sombreado (comparación piras)
 # data['Dh'] = data['Gh'] - (data['Bn'] * np.cos(np.radians(solar_zenith)))
 
-#%% StaticCPVSystem
+# %% StaticCPVSystem
 static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_tilt=30,
     surface_azimuth=180,
@@ -100,7 +102,7 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
 
 diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
     data['dii'], data['temp_cell'])
-   
+
 dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
 
 airmass_absolute = location.get_airmass(data.index).airmass_absolute
@@ -112,7 +114,7 @@ uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data[
 
 (dc_cpv['p_mp'] * uf_global).plot(ylim=[0, 30])
 
-#%% DiffuseStaticSystem
+# %% DiffuseStaticSystem
 module_params_diffuse = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
@@ -152,13 +154,13 @@ diffuse_static_sys = cpvlib.DiffuseStaticSystem(
 # el aoi de difusa debe ser el mismo que cpv
 # aoi = diffuse_static_sys.get_aoi(solar_zenith, solar_azimuth)
 
-data['poa_diffuse_static'] = diffuse_static_sys.get_irradiance(solar_zenith, 
-                                                            solar_azimuth,
-                                                            aoi=aoi,
-                                                            aoi_limit=55,
-                                                            dii=data['dii'],
-                                                            gii=data['gii']
-                                                            )
+data['poa_diffuse_static'] = diffuse_static_sys.get_irradiance(solar_zenith,
+                                                               solar_azimuth,
+                                                               aoi=aoi,
+                                                               aoi_limit=55,
+                                                               dii=data['dii'],
+                                                               gii=data['gii']
+                                                               )
 
 celltemp_diffuse = diffuse_static_sys.pvsyst_celltemp(
     data['poa_diffuse_static'], data['temp_air'], data['wind_speed']
@@ -171,5 +173,5 @@ dc_diffuse = diffuse_static_sys.singlediode(*diode_parameters_diffuse)
 
 dc_diffuse['p_mp'].plot()
 
-#%% Irradiancias
+# %% Irradiancias
 data[['dni', 'dii', 'gii', 'poa_diffuse_static']].plot()
