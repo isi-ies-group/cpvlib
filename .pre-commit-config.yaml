@@ -10,11 +10,3 @@ repos:
     rev: ''  # Use the sha / tag you want to point at
     hooks:
     -   id: autopep8
--   repo: local
-    hooks:
-    -   id: tests
-        name: run tests
-        entry: pytest -v
-        language: system
-        types: [python]
-        stages: [push]
