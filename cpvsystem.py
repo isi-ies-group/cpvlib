@@ -9,8 +9,6 @@ import pandas as pd
 from pvlib import pvsystem
 from pvlib import atmosphere, irradiance
 from pvlib.tools import _build_kwargs
-from pvlib.location import Location
-
 
 class CPVSystem(pvsystem.PVSystem):
     """
@@ -384,30 +382,6 @@ class CPVSystem(pvsystem.PVSystem):
         
         return uf_global
 
-    def localize(self, location=None, latitude=None, longitude=None,
-                 **kwargs):
-        """
-        Creates a LocalizedCPVSystem object using this object
-        and location data. Must supply either location object or
-        latitude, longitude, and any location kwargs
-
-        Parameters
-        ----------
-        location : None or Location, default None
-        latitude : None or float, default None
-        longitude : None or float, default None
-        **kwargs : see Location
-
-        Returns
-        -------
-        localized_system : LocalizedCPVSystem
-        """
-
-        if location is None:
-            location = Location(latitude, longitude, **kwargs)
-
-        return LocalizedCPVSystem(cpvsystem=self, location=location)
-
 class StaticCPVSystem(CPVSystem):
     """
     The StaticCPVSystem class defines a set of CPV system attributes and 
@@ -571,31 +545,6 @@ class StaticCPVSystem(CPVSystem):
             aoi_uf[aoi_uf<0] = 0
 
         return aoi_uf
-    
-    def localize(self, location=None, latitude=None, longitude=None,
-                 **kwargs):
-        """
-        Creates a LocalizedStaticCPVSystem object using this object
-        and location data. Must supply either location object or
-        latitude, longitude, and any location kwargs
-
-        Parameters
-        ----------
-        location : None or Location, default None
-        latitude : None or float, default None
-        longitude : None or float, default None
-        **kwargs : see Location
-
-        Returns
-        -------
-        localized_system : LocalizedStaticCPVSystem
-        """
-
-        if location is None:
-            location = Location(latitude, longitude, **kwargs)
-
-        return LocalizedStaticCPVSystem(staticcpvsystem=self, 
-                                        location=location)
 
 class DiffuseStaticSystem(pvsystem.PVSystem):
     
