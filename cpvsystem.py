@@ -466,11 +466,11 @@ class StaticCPVSystem(CPVSystem):
         return aoi_uf
 
 
-class DiffuseStaticSystem(pvsystem.PVSystem):
+class StaticDiffuseSystem(pvsystem.PVSystem):
 
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
-        return ('DiffuseStaticSystem: \n  ' + '\n  '.join(
+        return ('StaticDiffuseSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
     def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,

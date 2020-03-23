@@ -114,7 +114,7 @@ uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data[
 
 (dc_cpv['p_mp'] * uf_global).plot(ylim=[0, 30])
 
-# %% DiffuseStaticSystem
+# %% StaticDiffuseSystem
 module_params_diffuse = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
@@ -137,7 +137,7 @@ module_params_diffuse = {
     "Vmpo": 43.9,
 }
 
-diffuse_static_sys = cpvlib.DiffuseStaticSystem(
+static_diffuse_sys = cpvlib.StaticDiffuseSystem(
     surface_tilt=30,
     surface_azimuth=180,
     module=None,
@@ -152,9 +152,9 @@ diffuse_static_sys = cpvlib.DiffuseStaticSystem(
 )
 
 # el aoi de difusa debe ser el mismo que cpv
-# aoi = diffuse_static_sys.get_aoi(solar_zenith, solar_azimuth)
+# aoi = static_diffuse_sys.get_aoi(solar_zenith, solar_azimuth)
 
-data['poa_diffuse_static'] = diffuse_static_sys.get_irradiance(solar_zenith,
+data['poa_diffuse_static'] = static_diffuse_sys.get_irradiance(solar_zenith,
                                                                solar_azimuth,
                                                                aoi=aoi,
                                                                aoi_limit=55,
@@ -162,14 +162,14 @@ data['poa_diffuse_static'] = diffuse_static_sys.get_irradiance(solar_zenith,
                                                                gii=data['gii']
                                                                )
 
-celltemp_diffuse = diffuse_static_sys.pvsyst_celltemp(
+celltemp_diffuse = static_diffuse_sys.pvsyst_celltemp(
     data['poa_diffuse_static'], data['temp_air'], data['wind_speed']
 )
 
-diode_parameters_diffuse = diffuse_static_sys.calcparams_pvsyst(
+diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
     data['poa_diffuse_static'], celltemp_diffuse)
 
-dc_diffuse = diffuse_static_sys.singlediode(*diode_parameters_diffuse)
+dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
 
 dc_diffuse['p_mp'].plot()
 
