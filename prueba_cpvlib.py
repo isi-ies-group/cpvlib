@@ -35,9 +35,9 @@ module_params_cpv = {
 
 UF_parameters_cpv = {
     "IscDNI_top": 0.96 / 1000,
-    "aoi_thld": 61.978505569631494,
-    "aoi_uf_m_low": -2.716773886925838e-07,
-    "aoi_uf_m_high": -1.781998474992582e-05,
+    # "aoi_thld": 61.978505569631494,
+    # "aoi_uf_m_low": -2.716773886925838e-07,
+    # "aoi_uf_m_high": -1.781998474992582e-05,
     "am_thld": 4.574231933073185,
     "am_uf_m_low": 3.906372068620377e-06,
     "am_uf_m_high": -3.0335768119184845e-05,
@@ -63,6 +63,8 @@ data = data.rename(columns={
     'T_Amb (°C)': 'temp_air',
     'Wind Speed (m/s)': 'wind_speed',
     'T_Backplane (°C)': 'temp_cell',
+    'ISC_measured_IIIV (A)':'isc35',
+    'ISC_measured_Si (A)':'iscSi',
 })
 
 # GII (W/m2): The Global Inclined (plane of array) Irradiance is calculated by
@@ -94,36 +96,38 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     name=None,
 )
 
-# data['dii'] = static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, data['dni'])
+data['aoi'] = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
-# temp_cell = static_cpv_sys.pvsyst_celltemp(
-#     data['dii'], data[temp_air'], data['wind_speed']
-# )
+data['dii_effective'] = data['dii'] * pvlib.iam.ashrae(data['aoi'], b=0.7)
 
 diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
-    data['dii'], data['temp_cell'])
+    data['dii_effective'], data['temp_cell'])
 
 dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
 
 airmass_absolute = location.get_airmass(data.index).airmass_absolute
-aoi = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
-# OJO uf_global incluye uf_aoi!!
+# OJO uf_global NO incluye uf_aoi!!
 uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
-                                                         aoi, solar_zenith, solar_azimuth)
+                                                        solar_zenith, solar_azimuth)
 
-(dc_cpv['p_mp'] * uf_global).plot(ylim=[0, 30])
+#%% PLot Isc - CPV
+data['isc35'].plot()
+(dc_cpv['i_sc'] * uf_global).plot()
 
 # %% StaticDiffuseSystem
+modules = pvlib.pvsystem.retrieve_sam('cecmod')
+mod = modules['Canadian_Solar_Inc__CS5P_220M']
+
 module_params_diffuse = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
-    "I_L_ref": 0.96,
-    "I_o_ref": 0.00000000017,
-    "R_sh_ref": 5226,
+    "I_L_ref": mod["I_L_ref"],
+    "I_o_ref": mod["I_o_ref"],
+    "R_sh_ref": mod["R_sh_ref"],
     "R_sh_0": 21000,
     "R_sh_exp": 5.50,
-    "R_s": 0.01,
+    "R_s": mod["R_s"],
     "alpha_sc": 0.00,
     "EgRef": 3.91,
     "irrad_ref": 1000,
@@ -152,13 +156,12 @@ static_diffuse_sys = cpvlib.StaticDiffuseSystem(
 )
 
 # el aoi de difusa debe ser el mismo que cpv
-# aoi = static_diffuse_sys.get_aoi(solar_zenith, solar_azimuth)
 
 data['poa_diffuse_static'] = static_diffuse_sys.get_irradiance(solar_zenith,
                                                                solar_azimuth,
-                                                               aoi=aoi,
+                                                               aoi=data['aoi'],
                                                                aoi_limit=55,
-                                                               dii=data['dii'],
+                                                               dii=data['dii_effective'],
                                                                gii=data['gii']
                                                                )
 
@@ -171,7 +174,9 @@ diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
 
 dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
 
-dc_diffuse['p_mp'].plot()
+#%% PLot Isc - diffuse
+data['iscSi'].plot()
+dc_diffuse['i_sc'].plot()
 
 # %% Irradiancias
-data[['dni', 'dii', 'gii', 'poa_diffuse_static']].plot()
+data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot()

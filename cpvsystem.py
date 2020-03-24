@@ -281,22 +281,14 @@ class CPVSystem(pvsystem.PVSystem):
                                       m_high=dni_uf_m_high)
 
     def get_global_utilization_factor(self, airmass_absolute, temp_air,
-                                      aoi, solar_zenith, solar_azimuth):
+                                      solar_zenith, solar_azimuth):
 
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
 
         uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
 
-        uf_am_at = (uf_am * self.module_parameters['weight_am'] +
+        uf_global = (uf_am * self.module_parameters['weight_am'] +
                     uf_ta * self.module_parameters['weight_temp'])
-
-        uf_aoi = self.get_aoi_util_factor(aoi=aoi)
-
-        uf_aoi_ast = self.get_aoi_util_factor(aoi=0)
-
-        uf_aoi_norm = uf_aoi / uf_aoi_ast
-
-        uf_global = uf_am_at * uf_aoi_norm
 
         return uf_global
 
@@ -465,7 +457,26 @@ class StaticCPVSystem(CPVSystem):
 
         return aoi_uf
 
+    def get_global_utilization_factor_con_aoi(self, airmass_absolute, temp_air,
+                                      aoi, solar_zenith, solar_azimuth):
 
+        uf_am = self.get_am_util_factor(airmass=airmass_absolute)
+
+        uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
+
+        uf_am_at = (uf_am * self.module_parameters['weight_am'] +
+                    uf_ta * self.module_parameters['weight_temp'])
+
+        uf_aoi = self.get_aoi_util_factor(aoi=aoi)
+
+        uf_aoi_ast = self.get_aoi_util_factor(aoi=0)
+
+        uf_aoi_norm = uf_aoi / uf_aoi_ast
+
+        uf_global = uf_am_at * uf_aoi_norm
+
+        return uf_global
+    
 class StaticDiffuseSystem(pvsystem.PVSystem):
 
     def __repr__(self):

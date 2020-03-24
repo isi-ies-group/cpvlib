@@ -14,3 +14,4 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * Obtener funcion IAM
 * Cambiar UF_AOI por IAM
 * Meter aoi_limit=55 en parametros del módulo
+* Escribir tests basados en dataset 2019-05 y hace más test
