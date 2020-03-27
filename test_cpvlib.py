@@ -27,9 +27,9 @@ module_params_cpv = {
     "cells_in_parallel": 48,
     "eta_m": 0.32,
     "alpha_absorption": 0.9,
-    "Area": 1.2688,
-    "Impo": 8.3,
-    "Vmpo": 43.9,
+    # "Area": 1.2688,
+    # "Impo": 8.3,
+    # "Vmpo": 43.9,
 }
 
 UF_parameters = {

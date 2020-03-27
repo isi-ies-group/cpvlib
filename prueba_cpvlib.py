@@ -28,16 +28,13 @@ module_params_cpv = {
     "cells_in_parallel": 48,
     "eta_m": 0.32,
     "alpha_absorption": 0.9,
-    "Area": 1.2688,
-    "Impo": 8.3,
-    "Vmpo": 43.9,
+    # "Area": 1.2688,
+    # "Impo": 8.3,
+    # "Vmpo": 43.9,
 }
 
 UF_parameters_cpv = {
     "IscDNI_top": 0.96 / 1000,
-    # "aoi_thld": 61.978505569631494,
-    # "aoi_uf_m_low": -2.716773886925838e-07,
-    # "aoi_uf_m_high": -1.781998474992582e-05,
     "am_thld": 4.574231933073185,
     "am_uf_m_low": 3.906372068620377e-06,
     "am_uf_m_high": -3.0335768119184845e-05,
@@ -116,29 +113,28 @@ data['isc35'].plot()
 (dc_cpv['i_sc'] * uf_global).plot()
 
 # %% StaticDiffuseSystem
-modules = pvlib.pvsystem.retrieve_sam('cecmod')
-mod = modules['Canadian_Solar_Inc__CS5P_220M']
-
+# toma valores por defecto de module_params_diffuse en:
+# https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
 module_params_diffuse = {
-    "gamma_ref": 5.524,
-    "mu_gamma": 0.003,
-    "I_L_ref": mod["I_L_ref"],
-    "I_o_ref": mod["I_o_ref"],
-    "R_sh_ref": mod["R_sh_ref"],
-    "R_sh_0": 21000,
-    "R_sh_exp": 5.50,
-    "R_s": mod["R_s"],
-    "alpha_sc": 0.00,
-    "EgRef": 3.91,
+    "gamma_ref": 1.05, # NUEVO
+    "mu_gamma": 0.001, # NUEVO
+    "I_L_ref": 6.0, # NUEVO
+    "I_o_ref": 5e-9, # NUEVO
+    "R_sh_ref": 300, # NUEVO
+    "R_sh_0": 1000, # NUEVO
+    "R_sh_exp": 5.5, # NUEVO
+    "R_s": 0.5, # NUEVO
+    "alpha_sc": 0.001, # NUEVO
+    "EgRef": 1.121, # NUEVO
     "irrad_ref": 1000,
     "temp_ref": 25,
     "cells_in_series": 12,
     "cells_in_parallel": 48,
-    "eta_m": 0.32,
-    "alpha_absorption": 0.9,
-    "Area": 1.2688,
-    "Impo": 8.3,
-    "Vmpo": 43.9,
+    "eta_m": 0.1, # valor por defecto de pvsyst_celltemp()
+    "alpha_absorption": 0.9, # valor por defecto de pvsyst_celltemp()
+    # "Area": 1.2688,
+    # "Impo": 8.3,
+    # "Vmpo": 43.9,
 }
 
 static_diffuse_sys = cpvlib.StaticDiffuseSystem(
