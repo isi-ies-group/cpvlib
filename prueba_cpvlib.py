@@ -116,16 +116,16 @@ data['isc35'].plot()
 # toma valores por defecto de module_params_diffuse en:
 # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
 module_params_diffuse = {
-    "gamma_ref": 1.05, # NUEVO
-    "mu_gamma": 0.001, # NUEVO
-    "I_L_ref": 6.0, # NUEVO
-    "I_o_ref": 5e-9, # NUEVO
-    "R_sh_ref": 300, # NUEVO
-    "R_sh_0": 1000, # NUEVO
-    "R_sh_exp": 5.5, # NUEVO
-    "R_s": 0.5, # NUEVO
-    "alpha_sc": 0.001, # NUEVO
-    "EgRef": 1.121, # NUEVO
+    "gamma_ref": 1.05, # valor de test de pvlib 
+    "mu_gamma": 0.001, # valor de test de pvlib 
+    "I_L_ref": 6.0, # valor de test de pvlib 
+    "I_o_ref": 5e-9, # valor de test de pvlib 
+    "R_sh_ref": 300, # valor de test de pvlib 
+    "R_sh_0": 1000, # valor de test de pvlib 
+    "R_sh_exp": 5.5, # valor de test de pvlib 
+    "R_s": 0.5, # valor de test de pvlib 
+    "alpha_sc": 0.001, # valor de test de pvlib 
+    "EgRef": 1.121, # valor de test de pvlib 
     "irrad_ref": 1000,
     "temp_ref": 25,
     "cells_in_series": 12,
@@ -151,13 +151,12 @@ static_diffuse_sys = cpvlib.StaticDiffuseSystem(
     name=None,
 )
 
-# el aoi de difusa debe ser el mismo que cpv
-
+# el aoi de difusa es el mismo que cpv
 data['poa_diffuse_static'] = static_diffuse_sys.get_irradiance(solar_zenith,
                                                                solar_azimuth,
                                                                aoi=data['aoi'],
                                                                aoi_limit=55,
-                                                               dii=data['dii_effective'],
+                                                               dii=data['dii'], # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
                                                                gii=data['gii']
                                                                )
 
@@ -170,9 +169,9 @@ diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
 
 dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
 
-#%% PLot Isc - diffuse
+#% PLot Isc - diffuse
 data['iscSi'].plot()
 dc_diffuse['i_sc'].plot()
 
 # %% Irradiancias
-data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot()
+data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
