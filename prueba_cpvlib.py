@@ -108,7 +108,7 @@ airmass_absolute = location.get_airmass(data.index).airmass_absolute
 uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
                                                         solar_zenith, solar_azimuth)
 
-#%% PLot Isc - CPV
+#%% Plot Isc - CPV
 data['isc35'].plot()
 (dc_cpv['i_sc'] * uf_global).plot()
 

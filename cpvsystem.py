@@ -535,7 +535,6 @@ class StaticDiffuseSystem(pvsystem.PVSystem):
                 dni)
 
         if gii is None:
-
             irr = irradiance.get_total_irradiance(self.surface_tilt,
                                                   self.surface_azimuth,
                                                   solar_zenith, solar_azimuth,
@@ -547,6 +546,7 @@ class StaticDiffuseSystem(pvsystem.PVSystem):
                                                   **kwargs)
 
             poa_diffuse = irr['poa_sky_diffuse'] + irr['poa_ground_diffuse']
+            gii = irr['poa_global']
 
         else:
             poa_diffuse = gii - dii
