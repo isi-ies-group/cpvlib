@@ -10,7 +10,7 @@ import pytest
 import pvlib
 import cpvsystem as cpvlib
 
-module_params = {
+module_params_cpv = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
     "I_L_ref": 0.96,
@@ -47,7 +47,7 @@ UF_parameters = {
     "weight_temp": 0.8,
 }
 
-module_params.update(UF_parameters)
+module_params_cpv.update(UF_parameters)
 
 test_data = [
     ('meteo2020_03_04.txt', 6377.265283689235),
@@ -55,8 +55,8 @@ test_data = [
 ]
 
 
-@pytest.mark.parametrize("dia, p_mp", test_data)
-def test_StaticCPVSystem_daily_energy(dia, p_mp):
+@pytest.mark.parametrize("dia, energy", test_data)
+def test_StaticCPVSystem_energy_daily(dia, energy):
 
     meteo = pd.read_csv(
         dia, sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
@@ -69,7 +69,7 @@ def test_StaticCPVSystem_daily_energy(dia, p_mp):
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
-        module_parameters=module_params,
+        module_parameters=module_params_cpv,
         modules_per_string=1,
         strings_per_inverter=1,
         inverter=None,
@@ -98,20 +98,20 @@ def test_StaticCPVSystem_daily_energy(dia, p_mp):
 
     uf_am = static_cpv_sys.get_am_util_factor(
         airmass=location.get_airmass(meteo.index).airmass_absolute,
-        # am_thld=module_params['am_thld'],
-        # am_uf_m_low=module_params['am_uf_m_low']/module_params['IscDNI_top'],
-        # am_uf_m_high=module_params['am_uf_m_high']/module_params['IscDNI_top']
+        # am_thld=module_params_cpv['am_thld'],
+        # am_uf_m_low=module_params_cpv['am_uf_m_low']/module_params_cpv['IscDNI_top'],
+        # am_uf_m_high=module_params_cpv['am_uf_m_high']/module_params_cpv['IscDNI_top']
     )
 
     uf_ta = static_cpv_sys.get_tempair_util_factor(
         temp_air=meteo['Temp. Ai 1'],
-        # ta_thld=module_params['ta_thld'] ,
-        # ta_uf_m_low=module_params['ta_uf_m_low']/module_params['IscDNI_top'],
-        # ta_uf_m_high=module_params['ta_uf_m_high']/module_params['IscDNI_top']
+        # ta_thld=module_params_cpv['ta_thld'] ,
+        # ta_uf_m_low=module_params_cpv['ta_uf_m_low']/module_params_cpv['IscDNI_top'],
+        # ta_uf_m_high=module_params_cpv['ta_uf_m_high']/module_params_cpv['IscDNI_top']
     )
 
-    uf_am_at = uf_am * module_params['weight_am'] + \
-        uf_ta * module_params['weight_temp']
+    uf_am_at = uf_am * module_params_cpv['weight_am'] + \
+        uf_ta * module_params_cpv['weight_temp']
 
     # ax=meteo['dii'].plot();meteo['Bn'].plot(ax=ax)
 
@@ -120,20 +120,74 @@ def test_StaticCPVSystem_daily_energy(dia, p_mp):
             solar_zenith=location.get_solarposition(meteo.index).zenith,
             solar_azimuth=location.get_solarposition(meteo.index).azimuth,
         ),
-        # aoi_thld=module_params['aoi_thld'],
-        # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
-        # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
+        # aoi_thld=module_params_cpv['aoi_thld'],
+        # aoi_uf_m_low=module_params_cpv['aoi_uf_m_low']/module_params_cpv['IscDNI_top'],
+        # aoi_uf_m_high=module_params_cpv['aoi_uf_m_high']/module_params_cpv['IscDNI_top']
     )
 
     uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
         aoi=0,
-        # aoi_thld=module_params['aoi_thld'],
-        # aoi_uf_m_low=module_params['aoi_uf_m_low']/module_params['IscDNI_top'],
-        # aoi_uf_m_high=module_params['aoi_uf_m_high']/module_params['IscDNI_top']
+        # aoi_thld=module_params_cpv['aoi_thld'],
+        # aoi_uf_m_low=module_params_cpv['aoi_uf_m_low']/module_params_cpv['IscDNI_top'],
+        # aoi_uf_m_high=module_params_cpv['aoi_uf_m_high']/module_params_cpv['IscDNI_top']
     )
 
     uf_aoi_norm = uf_aoi / uf_aoi_ast
 
     uf_global = uf_am_at * uf_aoi_norm
 
-    assert (dc['p_mp'] * uf_global).sum() == p_mp
+    assert (dc['p_mp'] * uf_global).sum() == energy
+
+def test_StaticCPVSystem_energy_2019_05(energy=90509.11811618837):
+    
+    data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time',
+                       parse_dates=True, encoding='latin1')
+    data.index = data.index.tz_localize('Europe/Madrid')
+    
+    data = data.rename(columns={
+        'DNI (W/m2)': 'dni',
+        'DII (W/m2)': 'dii',
+        'GII (W/m2)': 'gii',
+        'T_Amb (°C)': 'temp_air',
+        'Wind Speed (m/s)': 'wind_speed',
+        'T_Backplane (°C)': 'temp_cell',
+        'ISC_measured_IIIV (A)':'isc35',
+        'ISC_measured_Si (A)':'iscSi',
+    })
+     
+    location = pvlib.location.Location(
+        latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
+    
+    solar_zenith = location.get_solarposition(data.index).zenith
+    solar_azimuth = location.get_solarposition(data.index).azimuth
+       
+    static_cpv_sys = cpvlib.StaticCPVSystem(
+        surface_tilt=30,
+        surface_azimuth=180,
+        module=None,
+        module_parameters=module_params_cpv,
+        modules_per_string=1,
+        strings_per_inverter=1,
+        inverter=None,
+        inverter_parameters=None,
+        racking_model="insulated",
+        losses_parameters=None,
+        name=None,
+    )
+    
+    data['aoi'] = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
+    
+    data['dii_effective'] = data['dii'] * pvlib.iam.ashrae(data['aoi'], b=0.7)
+    
+    diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
+        data['dii_effective'], data['temp_cell'])
+    
+    dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
+    
+    airmass_absolute = location.get_airmass(data.index).airmass_absolute
+    
+    # OJO uf_global NO incluye uf_aoi!!
+    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
+                                                            solar_zenith, solar_azimuth)
+    
+    assert (dc_cpv['p_mp'] * uf_global).sum() == energy
