@@ -17,3 +17,4 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * Escribir tests basados en dataset 2019-05 y hacer más test
 * Upgrade a pvlib v0.8 -> Hay que usar pvlib.temperature.pvsyst_cell()
 * Ver racking_model='open_rack_cell_glassback' en CPVSystem, ya que es del modelo 'sapm', pero usamo el 'pvsyst'
+* Vigilar (test?) el paso de kwargs de los métodos de las clases

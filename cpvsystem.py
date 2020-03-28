@@ -5,6 +5,7 @@ performance of CPV modules.
 
 import pandas as pd
 
+import pvlib
 from pvlib import pvsystem
 from pvlib.pvsystem import PVSystem
 from pvlib import atmosphere, irradiance
@@ -99,7 +100,7 @@ class CPVSystem(PVSystem):
             self.losses_parameters = losses_parameters
 
         self.racking_model = racking_model
-
+                
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('CPVSystem: \n  ' + '\n  '.join(
@@ -611,7 +612,10 @@ class StaticHybridSystem():
                  **kwargs):
         
         self.name = name
-
+        
+        self.surface_tilt = surface_tilt
+        self.surface_azimuth = surface_azimuth
+        
         # could tie these together with @property
         self.module_cpv = module_cpv
         self.module_diffuse = module_diffuse
@@ -655,6 +659,7 @@ class StaticHybridSystem():
             losses_parameters=losses_parameters,
             name=name,
             )
+        
         self.static_diffuse_sys = StaticDiffuseSystem(
             surface_tilt=surface_tilt,
             surface_azimuth=surface_azimuth,
@@ -674,7 +679,7 @@ class StaticHybridSystem():
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, iam_param, aoi_limit, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', **kwargs):
         """
@@ -712,6 +717,8 @@ class StaticHybridSystem():
         if dii is None:
             dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
         
+        aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
+
         poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
                                 solar_azimuth,
                                 aoi=aoi,
@@ -721,7 +728,9 @@ class StaticHybridSystem():
                                 **kwargs
                                 )
         
-        return dii, poa_diffuse_static
+        dii_effective = dii * pvlib.iam.ashrae(aoi, b=iam_param)
+        
+        return dii_effective, poa_diffuse_static
 
     def pvsyst_celltemp(self, dii, poa_diffuse_static, temp_air, wind_speed=1.0):
         """
@@ -743,7 +752,7 @@ class StaticHybridSystem():
         
         return celltemp_cpv, celltemp_diffuse
     
-    def calcparams_pvsyst(self, dii, poa_diffuse_static, temp_cell):
+    def calcparams_pvsyst(self, dii, poa_diffuse_static, temp_cell_cpv, temp_cell_diffuse):
         """
         Use the :py:func:`calcparams_pvsyst` function, the input
         parameters and ``self.module_parameters`` to calculate the
@@ -762,21 +771,25 @@ class StaticHybridSystem():
         See pvsystem.calcparams_pvsyst for details
         """
 
-        kwargs = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
-                                'R_sh_ref', 'R_sh_0', 'R_sh_exp',
-                                'R_s', 'alpha_sc', 'EgRef',
-                                'irrad_ref', 'temp_ref',
-                                'cells_in_series'],
-                               self.module_parameters)
-
-        diode_parameters_cpv = self.static_cpv_sys.calcparams_pvsyst(dii, temp_cell, **kwargs)
-        diode_parameters_diffuse =  self.static_diffuse_sys.calcparams_pvsyst(poa_diffuse_static, temp_cell, **kwargs)
+        # kwargs_cpv = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
+        #                         'R_sh_ref', 'R_sh_0', 'R_sh_exp',
+        #                         'R_s', 'alpha_sc', 'EgRef',
+        #                         'irrad_ref', 'temp_ref',
+        #                         'cells_in_series'],
+        #                        self.static_cpv_sys.module_parameters)
+        diode_parameters_cpv = self.static_cpv_sys.calcparams_pvsyst(dii, temp_cell_cpv)
+        
+        # kwargs_diffuse = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
+        #                         'R_sh_ref', 'R_sh_0', 'R_sh_exp',
+        #                         'R_s', 'alpha_sc', 'EgRef',
+        #                         'irrad_ref', 'temp_ref',
+        #                         'cells_in_series'],
+        #                        self.static_cpv_sys.module_parameters)
+        diode_parameters_diffuse =  self.static_diffuse_sys.calcparams_pvsyst(poa_diffuse_static, temp_cell_diffuse)
 
         return diode_parameters_cpv, diode_parameters_diffuse
     
-    def singlediode(self, photocurrent, saturation_current,
-                    resistance_series, resistance_shunt, nNsVth,
-                    ivcurve_pnts=None):
+    def singlediode(self, diode_parameters_cpv, diode_parameters_diffuse, ivcurve_pnts=None):
         """Wrapper around the :py:func:`singlediode` function.
 
         Parameters
@@ -788,11 +801,9 @@ class StaticHybridSystem():
         See pvsystem.singlediode for details
         """
         
-        diode_parameters_cpv = self.static_cpv_sys.inglediode(photocurrent, saturation_current,
-                           resistance_series, resistance_shunt, nNsVth,
+        diode_parameters_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
                            ivcurve_pnts=ivcurve_pnts)
-        diode_parameters_diffuse =  self.static_diffuse_sys.singlediode(photocurrent, saturation_current,
-                           resistance_series, resistance_shunt, nNsVth,
+        diode_parameters_diffuse = self.static_diffuse_sys.singlediode(*diode_parameters_diffuse,
                            ivcurve_pnts=ivcurve_pnts)
         
         return diode_parameters_cpv, diode_parameters_diffuse
