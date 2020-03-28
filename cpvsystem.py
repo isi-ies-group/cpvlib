@@ -589,6 +589,38 @@ class StaticHybridSystem(object):
                  losses_parameters=None,
                  name=None,
                  **kwargs):
+        
+        self.name = name
+
+        # could tie these together with @property
+        self.module_cpv = module_cpv
+        self.module_diffuse = module_diffuse
+        
+        if module_parameters_cpv is None:
+            self.module_parameters_cpv = {}
+        else:
+            self.module_parameters_cpv = module_parameters_cpv
+        
+        if module_parameters_diffuse is None:
+            self.module_parameters_diffuse = {}
+        else:
+            self.module_parameters_diffuse = module_parameters_diffuse
+
+        self.modules_per_string = modules_per_string
+        self.strings_per_inverter = strings_per_inverter
+
+        self.inverter = inverter
+        if inverter_parameters is None:
+            self.inverter_parameters = {}
+        else:
+            self.inverter_parameters = inverter_parameters
+
+        if losses_parameters is None:
+            self.losses_parameters = {}
+        else:
+            self.losses_parameters = losses_parameters
+
+        self.racking_model = racking_model
 
         self.static_cpv_sys = StaticCPVSystem(
             surface_tilt=surface_tilt,
@@ -618,7 +650,7 @@ class StaticHybridSystem(object):
             )
 
     def __repr__(self):
-        attrs = ['name', 'module', 'inverter', 'racking_model']
+        attrs = ['name', 'module_cpv', 'module_diffuse', 'inverter', 'racking_model']
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
@@ -657,8 +689,10 @@ class StaticHybridSystem(object):
         irradiation : DataFrame
         """
         
-        dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
-        poa_diffuse = self.static_diffuse_sys.get_irradiance(solar_zenith,
+        if dii is None:
+            dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
+        
+        poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
                                 solar_azimuth,
                                 aoi=aoi,
                                 aoi_limit=aoi_limit,

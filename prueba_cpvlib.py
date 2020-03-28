@@ -193,7 +193,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     name=None,
     )
 
-static_hybrid_sys.get_irradiance(solar_zenith,
+dii_h, poa_diffuse_static_h = static_hybrid_sys.get_irradiance(solar_zenith,
                                 solar_azimuth,
                                 aoi=data['aoi'],
                                 aoi_limit=55,
