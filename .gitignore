@@ -1,1 +1,16 @@
-.spyproject/
+# git rm -r --cached [file]
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Pytest
+.pytest_cache/

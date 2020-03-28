@@ -5,7 +5,7 @@ Created on Tue Mar  3 19:09:17 2020
 """
 
 import pandas as pd
-# import numpy as np
+import numpy as np
 # import matplotlib.pyplot as plt
 
 import pvlib
@@ -60,8 +60,8 @@ data = data.rename(columns={
     'T_Amb (°C)': 'temp_air',
     'Wind Speed (m/s)': 'wind_speed',
     'T_Backplane (°C)': 'temp_cell',
-    'ISC_measured_IIIV (A)':'isc35',
-    'ISC_measured_Si (A)':'iscSi',
+    'ISC_measured_IIIV (A)': 'isc35',
+    'ISC_measured_Si (A)': 'iscSi',
 })
 
 # GII (W/m2): The Global Inclined (plane of array) Irradiance is calculated by
@@ -106,9 +106,9 @@ airmass_absolute = location.get_airmass(data.index).airmass_absolute
 
 # OJO uf_global NO incluye uf_aoi!!
 uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
-                                                        solar_zenith, solar_azimuth)
+                                                         solar_zenith, solar_azimuth)
 
-#%% Plot Isc - CPV
+# %% Plot Isc - CPV
 # data['isc35'].plot()
 # (dc_cpv['i_sc'] * uf_global).plot()
 
@@ -116,22 +116,22 @@ uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data[
 # toma valores por defecto de module_params_diffuse para método calcparams_pvsyst() en:
 # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
 module_params_diffuse = {
-    "gamma_ref": 1.05, # valor de test de calcparams_pvsyst() 
-    "mu_gamma": 0.001, # valor de test de calcparams_pvsyst() 
-    "I_L_ref": 6.0, # valor de test de calcparams_pvsyst() 
-    "I_o_ref": 5e-9, # valor de test de calcparams_pvsyst() 
-    "R_sh_ref": 300, # valor de test de calcparams_pvsyst() 
-    "R_sh_0": 1000, # valor de test de calcparams_pvsyst() 
-    "R_sh_exp": 5.5, # valor de test de calcparams_pvsyst() 
-    "R_s": 0.5, # valor de test de calcparams_pvsyst() 
-    "alpha_sc": 0.001, # valor de test de calcparams_pvsyst() 
-    "EgRef": 1.121, # valor de test de calcparams_pvsyst() 
-    "irrad_ref": 1000, # calcparams_pvsyst()
-    "temp_ref": 25, # calcparams_pvsyst()
-    "cells_in_series": 12, # calcparams_pvsyst()
+    "gamma_ref": 1.05,  # valor de test de calcparams_pvsyst()
+    "mu_gamma": 0.001,  # valor de test de calcparams_pvsyst()
+    "I_L_ref": 6.0,  # valor de test de calcparams_pvsyst()
+    "I_o_ref": 5e-9,  # valor de test de calcparams_pvsyst()
+    "R_sh_ref": 300,  # valor de test de calcparams_pvsyst()
+    "R_sh_0": 1000,  # valor de test de calcparams_pvsyst()
+    "R_sh_exp": 5.5,  # valor de test de calcparams_pvsyst()
+    "R_s": 0.5,  # valor de test de calcparams_pvsyst()
+    "alpha_sc": 0.001,  # valor de test de calcparams_pvsyst()
+    "EgRef": 1.121,  # valor de test de calcparams_pvsyst()
+    "irrad_ref": 1000,  # calcparams_pvsyst()
+    "temp_ref": 25,  # calcparams_pvsyst()
+    "cells_in_series": 12,  # calcparams_pvsyst()
     "cells_in_parallel": 48,
-    "eta_m": 0.1, # valor por defecto de pvsyst_celltemp()
-    "alpha_absorption": 0.9, # valor por defecto de pvsyst_celltemp()
+    "eta_m": 0.1,  # valor por defecto de pvsyst_celltemp()
+    "alpha_absorption": 0.9,  # valor por defecto de pvsyst_celltemp()
     # "Area": 1.2688,
     # "Impo": 8.3, # parámetro de sapm()
     # "Vmpo": 43.9, # parámetro de sapm()
@@ -156,7 +156,8 @@ data['poa_diffuse_static'] = static_diffuse_sys.get_irradiance(solar_zenith,
                                                                solar_azimuth,
                                                                aoi=data['aoi'],
                                                                aoi_limit=55,
-                                                               dii=data['dii'], # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                               # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                               dii=data['dii'],
                                                                gii=data['gii']
                                                                )
 
@@ -169,14 +170,13 @@ diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
 
 dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
 
-#%% Plot Isc - diffuse
-# data['iscSi'].plot()
-# dc_diffuse['i_sc'].plot()
+# %% Plot Isc - diffuse
+# data['iscSi'].plot(); dc_diffuse['i_sc'].plot()
 
 # %% Irradiancias
 # data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
 
-#%% StaticHybridSystem
+# %% StaticHybridSystem
 static_hybrid_sys = cpvlib.StaticHybridSystem(
     surface_tilt=30,
     surface_azimuth=180,
@@ -191,12 +191,29 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     racking_model="insulated",
     losses_parameters=None,
     name=None,
-    )
+)
+
+cpvlib.StaticCPVSystem.mro()
 
 dii_h, poa_diffuse_static_h = static_hybrid_sys.get_irradiance(solar_zenith,
-                                solar_azimuth,
-                                aoi=data['aoi'],
-                                aoi_limit=55,
-                                dii=data['dii'], # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
-                                gii=data['gii']
-                                )
+                                                               solar_azimuth,
+                                                               aoi=data['aoi'],
+                                                               aoi_limit=55,
+                                                               dii=None,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                               gii=data['gii'],
+                                                               dni=data['dni']
+                                                               )
+
+# data['dii'].plot();dii_h.plot()
+# (dii_h - data['dii']).plot(secondary_y=True)
+# pd.testing.assert_series_equal(data['dii'], dii_h, check_less_precise=0)
+assert np.allclose(data['dii'], dii_h, atol=1) is True
+assert np.allclose(data['poa_diffuse_static'],
+                   poa_diffuse_static_h, atol=1) is True
+
+_, celltemp_diffuse = static_hybrid_sys.pvsyst_celltemp(
+    dii=data['dii'],
+    poa_diffuse_static=data['poa_diffuse_static'],
+    temp_air=data['temp_air'],
+    wind_speed=data['wind_speed']
+    )

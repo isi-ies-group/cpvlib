@@ -571,8 +571,28 @@ class StaticDiffuseSystem(PVSystem):
         poa_diffuse_static = pd.concat([poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
         return poa_diffuse_static
+    
+    def pvsyst_celltemp(self, poa_diffuse_static, temp_air, wind_speed=1.0):
+        """
+        Uses :py:func:`pvsystem.pvsyst_celltemp` to calculate module
+        temperatures based on ``self.racking_model`` and the input parameters.
 
-class StaticHybridSystem(object):
+        Parameters
+        ----------
+        See pvsystem.pvsyst_celltemp for details
+
+        Returns
+        -------
+        See pvsystem.pvsyst_celltemp for details
+        """
+
+        kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
+                               self.module_parameters)
+
+        return pvsystem.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed,
+                                        model_params=self.racking_model,
+                                        **kwargs)
+class StaticHybridSystem():
     
     def __init__(self,
                  surface_tilt=30,
@@ -698,7 +718,7 @@ class StaticHybridSystem(object):
                                 aoi_limit=aoi_limit,
                                 dii=dii, # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
                                 gii=gii,
-                                 **kwargs
+                                **kwargs
                                 )
         
         return dii, poa_diffuse_static
@@ -716,17 +736,10 @@ class StaticHybridSystem(object):
         -------
         See pvsystem.pvsyst_celltemp for details
         """
-
-        kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
-                               self.module_parameters)
         
-        celltemp_cpv = self.static_cpv_sys.pvsyst_celltemp(dii, temp_air, wind_speed,
-                                        model_params=self.racking_model,
-                                        **kwargs)
+        celltemp_cpv = self.static_cpv_sys.pvsyst_celltemp(dii, temp_air, wind_speed)
         
-        celltemp_diffuse = self.static_diffuse_sys.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed,
-                                        model_params=self.racking_model,
-                                        **kwargs)
+        celltemp_diffuse = self.static_diffuse_sys.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed)
         
         return celltemp_cpv, celltemp_diffuse
     
