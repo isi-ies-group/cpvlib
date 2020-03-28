@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 import pvlib
-import cpvsystem as cpvlib
+import cpvlib
 
 module_params_cpv = {
     "gamma_ref": 5.524,
