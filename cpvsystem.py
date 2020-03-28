@@ -803,11 +803,23 @@ class StaticHybridSystem():
         
         diode_parameters_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
                            ivcurve_pnts=ivcurve_pnts)
+        
         diode_parameters_diffuse = self.static_diffuse_sys.singlediode(*diode_parameters_diffuse,
                            ivcurve_pnts=ivcurve_pnts)
         
         return diode_parameters_cpv, diode_parameters_diffuse
 
+    def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air,
+                                      solar_zenith, solar_azimuth):
+
+        uf_am = self.static_cpv_sys.get_am_util_factor(airmass=airmass_absolute)
+
+        uf_ta = self.static_cpv_sys.get_tempair_util_factor(temp_air=temp_air)
+
+        uf_global = (uf_am * self.static_cpv_sys.module_parameters['weight_am'] +
+                    uf_ta * self.static_cpv_sys.module_parameters['weight_temp'])
+
+        return uf_global
 
 def get_simple_util_factor(x, thld, m_low, m_high):
     """

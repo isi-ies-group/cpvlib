@@ -191,7 +191,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     racking_model="insulated",
     losses_parameters=None,
     name=None,
-    )
+)
 
 # get_effective_irradiance
 dii_effective_h, poa_diffuse_static_h = static_hybrid_sys.get_effective_irradiance(
@@ -202,7 +202,7 @@ dii_effective_h, poa_diffuse_static_h = static_hybrid_sys.get_effective_irradian
     dii=None,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
     gii=data['gii'],
     dni=data['dni']
-    )
+)
 
 assert np.allclose(data['dii_effective'], dii_effective_h, atol=1) is True
 assert np.allclose(data['poa_diffuse_static'],
@@ -214,10 +214,11 @@ _, celltemp_diffuse_h = static_hybrid_sys.pvsyst_celltemp(
     poa_diffuse_static=poa_diffuse_static_h,
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
-    )
+)
 
 assert np.allclose(celltemp_diffuse, celltemp_diffuse_h, atol=1) is True
-celltemp_diffuse.plot();celltemp_diffuse_h.plot()
+celltemp_diffuse.plot()
+celltemp_diffuse_h.plot()
 
 # calcparams_pvsyst
 diode_parameters_cpv_h, diode_parameters_diffuse_h = static_hybrid_sys.calcparams_pvsyst(
@@ -225,7 +226,7 @@ diode_parameters_cpv_h, diode_parameters_diffuse_h = static_hybrid_sys.calcparam
     poa_diffuse_static=poa_diffuse_static_h,
     temp_cell_cpv=data['temp_cell_35'],
     temp_cell_diffuse=celltemp_diffuse_h,
-    )
+)
 
 for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv_h):
     assert np.allclose(diode_param, diode_param_h, atol=10) is True
@@ -233,13 +234,25 @@ for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv
 (diode_param - diode_param_h).plot()
 
 # singlediode
-dc_cpv_h, dc_diffuse_h = static_hybrid_sys.singlediode(diode_parameters_cpv_h, diode_parameters_diffuse_h)
+airmass_absolute = location.get_airmass(data.index).airmass_absolute
+dc_cpv_h, dc_diffuse_h = static_hybrid_sys.singlediode(
+    diode_parameters_cpv_h, diode_parameters_diffuse_h)
 
 for dc_param in dc_cpv:
     assert np.allclose(dc_cpv[dc_param], dc_cpv_h[dc_param], atol=1) is True
-    
-for dc_param in dc_cpv:
-    assert np.allclose(dc_diffuse[dc_param].fillna(0), dc_diffuse_h[dc_param].fillna(0), atol=100) is True
 
-dc_diffuse[dc_param].plot();dc_diffuse_h[dc_param].plot()
+for dc_param in dc_cpv:
+    assert np.allclose(dc_diffuse[dc_param].fillna(
+        0), dc_diffuse_h[dc_param].fillna(0), atol=100) is True
+
+dc_diffuse[dc_param].plot()
+dc_diffuse_h[dc_param].plot()
 (dc_diffuse[dc_param] - dc_diffuse_h[dc_param]).plot()
+
+# uf_global
+airmass_absolute = location.get_airmass(data.index).airmass_absolute
+
+uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'],
+                                                                  solar_zenith, solar_azimuth)
+
+assert np.allclose(uf_global, uf_global_h, atol=0.001) is True
