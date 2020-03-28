@@ -9,7 +9,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 
 import pvlib
-import cpvsystem as cpvlib
+import cpvlib
 
 mod_params_cpv = {
     "gamma_ref": 5.524,
