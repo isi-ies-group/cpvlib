@@ -15,3 +15,5 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * Cambiar UF_AOI por IAM
 * Meter aoi_limit=55 en parametros del módulo
 * Escribir tests basados en dataset 2019-05 y hacer más test
+* Upgrade a pvlib v0.8 -> Hay que usar pvlib.temperature.pvsyst_cell()
+* Ver racking_model='open_rack_cell_glassback' en CPVSystem, ya que es del modelo 'sapm', pero usamo el 'pvsyst'

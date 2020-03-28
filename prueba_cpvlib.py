@@ -109,32 +109,32 @@ uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data[
                                                         solar_zenith, solar_azimuth)
 
 #%% Plot Isc - CPV
-data['isc35'].plot()
-(dc_cpv['i_sc'] * uf_global).plot()
+# data['isc35'].plot()
+# (dc_cpv['i_sc'] * uf_global).plot()
 
 # %% StaticDiffuseSystem
-# toma valores por defecto de module_params_diffuse en:
+# toma valores por defecto de module_params_diffuse para método calcparams_pvsyst() en:
 # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
 module_params_diffuse = {
-    "gamma_ref": 1.05, # valor de test de pvlib 
-    "mu_gamma": 0.001, # valor de test de pvlib 
-    "I_L_ref": 6.0, # valor de test de pvlib 
-    "I_o_ref": 5e-9, # valor de test de pvlib 
-    "R_sh_ref": 300, # valor de test de pvlib 
-    "R_sh_0": 1000, # valor de test de pvlib 
-    "R_sh_exp": 5.5, # valor de test de pvlib 
-    "R_s": 0.5, # valor de test de pvlib 
-    "alpha_sc": 0.001, # valor de test de pvlib 
-    "EgRef": 1.121, # valor de test de pvlib 
-    "irrad_ref": 1000,
-    "temp_ref": 25,
-    "cells_in_series": 12,
+    "gamma_ref": 1.05, # valor de test de calcparams_pvsyst() 
+    "mu_gamma": 0.001, # valor de test de calcparams_pvsyst() 
+    "I_L_ref": 6.0, # valor de test de calcparams_pvsyst() 
+    "I_o_ref": 5e-9, # valor de test de calcparams_pvsyst() 
+    "R_sh_ref": 300, # valor de test de calcparams_pvsyst() 
+    "R_sh_0": 1000, # valor de test de calcparams_pvsyst() 
+    "R_sh_exp": 5.5, # valor de test de calcparams_pvsyst() 
+    "R_s": 0.5, # valor de test de calcparams_pvsyst() 
+    "alpha_sc": 0.001, # valor de test de calcparams_pvsyst() 
+    "EgRef": 1.121, # valor de test de calcparams_pvsyst() 
+    "irrad_ref": 1000, # calcparams_pvsyst()
+    "temp_ref": 25, # calcparams_pvsyst()
+    "cells_in_series": 12, # calcparams_pvsyst()
     "cells_in_parallel": 48,
     "eta_m": 0.1, # valor por defecto de pvsyst_celltemp()
     "alpha_absorption": 0.9, # valor por defecto de pvsyst_celltemp()
     # "Area": 1.2688,
-    # "Impo": 8.3,
-    # "Vmpo": 43.9,
+    # "Impo": 8.3, # parámetro de sapm()
+    # "Vmpo": 43.9, # parámetro de sapm()
 }
 
 static_diffuse_sys = cpvlib.StaticDiffuseSystem(
@@ -169,9 +169,34 @@ diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
 
 dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
 
-#% PLot Isc - diffuse
-data['iscSi'].plot()
-dc_diffuse['i_sc'].plot()
+#%% Plot Isc - diffuse
+# data['iscSi'].plot()
+# dc_diffuse['i_sc'].plot()
 
 # %% Irradiancias
-data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
+# data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
+
+#%% StaticHybridSystem
+static_hybrid_sys = cpvlib.StaticHybridSystem(
+    surface_tilt=30,
+    surface_azimuth=180,
+    module_cpv=None,
+    module_diffse=None,
+    module_params_cpv=module_params_cpv,
+    module_parameters_diffuse=module_params_diffuse,
+    modules_per_string=1,
+    strings_per_inverter=1,
+    inverter=None,
+    inverter_parameters=None,
+    racking_model="insulated",
+    losses_parameters=None,
+    name=None,
+    )
+
+static_hybrid_sys.get_irradiance(solar_zenith,
+                                solar_azimuth,
+                                aoi=data['aoi'],
+                                aoi_limit=55,
+                                dii=data['dii'], # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                gii=data['gii']
+                                )
