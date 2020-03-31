@@ -5,7 +5,7 @@ Created on Tue Mar 31 03:04:44 2020
 @author: Ruben
 """
 import pandas as pd
-import numpy as np
+# import numpy as np
 # import matplotlib.pyplot as plt
 
 import pvlib
@@ -122,7 +122,7 @@ data['dii_effective'], data['poa_diffuse_static'] = static_hybrid_sys.get_effect
 )
 
 # pvsyst_celltemp
-_, celltemp_diffuse = static_hybrid_sys.pvsyst_celltemp(
+_, data['celltemp_diffuse'] = static_hybrid_sys.pvsyst_celltemp(
     dii=data['dii_effective'],
     poa_diffuse_static=data['poa_diffuse_static'],
     temp_air=data['temp_air'],
@@ -134,11 +134,10 @@ diode_parameters_cpv, diode_parameters_diffuse = static_hybrid_sys.calcparams_pv
     dii=data['dii_effective'],
     poa_diffuse_static=data['poa_diffuse_static'],
     temp_cell_cpv=data['temp_cell_35'],
-    temp_cell_diffuse=celltemp_diffuse,
+    temp_cell_diffuse=data['celltemp_diffuse'],
 )
 
 # singlediode
-airmass_absolute = location.get_airmass(data.index).airmass_absolute
 dc_cpv, dc_diffuse = static_hybrid_sys.singlediode(
     diode_parameters_cpv, diode_parameters_diffuse)
 
