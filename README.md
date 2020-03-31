@@ -11,7 +11,7 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [x] StaticCPVSystem debe heredar de verdad de CPVSystem
 * [x] Usar nombre "hybrid" para el sistema entero, no para el sistema de difusa
 * [x] Generar dii directamente desde el método StaticCPVSystem.get_irradiance()
-* [ ] Ejecutar los UFs internamente en StaticCPVSystem
+* [x] Ejecutar los UFs internamente en StaticCPVSystem
 * [x] Renombrar dict UF_parameters a notación de Marcos
 * [ ] Auto rellenar los parámetros de UF desde self.xxx para UF_DNI
 * [ ] Contar efecto desuniformidad en células de base cuando DNI se suma a difusa
