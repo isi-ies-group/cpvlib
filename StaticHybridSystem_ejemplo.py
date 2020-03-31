@@ -11,6 +11,7 @@ import pandas as pd
 import pvlib
 import cpvlib
 
+#%% Parámetros configuración módulo
 mod_params_cpv = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
@@ -71,7 +72,7 @@ mod_params_diffuse = {
     # "Vmpo": 43.9, # parámetro de sapm()
 }
 
-# lee datos campaña 2019-05
+#%% lee datos campaña 2019-05
 data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time',
                    parse_dates=True, encoding='latin1')
 data.index = data.index.tz_localize('Europe/Madrid')
@@ -93,7 +94,7 @@ location = pvlib.location.Location(
 solar_zenith = location.get_solarposition(data.index).zenith
 solar_azimuth = location.get_solarposition(data.index).azimuth
 
-# StaticHybridSystem
+#%% StaticHybridSystem
 static_hybrid_sys = cpvlib.StaticHybridSystem(
     surface_tilt=30,
     surface_azimuth=180,

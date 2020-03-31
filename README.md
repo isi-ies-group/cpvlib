@@ -20,6 +20,7 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [x] Obtener funcion IAM
 * [x] Cambiar UF_AOI por IAM
 * [ ] Meter aoi_limit=55 en parametros del módulo
+* [ ] Meter parámetro de IAM en parametros del módulo
 * [x] Escribir tests basados en dataset 2019-05
 * [ ] Hacer más tests
 * [ ] Upgrade a pvlib v0.8 -> Hay que usar pvlib.temperature.pvsyst_cell()
