@@ -51,7 +51,9 @@ data[['isc_35', 'isc_si', 'aoi']].plot(secondary_y='aoi')
 
 #%% ajuste iam.ashrae
 data_noinf = data.drop(data[data.dii == 0].index)
-param,_ = curve_fit(pvlib.iam.ashrae, data_noinf['aoi'], data_noinf['isc35/dii'])
+param, pcov = curve_fit(pvlib.iam.ashrae, data_noinf['aoi'], data_noinf['isc35/dii'])
+
+SEM = np.sqrt(np.diag(pcov))
 
 #%% Plots IAM - ASHRAE
 data.plot(x='aoi', y='isc35/dii', style='.', ylim=[0, 1.3])

@@ -5,6 +5,7 @@ Created on Wed Apr  8 16:01:01 2020
 @author: Ruben
 """
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
@@ -31,7 +32,9 @@ def f(meteo_inputs, a ,b):
     poa_global, temp_air, wind_speed = meteo_inputs
     return sapm_module(poa_global, temp_air, wind_speed, a, b)
 
-param,_ = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+param, pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+
+SEM = np.sqrt(np.diag(pcov))
 
 a, b = param
 temp_cell_35_est = sapm_module(data.dii, data.temp_air, data.wind_speed, a, b)
