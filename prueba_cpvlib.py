@@ -49,7 +49,7 @@ mod_params_cpv.update(UF_parameters_cpv)
 
 # data = pd.read_csv('data2020_03_14.txt', sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
 
-data = pd.read_csv('InsolightMay2019.csv', index_col='Date Time',
+data = pd.read_csv('datos/InsolightMay2019.csv', index_col='Date Time',
                    parse_dates=True, encoding='latin1')
 data.index = data.index.tz_localize('Europe/Madrid')
 
