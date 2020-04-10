@@ -71,8 +71,8 @@ def data():
     return data
 
 test_data = [
-    ('meteo2020_03_04.txt', 6377.265283689235),
-    ('meteo2020_03_14.txt', 8494.147901845981),
+    ('datos/meteo2020_03_04.txt', 6377.265283689235),
+    ('datos/meteo2020_03_14.txt', 8494.147901845981),
 ]
 
 
@@ -336,8 +336,8 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     )
     
     assert np.allclose(celltemp_diffuse, celltemp_diffuse_h, atol=1) is True
-    celltemp_diffuse.plot()
-    celltemp_diffuse_h.plot()
+    # celltemp_diffuse.plot()
+    # celltemp_diffuse_h.plot()
     
     # calcparams_pvsyst
     diode_parameters_cpv_h, diode_parameters_diffuse_h = static_hybrid_sys.calcparams_pvsyst(
@@ -350,7 +350,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv_h):
         assert np.allclose(diode_param, diode_param_h, atol=10) is True
     
-    (diode_param - diode_param_h).plot()
+    # (diode_param - diode_param_h).plot()
     
     # singlediode
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
@@ -364,9 +364,9 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         assert np.allclose(dc_diffuse[dc_param].fillna(
             0), dc_diffuse_h[dc_param].fillna(0), atol=100) is True
     
-    dc_diffuse[dc_param].plot()
-    dc_diffuse_h[dc_param].plot()
-    (dc_diffuse[dc_param] - dc_diffuse_h[dc_param]).plot()
+    # dc_diffuse[dc_param].plot()
+    # dc_diffuse_h[dc_param].plot()
+    # (dc_diffuse[dc_param] - dc_diffuse_h[dc_param]).plot()
     
     # uf_global
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
