@@ -53,7 +53,7 @@ mod_params_cpv.update(UF_parameters_cpv)
 mod_params_diffuse = {
     "gamma_ref": 1.05,  # valor de test de calcparams_pvsyst()
     "mu_gamma": 0.001,  # valor de test de calcparams_pvsyst()
-    "I_L_ref": 6.0,  # valor de test de calcparams_pvsyst()
+    "I_L_ref": 4*6.0,  # valor de test de calcparams_pvsyst()
     "I_o_ref": 5e-9,  # valor de test de calcparams_pvsyst()
     "R_sh_ref": 300,  # valor de test de calcparams_pvsyst()
     "R_sh_0": 1000,  # valor de test de calcparams_pvsyst()
@@ -63,8 +63,8 @@ mod_params_diffuse = {
     "EgRef": 1.121,  # valor de test de calcparams_pvsyst()
     "irrad_ref": 1000,  # calcparams_pvsyst()
     "temp_ref": 25,  # calcparams_pvsyst()
-    "cells_in_series": 12,  # calcparams_pvsyst()
-    "cells_in_parallel": 48,
+    "cells_in_series": 2,  # visto Vmp~=Pmp/Isc
+    # "cells_in_parallel": 48, # 
     "eta_m": 0.1,  # valor por defecto de pvsyst_celltemp()
     "alpha_absorption": 0.9,  # valor por defecto de pvsyst_celltemp()
     # "Area": 1.2688,
@@ -148,11 +148,11 @@ airmass_absolute = location.get_airmass(data.index).airmass_absolute
 uf_global = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'],
                                                                   solar_zenith, solar_azimuth)
 #%% Plot Irradiancias
-data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
+# data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
 
 #%% Plot Isc - CPV
-data['isc35'].plot()
-(dc_cpv['i_sc'] * uf_global).plot()
+# data['isc35'].plot()
+# (dc_cpv['i_sc'] * uf_global).plot()
 
 #%% Plot Isc - diffuse
 data['iscSi'].plot()

@@ -26,6 +26,7 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [ ] Upgrade a pvlib v0.8 -> Hay que usar pvlib.temperature.pvsyst_cell()
 * [ ] Ver racking_model='open_rack_cell_glassback' en CPVSystem, ya que es del modelo 'sapm', pero usamo el 'pvsyst'
 * [ ] Vigilar (test?) el paso de kwargs de los métodos de las clases
+
 * [ ] Extraer parámetros de sistema difusa. Ver UF: luz que no llega.
 * [ ] Hay más temperatura de célula. Modelo radiación difusa + directa
 * [ ] Ajustar módulos CPV con modelos térmicos Sandia (a, b) y PVSyst
