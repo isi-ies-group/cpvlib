@@ -72,7 +72,7 @@ mod_params_diffuse = {
     # "Vmpo": 43.9, # parámetro de sapm()
 }
 
-#%% lee datos campaña 2019-05
+#%% lee datos campaña 2019-05 https://doi.org/10.5281/zenodo.3346822
 data = pd.read_csv('datos/InsolightMay2019.csv', index_col='Date Time',
                    parse_dates=True, encoding='latin1')
 data.index = data.index.tz_localize('Europe/Madrid')
