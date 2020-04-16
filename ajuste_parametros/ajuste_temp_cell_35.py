@@ -24,7 +24,7 @@ data = data.rename(columns={
     'Wind Speed (m/s)': 'wind_speed',
     'T_Backplane (°C)': 'temp_cell_35',
     'ISC_measured_IIIV (A)': 'isc35',
-    'ISC_measured_Si (A)': 'iscSi',
+    'ISC_measured_Si (A)': 'iscsi',
 })
 
 # filtro 3 días soleados
