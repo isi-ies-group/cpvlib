@@ -28,7 +28,7 @@ data = data.rename(columns={
 })
 
 # filtro 3 días soleados
-data = data['2019-05-30':'2019-06-01']
+# data = data['2019-05-30':'2019-06-01']
 
 #%% Ajuste sapm_module
 def f(meteo_inputs, a ,b):
@@ -37,16 +37,15 @@ def f(meteo_inputs, a ,b):
 
 (a, b), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
 
-temp_cell_35_est = sapm_module(data.dii, data.temp_air, data.wind_speed, a, b)
+temp_cell_35_est_sapm = sapm_module(data.dii, data.temp_air, data.wind_speed, a, b)
 
-plt.hist2d(data.temp_cell_35, temp_cell_35_est, bins=30)
+plt.hist2d(data.temp_cell_35, temp_cell_35_est_sapm, bins=30)
 plt.grid(True)
 
-
-residuals = data.temp_cell_35 - temp_cell_35_est
-RMSE = np.sqrt(((residuals) ** 2).mean())
-print(RMSE)
-plt.hist(residuals, bins=100)
+residuals_sapm = data.temp_cell_35 - temp_cell_35_est_sapm
+RMSE_sapm = np.sqrt(((residuals_sapm) ** 2).mean())
+print(RMSE_sapm)
+plt.hist(residuals_sapm, bins=100)
 
 #%% Ajuste pvsyst_cell
 def f(meteo_inputs, u_c, u_v, eta_m=0.1, alpha_absorption=0.9):
@@ -55,13 +54,12 @@ def f(meteo_inputs, u_c, u_v, eta_m=0.1, alpha_absorption=0.9):
 
 (u_c, u_v, eta_m, alpha_absorption), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
 
-temp_cell_35_est = pvsyst_cell(data.dii, data.temp_air, data.wind_speed, u_c, u_v, eta_m, alpha_absorption)
+temp_cell_35_est_pvsyst = pvsyst_cell(data.dii, data.temp_air, data.wind_speed, u_c, u_v, eta_m, alpha_absorption)
 
-plt.hist2d(data.temp_cell_35, temp_cell_35_est, bins=30)
+plt.hist2d(data.temp_cell_35, temp_cell_35_est_pvsyst, bins=30)
 plt.grid(True)
 
-
-residuals = data.temp_cell_35 - temp_cell_35_est
-RMSE = np.sqrt(((residuals) ** 2).mean())
-print(RMSE)
-plt.hist(residuals, bins=100)
+residuals_pvsyst = data.temp_cell_35 - temp_cell_35_est_pvsyst
+RMSE_pvsyst = np.sqrt(((residuals_pvsyst) ** 2).mean())
+print(RMSE_pvsyst)
+plt.hist(residuals_pvsyst, bins=100)

@@ -38,30 +38,29 @@ data['aoi'] = pvlib.irradiance.aoi(surface_tilt=30, surface_azimuth=180,
 # filtro 3 días soleados
 data = data['2019-05-30':'2019-06-01']
 
-
 data['isc35/dii'] = data['isc_35'] / data['dii']
 isc35_dii_max = data['isc35/dii'][data.aoi<55].max()
 
 # Normaliza por el máximo
 data['isc35/dii'] /= isc35_dii_max
 
-
 #%% Plot isc, aoi
 data[['isc_35', 'isc_si', 'aoi']].plot(secondary_y='aoi')
 
 #%% ajuste iam.ashrae
-data_noinf = data.drop(data[data.dii == 0].index)
-param, pcov = curve_fit(pvlib.iam.ashrae, data_noinf['aoi'], data_noinf['isc35/dii'])
+data_noinf = data.drop(data[data.dii == 0].index)[data.aoi<55]
 
-SEM = np.sqrt(np.diag(pcov))
+param_b,_ = curve_fit(pvlib.iam.ashrae, data_noinf['aoi'], data_noinf['isc35/dii'])
 
-#%% Plots IAM - ASHRAE
+isc35_dii_est_ashrae = pvlib.iam.ashrae(data_noinf['aoi'], b=param_b)
+
+residuals_ashrae = data_noinf['isc35/dii'] - isc35_dii_est_ashrae
+RMSE_ashrae = np.sqrt(((residuals_ashrae) ** 2).mean())
+print(RMSE_ashrae)
+plt.hist(residuals_ashrae, bins=100)
+
 data.plot(x='aoi', y='isc35/dii', style='.', ylim=[0, 1.3])
-# data.plot(x='aoi', y='isc_si/dii', style='.', ylim=[0, 0.01])
-
-for var in np.arange(start=0, stop=1, step=0.1):
-    plt.plot(data['aoi'], pvlib.iam.ashrae(data['aoi'], b=var), label="{0:.2f}".format(var), linewidth=0.5)
-
+plt.plot(data_noinf['aoi'], isc35_dii_est_ashrae, label=f"{param_b[0]:.2f}", linewidth=0.5)
 plt.legend()
 plt.grid()
 
@@ -74,6 +73,17 @@ for var in np.arange(start=1, stop=150, step=10):
 
 plt.legend()
 
-#%% ajuste iam.physical
-# pvlib.iam.physical(aoi, n=1.526, K=4., L=0.002)
-param,_ = curve_fit(pvlib.iam.physical, data_noinf['aoi'], data_noinf['isc35/dii'])
+#%% ajuste iam.physical pvlib.iam.physical(aoi, n=1.526, K=4., L=0.002)
+(n, K, L),_ = curve_fit(pvlib.iam.physical, data_noinf['aoi'], data_noinf['isc35/dii'])
+
+isc35_dii_est_phys = pvlib.iam.physical(data_noinf['aoi'], n, K, L)
+
+residuals_phys = data_noinf['isc35/dii'] - isc35_dii_est_phys
+RMSE_phys = np.sqrt(((residuals_phys) ** 2).mean())
+print(RMSE_phys)
+plt.hist(residuals_phys, bins=100)
+
+data.plot(x='aoi', y='isc35/dii', style='.', ylim=[0, 1.3])
+plt.plot(data_noinf['aoi'], isc35_dii_est_phys, label=f"{n:.2f}, {K:.2f}, {L:.2f}", linewidth=0.5)
+plt.legend()
+plt.grid()
