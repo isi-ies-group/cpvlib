@@ -27,8 +27,9 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [ ] Ver racking_model='open_rack_cell_glassback' en CPVSystem, ya que es del modelo 'sapm', pero usamo el 'pvsyst'
 * [ ] Vigilar (test?) el paso de kwargs de los métodos de las clases
 
-* [ ] Extraer parámetros de sistema difusa. Ver UF: luz que no llega.
-* [ ] Hay más temperatura de célula. Modelo radiación difusa + directa
-* [ ] Ajustar módulos CPV con modelos térmicos Sandia (a, b) y PVSyst
+* [x] Extraer parámetros de sistema difusa. Ver UF: luz que no llega.
+* [x] Ajustar módulos CPV (Fadrique e Intrepido) con modelos térmicos Sandia (a, b) y PVSyst
 * [ ] Ver Voc de silicio como indicador de tcell. Como 1ª aprox. tomamos GII como radiación de entrada.
-* [ ] Que medimos? Para utilizar medidas de ahora. Preguntar a Steve
+        Hay más temperatura de célula: Modelo radiación difusa + directa
+* [x] Que medimos? Para utilizar medidas de ahora. Preguntar a Steve ->
+        carpeta 'inso_mod': Solo un módulo (29) tiene corriente difusa y es 0.1 A (/10 esperado)

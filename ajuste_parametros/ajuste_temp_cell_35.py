@@ -31,11 +31,11 @@ data = data.rename(columns={
 # data = data['2019-05-30':'2019-06-01']
 
 #%% Ajuste sapm_module
-def f(meteo_inputs, a ,b):
+def f_sapm(meteo_inputs, a ,b):
     poa_global, temp_air, wind_speed = meteo_inputs
     return sapm_module(poa_global, temp_air, wind_speed, a, b)
 
-(a, b), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+(a, b), pcov = curve_fit(f_sapm, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
 print("a, b =", a, b)
 
 temp_cell_35_est_sapm = sapm_module(data.dii, data.temp_air, data.wind_speed, a, b)
@@ -51,11 +51,11 @@ plt.figure()
 plt.hist(residuals_sapm, bins=100)
 
 #%% Ajuste pvsyst_cell
-def f(meteo_inputs, u_c, u_v, eta_m=0.1, alpha_absorption=0.9):
+def f_pvsyst(meteo_inputs, u_c, u_v, eta_m, alpha_absorption):
     poa_global, temp_air, wind_speed = meteo_inputs
     return pvsyst_cell(poa_global, temp_air, wind_speed, u_c, u_v, eta_m, alpha_absorption)
 
-(u_c, u_v, eta_m, alpha_absorption), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+(u_c, u_v, eta_m, alpha_absorption), pcov = curve_fit(f_pvsyst, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
 print("u_c, u_v, eta_m, alpha_absorption =", u_c, u_v, eta_m, alpha_absorption)
 
 temp_cell_35_est_pvsyst = pvsyst_cell(data.dii, data.temp_air, data.wind_speed, u_c, u_v, eta_m, alpha_absorption)

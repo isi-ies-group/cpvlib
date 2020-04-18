@@ -35,7 +35,7 @@ def ajuste_temp_sapm_module(data, grafica=True):
     return a, b
 
 def ajuste_temp_pvsyst_cell(data, grafica=True):
-    def f(meteo_inputs, u_c, u_v, eta_m=0.1, alpha_absorption=0.9):
+    def f(meteo_inputs, u_c, u_v, eta_m, alpha_absorption):
         poa_global, temp_air, wind_speed = meteo_inputs
         return pvsyst_cell(poa_global, temp_air, wind_speed, u_c, u_v, eta_m, alpha_absorption)
     
