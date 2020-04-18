@@ -36,15 +36,18 @@ def f(meteo_inputs, a ,b):
     return sapm_module(poa_global, temp_air, wind_speed, a, b)
 
 (a, b), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+print("a, b =", a, b)
 
 temp_cell_35_est_sapm = sapm_module(data.dii, data.temp_air, data.wind_speed, a, b)
 
-plt.hist2d(data.temp_cell_35, temp_cell_35_est_sapm, bins=30)
-plt.grid(True)
-
 residuals_sapm = data.temp_cell_35 - temp_cell_35_est_sapm
 RMSE_sapm = np.sqrt(((residuals_sapm) ** 2).mean())
-print(RMSE_sapm)
+print('RMSE SAPM_module:', RMSE_sapm)
+
+plt.figure()
+plt.hist2d(data.temp_cell_35, temp_cell_35_est_sapm, bins=30)
+plt.grid(True)
+plt.figure()
 plt.hist(residuals_sapm, bins=100)
 
 #%% Ajuste pvsyst_cell
@@ -53,13 +56,16 @@ def f(meteo_inputs, u_c, u_v, eta_m=0.1, alpha_absorption=0.9):
     return pvsyst_cell(poa_global, temp_air, wind_speed, u_c, u_v, eta_m, alpha_absorption)
 
 (u_c, u_v, eta_m, alpha_absorption), pcov = curve_fit(f, (data.dii, data.temp_air, data.wind_speed), data.temp_cell_35)
+print("u_c, u_v, eta_m, alpha_absorption =", u_c, u_v, eta_m, alpha_absorption)
 
 temp_cell_35_est_pvsyst = pvsyst_cell(data.dii, data.temp_air, data.wind_speed, u_c, u_v, eta_m, alpha_absorption)
-
-plt.hist2d(data.temp_cell_35, temp_cell_35_est_pvsyst, bins=30)
-plt.grid(True)
 
 residuals_pvsyst = data.temp_cell_35 - temp_cell_35_est_pvsyst
 RMSE_pvsyst = np.sqrt(((residuals_pvsyst) ** 2).mean())
 print(RMSE_pvsyst)
+
+plt.figure()
+plt.hist2d(data.temp_cell_35, temp_cell_35_est_pvsyst, bins=30)
+plt.grid(True)
+plt.figure()
 plt.hist(residuals_pvsyst, bins=100)
