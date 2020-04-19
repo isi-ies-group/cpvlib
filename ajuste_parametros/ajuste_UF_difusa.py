@@ -53,15 +53,12 @@ data_filt['isc_si/gii'].plot(style='.')
 
 data_filt.plot.scatter(y='isc_si/gii', x='aoi', ylim=[0, 0.006], xlim=[0, 90])
 
-# %% Ajuste lineal por tramos
-
-
+#%% Ajuste lineal por tramos
 def linear(x, a, b):
     return a * x + b
 
-
 data_filt_aoi1 = data_filt.query('aoi<55')
-data_filt_aoi2 = data_filt.query('55<aoi<75')
+data_filt_aoi2 = data_filt.query('55<aoi<80')
 
 (a1, b1), pcov = curve_fit(
     linear, data_filt_aoi1['aoi'], data_filt_aoi1['isc_si/gii'])
@@ -73,15 +70,37 @@ isc_si_est2 = linear(data_filt_aoi2['aoi'], a2, b2)
 
 residuals1 = data_filt_aoi1['isc_si/gii'] - isc_si_est1
 RMSE1 = np.sqrt(((residuals1) ** 2).mean())
-print(RMSE1)
+print(f'RMSE1={RMSE1} a1={a1} b1={b1}')
 plt.hist(residuals1, bins=100)
 
 residuals2 = data_filt_aoi2['isc_si/gii'] - isc_si_est2
 RMSE2 = np.sqrt(((residuals2) ** 2).mean())
-print(RMSE2)
+print(f'RMSE2={RMSE2} a2={a2} b2={b2}')
 plt.hist(residuals2, bins=100)
 
 ax = data_filt.plot.scatter(y='isc_si/gii', x='aoi',
                             ylim=[0, 0.006], xlim=[0, 90])
 ax.plot(data_filt_aoi1['aoi'], isc_si_est1, 'r-')
 ax.plot(data_filt_aoi2['aoi'], isc_si_est2, 'r-')
+
+#%% define la funcion por tramos
+def get_aoi_util_factor(aoi, aoi_thld, aoi_limit):
+    if isinstance(aoi, (int, float)):
+        aoi = float(aoi)
+    else:
+        aoi = aoi.values
+    condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
+    funclist = [lambda aoi:aoi*a1+b1, lambda aoi:aoi*a2+b2]
+    
+    return np.piecewise(aoi, condlist, funclist)
+
+aoi_thld, aoi_limit = 55, 80
+
+ax = data_filt.plot.scatter(y='isc_si/gii', x='aoi',
+                            ylim=[0, 0.006], xlim=[0, 90])
+ax.plot(data_filt['aoi'], get_aoi_util_factor(data_filt['aoi'], aoi_thld, aoi_limit), 'r.')
+
+uf_aoi_ast = get_aoi_util_factor(0, aoi_thld, aoi_limit)
+uf_aoi_norm = get_aoi_util_factor(data['aoi'], aoi_thld, aoi_limit) / uf_aoi_ast
+
+plt.plot(data['aoi'], uf_aoi_norm, '.')
