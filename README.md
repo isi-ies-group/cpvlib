@@ -28,6 +28,7 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [ ] Vigilar (test?) el paso de kwargs de los métodos de las clases
 
 * [x] Extraer parámetros de sistema difusa. Ver UF: luz que no llega.
+* [ ] Aplicar UF_difusa a sistema Hybrid
 * [x] Ajustar módulos CPV (Fadrique e Intrepido) con modelos térmicos Sandia (a, b) y PVSyst
 * [ ] Ver Voc de silicio como indicador de tcell. Como 1ª aprox. tomamos GII como radiación de entrada.
         Hay más temperatura de célula: Modelo radiación difusa + directa
