@@ -6,7 +6,7 @@ Created on Mon Apr 20 01:39:37 2020
 """
 
 # https://doi.org/10.5281/zenodo.3346823
-# 0.1 m2, 572 micro-cells + 4x 6"(15.24 cm) Si-cells in series
+# 0.1 m2, 572 (12 serie x 48 parallel) micro-cells + 4x 6"(15.24 cm) Si-cells in series
 # https://doi.org/10.5281/zenodo.3349781
 # 35 rango IV: 0.7 A, 35 V @DNI 900 W/m2
 # Si rango IV: 1.7 A, 2.2 V @GNI 950 W/m2 y DNI/GNI=0.7
