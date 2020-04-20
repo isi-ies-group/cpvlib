@@ -70,3 +70,11 @@ mod_params_diffuse = {
     # "Impo": 8.3, # parámetro de sapm()
     # "Vmpo": 43.9, # parámetro de sapm()
 }
+
+params_tracker = {
+    'axis_tilt':0,
+    'axis_azimuth':0,
+    'max_angle':90,
+    'backtrack':True,
+    'gcr':2.0/7.0
+}

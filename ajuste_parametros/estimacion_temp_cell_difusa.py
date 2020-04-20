@@ -6,7 +6,6 @@ Created on Mon Apr 20 01:37:10 2020
 """
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
 import pvlib
 

@@ -11,7 +11,7 @@ import pandas as pd
 import pvlib
 import cpvlib
 
-from parametros_sistemas import mod_params_cpv, mod_params_diffuse
+from parametros_sistemas import mod_params_cpv, mod_params_diffuse, params_tracker
 
 #%% Parámetros configuración módulo
 # https://doi.org/10.5281/zenodo.3346823
@@ -34,7 +34,7 @@ data = data.rename(columns={
     'Wind Speed (m/s)': 'wind_speed',
     'T_Backplane (°C)': 'temp_cell_35',
     'ISC_measured_IIIV (A)': 'isc35',
-    'ISC_measured_Si (A)': 'iscSi',
+    'ISC_measured_Si (A)': 'iscsi',
 })
 
 location = pvlib.location.Location(
@@ -51,6 +51,8 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     module_diffuse=None,
     module_parameters_cpv=mod_params_cpv,
     module_parameters_diffuse=mod_params_diffuse,
+    is_tracker=False,
+    parameters_tracker=params_tracker,
     modules_per_string=1,
     strings_per_inverter=1,
     inverter=None,
@@ -104,6 +106,15 @@ uf_global = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute
 # (dc_cpv['i_sc'] * uf_global).plot()
 
 #%% Plot Isc - diffuse
-data['iscSi'].plot()
+data['iscsi'].plot()
 dc_diffuse['i_sc'].plot()
 
+#%% energia
+# get_aoi(solar_zenith, solar_azimuth)
+
+print('\nTracker?', static_hybrid_sys.is_tracker)
+print(f"E_CPV={(dc_cpv['i_sc'] * uf_global).sum()}", f"E_diff={dc_diffuse['i_sc'].sum()}")
+#%% Prueba con seguidor
+tracker_data = pvlib.tracking.singleaxis(solar_zenith, solar_azimuth, **params_tracker)
+
+tracker_data.aoi.plot()

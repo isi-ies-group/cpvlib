@@ -602,6 +602,8 @@ class StaticHybridSystem():
                  module_parameters_cpv=None,
                  module_diffuse=None,
                  module_parameters_diffuse=None,
+                 is_tracker=False,
+                 parameters_tracker=None,
                  modules_per_string=1,
                  strings_per_inverter=1,
                  inverter=None,
@@ -620,6 +622,8 @@ class StaticHybridSystem():
         self.module_cpv = module_cpv
         self.module_diffuse = module_diffuse
         
+        self.is_tracker = is_tracker
+        
         if module_parameters_cpv is None:
             self.module_parameters_cpv = {}
         else:
@@ -629,7 +633,12 @@ class StaticHybridSystem():
             self.module_parameters_diffuse = {}
         else:
             self.module_parameters_diffuse = module_parameters_diffuse
-
+        
+        if parameters_tracker is None:
+            self.parameters_tracker = {}
+        else:
+            self.parameters_tracker = parameters_tracker
+            
         self.modules_per_string = modules_per_string
         self.strings_per_inverter = strings_per_inverter
 
@@ -714,11 +723,17 @@ class StaticHybridSystem():
         irradiation : DataFrame
         """
         
+        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
+        #                        self.parameters_tracker)
+        
         if dii is None:
             dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
         
-        aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-
+        if self.is_tracker:
+            aoi = pvlib.tracking.singleaxis(solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
+        else:
+            aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
+            
         poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
                                 solar_azimuth,
                                 aoi=aoi,
@@ -820,6 +835,7 @@ class StaticHybridSystem():
                     uf_ta * self.static_cpv_sys.module_parameters['weight_temp'])
 
         return uf_global
+
 
 def get_simple_util_factor(x, thld, m_low, m_high):
     """
