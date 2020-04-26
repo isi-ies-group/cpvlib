@@ -6,9 +6,6 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 ## Notebooks en Binder
 * prueba_tmy_HybridSystem.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=prueba_tmy_HybridSystem.ipynb)
 
-* prueba_cpvlib.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=prueba_cpvlib.ipynb)
-* determinacion_iam.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=determinacion_iam.ipynb)
-
 ## TO DO
 * [x] StaticCPVSystem debe heredar de verdad de CPVSystem
 * [x] Usar nombre "hybrid" para el sistema entero, no para el sistema de difusa
