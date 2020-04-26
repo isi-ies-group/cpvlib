@@ -11,6 +11,7 @@ Created on Mon Apr 20 01:39:37 2020
 # 35 rango IV: 0.7 A, 35 V @DNI 900 W/m2
 # Si rango IV: 1.7 A, 2.2 V @GNI 950 W/m2 y DNI/GNI=0.7
 
+# https://pvlib-python.readthedocs.io/en/stable/generated/pvlib.pvsystem.calcparams_pvsyst.html
 mod_params_cpv = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,

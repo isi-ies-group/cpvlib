@@ -602,7 +602,7 @@ class StaticHybridSystem():
                  module_parameters_cpv=None,
                  module_diffuse=None,
                  module_parameters_diffuse=None,
-                 is_tracker=False,
+                 in_tracker=False,
                  parameters_tracker=None,
                  modules_per_string=1,
                  strings_per_inverter=1,
@@ -622,7 +622,7 @@ class StaticHybridSystem():
         self.module_cpv = module_cpv
         self.module_diffuse = module_diffuse
         
-        self.is_tracker = is_tracker
+        self.in_tracker = in_tracker
         
         if module_parameters_cpv is None:
             self.module_parameters_cpv = {}
@@ -729,17 +729,20 @@ class StaticHybridSystem():
         if dii is None:
             dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
         
-        if self.is_tracker:
+        if self.in_tracker:
             aoi = pvlib.tracking.singleaxis(solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
         else:
             aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-            
+        
         poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
                                 solar_azimuth,
                                 aoi=aoi,
                                 aoi_limit=aoi_limit,
                                 dii=dii, # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
                                 gii=gii,
+                                ghi=ghi,
+                                dhi=dhi,
+                                dni=dni,
                                 **kwargs
                                 )
         
