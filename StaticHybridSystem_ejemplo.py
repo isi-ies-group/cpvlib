@@ -63,7 +63,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
 )
 
 # get_effective_irradiance
-data['dii_effective'], data['poa_diffuse_static'] = static_hybrid_sys.get_effective_irradiance(
+data['dii_effective'], data['poa_diffuse_static_effective'] = static_hybrid_sys.get_effective_irradiance(
     solar_zenith,
     solar_azimuth,
     iam_param=0.7,
@@ -76,7 +76,7 @@ data['dii_effective'], data['poa_diffuse_static'] = static_hybrid_sys.get_effect
 # pvsyst_celltemp
 _, data['celltemp_diffuse'] = static_hybrid_sys.pvsyst_celltemp(
     dii=data['dii_effective'],
-    poa_diffuse_static=data['poa_diffuse_static'],
+    poa_diffuse_static=data['poa_diffuse_static_effective'],
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
@@ -84,7 +84,7 @@ _, data['celltemp_diffuse'] = static_hybrid_sys.pvsyst_celltemp(
 # calcparams_pvsyst
 diode_parameters_cpv, diode_parameters_diffuse = static_hybrid_sys.calcparams_pvsyst(
     dii=data['dii_effective'],
-    poa_diffuse_static=data['poa_diffuse_static'],
+    poa_diffuse_static=data['poa_diffuse_static_effective'],
     temp_cell_cpv=data['temp_cell_35'],
     temp_cell_diffuse=data['celltemp_diffuse'],
 )
@@ -99,7 +99,7 @@ airmass_absolute = location.get_airmass(data.index).airmass_absolute
 uf_global = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'],
                                                                   solar_zenith, solar_azimuth)
 #%% Plot Irradiancias
-# data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static']].plot(legend=True)
+# data[['dni', 'dii', 'dii_effective', 'gii', 'poa_diffuse_static_effective']].plot(legend=True)
 
 #%% Plot Isc - CPV
 # data['isc35'].plot()

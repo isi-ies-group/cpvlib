@@ -100,7 +100,7 @@ class CPVSystem(PVSystem):
             self.losses_parameters = losses_parameters
 
         self.racking_model = racking_model
-                
+
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('CPVSystem: \n  ' + '\n  '.join(
@@ -289,7 +289,7 @@ class CPVSystem(PVSystem):
         uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
 
         uf_global = (uf_am * self.module_parameters['weight_am'] +
-                    uf_ta * self.module_parameters['weight_temp'])
+                     uf_ta * self.module_parameters['weight_temp'])
 
         return uf_global
 
@@ -372,8 +372,8 @@ class StaticCPVSystem(CPVSystem):
         self.surface_azimuth = surface_azimuth
 
         super().__init__(module, module_parameters, modules_per_string,
-                           strings_per_inverter, inverter, inverter_parameters,
-                           racking_model, losses_parameters, name, **kwargs)
+                         strings_per_inverter, inverter, inverter_parameters,
+                         racking_model, losses_parameters, name, **kwargs)
 
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
@@ -458,7 +458,7 @@ class StaticCPVSystem(CPVSystem):
         return aoi_uf
 
     def get_global_utilization_factor_con_aoi(self, airmass_absolute, temp_air,
-                                      aoi, solar_zenith, solar_azimuth):
+                                              aoi, solar_zenith, solar_azimuth):
 
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
 
@@ -476,9 +476,10 @@ class StaticCPVSystem(CPVSystem):
         uf_global = uf_am_at * uf_aoi_norm
 
         return uf_global
-    
+
+
 class StaticDiffuseSystem(PVSystem):
-    
+
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
@@ -486,16 +487,16 @@ class StaticDiffuseSystem(PVSystem):
                  inverter=None, inverter_parameters=None,
                  racking_model='open_rack_cell_glassback',
                  losses_parameters=None, name=None, **kwargs):
-        
+
         super().__init__(surface_tilt=surface_tilt, surface_azimuth=surface_azimuth,
-                 albedo=None, surface_type=None,
-                 module=module, module_type='glass_polymer',
-                 module_parameters=module_parameters,
-                 temperature_model_parameters=None,
-                 modules_per_string=modules_per_string, strings_per_inverter=strings_per_inverter,
-                 inverter=inverter, inverter_parameters=inverter_parameters,
-                 racking_model=racking_model, losses_parameters=losses_parameters, name=name,
-                 **kwargs)
+                         albedo=None, surface_type=None,
+                         module=module, module_type='glass_polymer',
+                         module_parameters=module_parameters,
+                         temperature_model_parameters=None,
+                         modules_per_string=modules_per_string, strings_per_inverter=strings_per_inverter,
+                         inverter=inverter, inverter_parameters=inverter_parameters,
+                         racking_model=racking_model, losses_parameters=losses_parameters, name=name,
+                         **kwargs)
 
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
@@ -568,11 +569,12 @@ class StaticDiffuseSystem(PVSystem):
 
         else:
             poa_diffuse = gii - dii
-            
-        poa_diffuse_static = pd.concat([poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
+
+        poa_diffuse_static = pd.concat(
+            [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
         return poa_diffuse_static
-    
+
     def pvsyst_celltemp(self, poa_diffuse_static, temp_air, wind_speed=1.0):
         """
         Uses :py:func:`pvsystem.pvsyst_celltemp` to calculate module
@@ -593,8 +595,20 @@ class StaticDiffuseSystem(PVSystem):
         return pvsystem.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed,
                                         model_params=self.racking_model,
                                         **kwargs)
+
+    def get_aoi_util_factor(aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
+        if isinstance(aoi, (int, float)):
+            aoi = float(aoi)
+        else:
+            aoi = aoi.values
+        condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
+        funclist = [lambda aoi:aoi*a1+b1, lambda aoi:aoi*a2+b2]
+
+        return np.piecewise(aoi, condlist, funclist)
+
+
 class StaticHybridSystem():
-    
+
     def __init__(self,
                  surface_tilt=30,
                  surface_azimuth=180,
@@ -612,33 +626,33 @@ class StaticHybridSystem():
                  losses_parameters=None,
                  name=None,
                  **kwargs):
-        
+
         self.name = name
-        
+
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
-        
+
         # could tie these together with @property
         self.module_cpv = module_cpv
         self.module_diffuse = module_diffuse
-        
+
         self.in_tracker = in_tracker
-        
+
         if module_parameters_cpv is None:
             self.module_parameters_cpv = {}
         else:
             self.module_parameters_cpv = module_parameters_cpv
-        
+
         if module_parameters_diffuse is None:
             self.module_parameters_diffuse = {}
         else:
             self.module_parameters_diffuse = module_parameters_diffuse
-        
+
         if parameters_tracker is None:
             self.parameters_tracker = {}
         else:
             self.parameters_tracker = parameters_tracker
-            
+
         self.modules_per_string = modules_per_string
         self.strings_per_inverter = strings_per_inverter
 
@@ -667,8 +681,8 @@ class StaticHybridSystem():
             racking_model=racking_model,
             losses_parameters=losses_parameters,
             name=name,
-            )
-        
+        )
+
         self.static_diffuse_sys = StaticDiffuseSystem(
             surface_tilt=surface_tilt,
             surface_azimuth=surface_azimuth,
@@ -681,16 +695,17 @@ class StaticHybridSystem():
             racking_model=racking_model,
             losses_parameters=losses_parameters,
             name=name,
-            )
+        )
 
     def __repr__(self):
-        attrs = ['name', 'module_cpv', 'module_diffuse', 'inverter', 'racking_model']
+        attrs = ['name', 'module_cpv', 'module_diffuse',
+                 'inverter', 'racking_model']
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
     def get_effective_irradiance(self, solar_zenith, solar_azimuth, iam_param, aoi_limit, dni=None,
-                       ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
-                       airmass=None, model='haydavies', **kwargs):
+                                 ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
+                                 airmass=None, model='haydavies', **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Dual axis
@@ -722,33 +737,38 @@ class StaticHybridSystem():
         -------
         irradiation : DataFrame
         """
-        
+
         # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
         #                        self.parameters_tracker)
-        
+
         if dii is None:
-            dii = self.static_cpv_sys.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
-        
+            dii = self.static_cpv_sys.get_irradiance(
+                solar_zenith, solar_azimuth, dni, **kwargs)
+
         if self.in_tracker:
-            aoi = pvlib.tracking.singleaxis(solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
+            aoi = pvlib.tracking.singleaxis(
+                solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
         else:
             aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-        
+
         poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
-                                solar_azimuth,
-                                aoi=aoi,
-                                aoi_limit=aoi_limit,
-                                dii=dii, # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
-                                gii=gii,
-                                ghi=ghi,
-                                dhi=dhi,
-                                dni=dni,
-                                **kwargs
-                                )
-        
+                                                                    solar_azimuth,
+                                                                    aoi=aoi,
+                                                                    aoi_limit=aoi_limit,
+                                                                    dii=dii,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                                    gii=gii,
+                                                                    ghi=ghi,
+                                                                    dhi=dhi,
+                                                                    dni=dni,
+                                                                    **kwargs
+                                                                    )
+
         dii_effective = dii * pvlib.iam.ashrae(aoi, b=iam_param)
-        
-        return dii_effective, poa_diffuse_static
+
+        poa_diffuse_static_effective = poa_diffuse_static * self.static_diffuse_sys.get_aoi_util_factor(
+            aoi=aoi, aoi_thld=55, aoi_limit=80, a1=1, b1=1, a2=1, b2=1)
+
+        return dii_effective, poa_diffuse_static_effective
 
     def pvsyst_celltemp(self, dii, poa_diffuse_static, temp_air, wind_speed=1.0):
         """
@@ -763,13 +783,15 @@ class StaticHybridSystem():
         -------
         See pvsystem.pvsyst_celltemp for details
         """
-        
-        celltemp_cpv = self.static_cpv_sys.pvsyst_celltemp(dii, temp_air, wind_speed)
-        
-        celltemp_diffuse = self.static_diffuse_sys.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed)
-        
+
+        celltemp_cpv = self.static_cpv_sys.pvsyst_celltemp(
+            dii, temp_air, wind_speed)
+
+        celltemp_diffuse = self.static_diffuse_sys.pvsyst_celltemp(
+            poa_diffuse_static, temp_air, wind_speed)
+
         return celltemp_cpv, celltemp_diffuse
-    
+
     def calcparams_pvsyst(self, dii, poa_diffuse_static, temp_cell_cpv, temp_cell_diffuse):
         """
         Use the :py:func:`calcparams_pvsyst` function, the input
@@ -795,18 +817,20 @@ class StaticHybridSystem():
         #                         'irrad_ref', 'temp_ref',
         #                         'cells_in_series'],
         #                        self.static_cpv_sys.module_parameters)
-        diode_parameters_cpv = self.static_cpv_sys.calcparams_pvsyst(dii, temp_cell_cpv)
-        
+        diode_parameters_cpv = self.static_cpv_sys.calcparams_pvsyst(
+            dii, temp_cell_cpv)
+
         # kwargs_diffuse = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
         #                         'R_sh_ref', 'R_sh_0', 'R_sh_exp',
         #                         'R_s', 'alpha_sc', 'EgRef',
         #                         'irrad_ref', 'temp_ref',
         #                         'cells_in_series'],
         #                        self.static_cpv_sys.module_parameters)
-        diode_parameters_diffuse =  self.static_diffuse_sys.calcparams_pvsyst(poa_diffuse_static, temp_cell_diffuse)
+        diode_parameters_diffuse = self.static_diffuse_sys.calcparams_pvsyst(
+            poa_diffuse_static, temp_cell_diffuse)
 
         return diode_parameters_cpv, diode_parameters_diffuse
-    
+
     def singlediode(self, diode_parameters_cpv, diode_parameters_diffuse, ivcurve_pnts=None):
         """Wrapper around the :py:func:`singlediode` function.
 
@@ -818,24 +842,25 @@ class StaticHybridSystem():
         -------
         See pvsystem.singlediode for details
         """
-        
+
         diode_parameters_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
-                           ivcurve_pnts=ivcurve_pnts)
-        
+                                                               ivcurve_pnts=ivcurve_pnts)
+
         diode_parameters_diffuse = self.static_diffuse_sys.singlediode(*diode_parameters_diffuse,
-                           ivcurve_pnts=ivcurve_pnts)
-        
+                                                                       ivcurve_pnts=ivcurve_pnts)
+
         return diode_parameters_cpv, diode_parameters_diffuse
 
     def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air,
-                                      solar_zenith, solar_azimuth):
+                                          solar_zenith, solar_azimuth):
 
-        uf_am = self.static_cpv_sys.get_am_util_factor(airmass=airmass_absolute)
+        uf_am = self.static_cpv_sys.get_am_util_factor(
+            airmass=airmass_absolute)
 
         uf_ta = self.static_cpv_sys.get_tempair_util_factor(temp_air=temp_air)
 
         uf_global = (uf_am * self.static_cpv_sys.module_parameters['weight_am'] +
-                    uf_ta * self.static_cpv_sys.module_parameters['weight_temp'])
+                     uf_ta * self.static_cpv_sys.module_parameters['weight_temp'])
 
         return uf_global
 

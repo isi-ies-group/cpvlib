@@ -84,7 +84,7 @@ ax.plot(data_filt_aoi1['aoi'], isc_si_est1, 'r-')
 ax.plot(data_filt_aoi2['aoi'], isc_si_est2, 'r-')
 
 #%% define la funcion por tramos
-def get_aoi_util_factor(aoi, aoi_thld, aoi_limit):
+def get_aoi_util_factor(aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
     if isinstance(aoi, (int, float)):
         aoi = float(aoi)
     else:
