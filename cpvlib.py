@@ -2,7 +2,7 @@
 The ``cpvsystem`` module contains functions for modeling the output and
 performance of CPV modules.
 """
-
+import numpy as np
 import pandas as pd
 
 import pvlib
