@@ -596,15 +596,19 @@ class StaticDiffuseSystem(PVSystem):
                                         model_params=self.racking_model,
                                         **kwargs)
 
-    def get_aoi_util_factor(aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
+    def get_iam(self, aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
         if isinstance(aoi, (int, float)):
             aoi = float(aoi)
         else:
             aoi = aoi.values
+            
         condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
-        funclist = [lambda aoi:aoi*a1+b1, lambda aoi:aoi*a2+b2]
-
-        return np.piecewise(aoi, condlist, funclist)
+        funclist = [lambda x:x*b1+a1, lambda x:x*b2+a2]
+        
+        if isinstance(aoi, (int, float)):
+            return np.piecewise(aoi, condlist, funclist)
+        else:
+            return np.piecewise(aoi, condlist, funclist)[0]
 
 
 class StaticHybridSystem():
@@ -763,10 +767,10 @@ class StaticHybridSystem():
                                                                     **kwargs
                                                                     )
 
-        dii_effective = dii * pvlib.iam.ashrae(aoi, b=iam_param)
+        poa_diffuse_static_effective = poa_diffuse_static #* self.static_diffuse_sys.get_iam(
+            #aoi=aoi, aoi_thld=55, aoi_limit=80, a1=1, b1=0, a2=1, b2=0)
 
-        poa_diffuse_static_effective = poa_diffuse_static * self.static_diffuse_sys.get_aoi_util_factor(
-            aoi=aoi, aoi_thld=55, aoi_limit=80, a1=1, b1=1, a2=1, b2=1)
+        dii_effective = dii * pvlib.iam.ashrae(aoi, b=iam_param)
 
         return dii_effective, poa_diffuse_static_effective
 

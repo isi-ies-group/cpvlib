@@ -112,7 +112,7 @@ dc_diffuse['i_sc'].plot()
 #%% energia
 # get_aoi(solar_zenith, solar_azimuth)
 
-print('\nTracker?', static_hybrid_sys.is_tracker)
+print('\nTracker?', static_hybrid_sys.in_tracker)
 print(f"E_CPV={(dc_cpv['i_sc'] * uf_global).sum()}", f"E_diff={dc_diffuse['i_sc'].sum()}")
 #%% Prueba con seguidor
 tracker_data = pvlib.tracking.singleaxis(solar_zenith, solar_azimuth, **params_tracker)

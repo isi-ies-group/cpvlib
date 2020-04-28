@@ -90,7 +90,7 @@ def get_aoi_util_factor(aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
     else:
         aoi = aoi.values
     condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
-    funclist = [lambda aoi:aoi*a1+b1, lambda aoi:aoi*a2+b2]
+    funclist = [lambda x:x*b1+a1, lambda x:x*b2+a2]
     
     return np.piecewise(aoi, condlist, funclist)
 
