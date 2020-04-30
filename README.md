@@ -36,4 +36,3 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [x] Que medimos? Para utilizar medidas de ahora. Preguntar a Steve ->
         carpeta 'inso_mod': Solo un módulo (29) tiene corriente difusa y es 0.1 A (/10 esperado)
 * [ ] Ajustar parametros de parte difusa y tracker
-* [ ] Añadir tracker a StaticCPVSystem
