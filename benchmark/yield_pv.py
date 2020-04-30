@@ -128,14 +128,14 @@ pv_diode_parameters = pv_sys.calcparams_pvsyst(
 
 pv_power = pv_sys.singlediode(*pv_diode_parameters)
 
-Yr = effective_irradiance.sum() / 1000
-Ya = pv_power['p_mp'].sum() / Pdc_stc
+Yr = effective_irradiance.resample('M').sum() / 1000
+Ya = pv_power['p_mp'].resample('M').sum() / Pdc_stc
 
 Lc = Yr - Ya
 
 PR = Ya / Yr
 
-print(f'PR={PR:.2}, Ya={Ya:.0f} kWh/kW, Yr={Yr:.0f} kWh/kW')
+print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW')
 
 #%% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:
