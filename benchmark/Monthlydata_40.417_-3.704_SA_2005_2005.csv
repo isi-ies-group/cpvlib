@@ -1,0 +1,23 @@
+Latitude (decimal degrees):	40.417
+Longitude (decimal degrees):	-3.704
+Radiation database:	PVGIS-SARAH
+Optimal slope angle (deg.):	37
+
+year		month		H(h)_m		H(i_opt)_m
+2005		Jan		89.39		179.18
+2005		Feb		93.83		148.53
+2005		Mar		147.39		189.68
+2005		Apr		183.3		196.78
+2005		May		208.98		200.54
+2005		Jun		235.84		214.09
+2005		Jul		253.91		235.63
+2005		Aug		216.8		224.52
+2005		Sep		172.24		210.32
+2005		Oct		109.69		153.22
+2005		Nov		70.52		118.03
+2005		Dec		69.68		142.22
+
+H(h)_m: Irradiation on horizontal plane (kWh/m2/mo)
+H(i_opt)_m: Irradiation on optimally inclined plane (kWh/m2/mo)
+
+PVGIS (c) European Communities, 2001-2020

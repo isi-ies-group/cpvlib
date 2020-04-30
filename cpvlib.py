@@ -73,8 +73,9 @@ class CPVSystem(PVSystem):
                  module=None, module_parameters=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
-                 racking_model='open_rack_cell_glassback',
-                 losses_parameters=None, name=None, **kwargs):
+                 # racking_model='open_rack_cell_glassback',# es solo de modelo sapm
+                 losses_parameters=None, name=None, albedo=None,
+                 surface_type=None, **kwargs):
 
         self.name = name
 
@@ -99,13 +100,19 @@ class CPVSystem(PVSystem):
         else:
             self.losses_parameters = losses_parameters
 
-        self.racking_model = racking_model
+        # self.racking_model = racking_model
+        
+        self.surface_type = surface_type
+        if albedo is None:
+            self.albedo = pvlib.irradiance.SURFACE_ALBEDOS.get(surface_type, 0.25)
+        else:
+            self.albedo = albedo
 
     def __repr__(self):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('CPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
-
+    
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
                        dni_extra=None, airmass=None, model='haydavies',
                        **kwargs):
@@ -177,7 +184,7 @@ class CPVSystem(PVSystem):
                                self.module_parameters)
 
         return pvsystem.pvsyst_celltemp(poa_global, temp_air, wind_speed,
-                                        model_params=self.racking_model,
+                                        # model_params=self.racking_model,
                                         **kwargs)
 
     def get_am_util_factor(self, airmass, am_thld=None, am_uf_m_low=None, am_uf_m_high=None):
