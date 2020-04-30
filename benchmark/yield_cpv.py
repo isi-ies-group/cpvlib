@@ -1,0 +1,153 @@
+
+import matplotlib.pyplot as plt
+import pvlib
+import cpvlib
+
+lat, lon = 40.4, -3.7
+
+data_pvgis = pvlib.iotools.get_pvgis_tmy(lat, lon)
+
+data_tmy = data_pvgis[0].rename(columns={
+    'Gb(n)': 'dni',
+    'G(h)': 'ghi',
+    'Gd(h)': 'dhi',
+    'T2m': 'temp_air',
+    'WS10m': 'wind_speed',
+})
+
+data_tmy = data_tmy.set_index(
+    data_tmy.index.map(lambda t: t.replace(year=2010)))
+
+data = data_tmy#['2010-06-01':'2010-06-01']
+
+location = pvlib.location.Location(
+    latitude=lat, longitude=lon, altitude=695, tz='utc')
+
+solpos = location.get_solarposition(data.index)
+
+# %% Parámetros
+# R_sh_exp = 5.5, # exp. R paral VALOR_DEFECTO
+# EgRef = 1.121, # VALOR_DEFECTO
+# irrad_ref = 1000,
+# temp_ref = 25
+
+modulo = 'insolight'
+
+if modulo == 'insolight':
+    # Insolight (César)
+    cpv_mod_params = {
+        "alpha_sc": 0.00,
+        "gamma_ref": 5.524,
+        "mu_gamma": 0.003,
+        "I_L_ref": 0.96,
+        "I_o_ref": 1.7e-10,
+        "R_sh_ref": 5226,
+        "R_sh_0": 21000,
+        "R_s": 0.01,
+        "EgRef": 3.91,
+        "cells_in_series": 12,
+    }
+    
+    A = 0.10  # m2
+
+    # UF
+    # para usa los UF hay que llamar a cpv_sys.get_global_utilization_factor_cpv()
+    # UF_parameters_cpv = {
+    #     "IscDNI_top": 0.96 / 1000,
+    #     "am_thld": 4.574231933073185,
+    #     "am_uf_m_low": 3.906372068620377e-06,
+    #     "am_uf_m_high": -3.0335768119184845e-05,
+    #     "ta_thld": 50,
+    #     "ta_uf_m_low": 4.6781224141650075e-06,
+    #     "ta_uf_m_high": 0,
+    #     "weight_am": 0.2,
+    #     "weight_temp": 0.8,
+    # }
+    
+    # cpv_mod_params.update(UF_parameters_cpv)
+
+elif modulo == 'soitec':
+    # Soitec CX-M500
+    cpv_mod_params = {
+        "alpha_sc": 0.00,
+        "gamma_ref": 3.664,
+        "mu_gamma": 0.003,
+        "I_L_ref": 3.861,
+        "I_o_ref": 0.005e-9,
+        "R_sh_ref": 3461,
+        "R_sh_0": 25000,
+        "R_s": 0.61,
+        "EgRef": 3.91,
+        "cells_in_series": 240,
+        "irrad_ref":943,
+        "temp_ref":64
+    }
+    
+    A = 7.386  # m2
+
+# calcula Pmp STC
+Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.CPVSystem(
+    module_parameters=cpv_mod_params
+    ).calcparams_pvsyst(
+    effective_irradiance=1000,
+    temp_cell=25))['p_mp']
+
+eff_a = Pdc_stc / (1000 * A)
+print(f'Pdc_stc={Pdc_stc:.0f} W, eff_a={eff_a:.2%}')
+
+temp_mod_params = {"eta_m": 0.32, "alpha_absorption": 0.9}
+# print(temp_mod_params)
+
+#%% Modelo PVSyst
+cpv_sys = cpvlib.CPVSystem(
+    surface_tilt=37,
+    surface_azimuth=180,
+    # albedo=0.2,
+    module_parameters=cpv_mod_params,
+    temperature_model_parameters=temp_mod_params,
+    modules_per_string=1,
+)
+
+effective_irradiance = data['dni']
+
+pv_cell_temp = cpv_sys.pvsyst_celltemp(
+    poa_global=effective_irradiance,
+    temp_air=data['temp_air'],
+    wind_speed=data['wind_speed']
+)
+
+pv_diode_parameters = cpv_sys.calcparams_pvsyst(
+    effective_irradiance=effective_irradiance,
+    temp_cell=pv_cell_temp,
+)
+
+pv_power = cpv_sys.singlediode(*pv_diode_parameters)
+    
+Yr = effective_irradiance.sum() / 1000
+Ya = pv_power['p_mp'].sum() / Pdc_stc
+
+Lc = Yr - Ya
+
+PR = Ya / Yr
+
+print(f'PR={PR:.2}, Ya={Ya:.0f} kWh/kW, Yr={Yr:.0f} kWh/kW')
+
+#%% Curvas IV vs G,Tc
+for G in [200, 400, 600, 800, 1000]:
+    d = cpv_sys.singlediode(*cpv_sys.calcparams_pvsyst(
+        effective_irradiance=G,
+        temp_cell=25,
+        ), ivcurve_pnts=20
+        )
+    plt.plot(d['v'], d['i'])
+
+for t in [10, 25, 40, 55, 70]:
+    d = cpv_sys.singlediode(*cpv_sys.calcparams_pvsyst(
+        effective_irradiance=1000,
+        temp_cell=t,
+        ), ivcurve_pnts=20
+        )
+    plt.plot(d['v'], d['i'])
+
+#%% Graficas Pot vs parametros
+# plt.plot(pv_cell_temp, pv_power['v_mp'], '.')
