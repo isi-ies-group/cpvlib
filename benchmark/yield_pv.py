@@ -30,7 +30,7 @@ solpos = location.get_solarposition(data.index)
 # irrad_ref = 1000,
 # temp_ref = 25
 
-modulo = 'ejemplo'
+modulo = 'isofoton'
 
 if modulo == 'ejemplo':
     # https://pvpmc.sandia.gov/PVLIB_Matlab_Help/html/pvl_calcparams_PVsyst_help.html
@@ -53,7 +53,7 @@ elif modulo == 'isofoton':
     pv_mod_params = {
         "alpha_sc": 2.3e-3,  # coef. temp. Isc
         "gamma_ref": 0.970,  # "Datos básicos"
-        "mu_gamma": -1e-07,  # "Parámetros modelo"
+        "mu_gamma": 0,  # "Parámetros modelo"
         "I_L_ref": 6.76,  # Isc
         "I_o_ref": 0.23e-9,  # "Datos básicos"
         "R_sh_ref": 200,  # R paral ref "Parámetros modelo"
@@ -153,3 +153,6 @@ for t in [10, 25, 40, 55, 70]:
         ), ivcurve_pnts=20
         )
     plt.plot(d['v'], d['i'])
+
+#%% Grafica V_mp vs cell_temp
+plt.plot(pv_cell_temp, pv_power['v_mp'], '.')

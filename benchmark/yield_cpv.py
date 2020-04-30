@@ -149,5 +149,5 @@ for t in [10, 25, 40, 55, 70]:
         )
     plt.plot(d['v'], d['i'])
 
-#%% Graficas Pot vs parametros
-# plt.plot(pv_cell_temp, pv_power['v_mp'], '.')
+#%% Grafica V_mp vs cell_temp
+plt.plot(pv_cell_temp, pv_power['v_mp'], '.')
