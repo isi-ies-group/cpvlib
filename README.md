@@ -42,3 +42,4 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [ ] Añadir tracker a StaticCPVSystem
 * [ ] Repasar get_aoi() CPVSystem y get_irradiance()
 * [ ] Renombrar in_tracker a in_singleaxistracker
+* [ ] Repasar atributo albedo

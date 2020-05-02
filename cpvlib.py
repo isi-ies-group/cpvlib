@@ -6,13 +6,10 @@ import numpy as np
 import pandas as pd
 
 import pvlib
-from pvlib import pvsystem
-from pvlib.pvsystem import PVSystem
-from pvlib import atmosphere, irradiance
 from pvlib.tools import _build_kwargs
 
 
-class CPVSystem(PVSystem):
+class CPVSystem(pvlib.pvsystem.PVSystem):
     """
     The CPVSystem class defines a set of CPV system attributes and modeling
     functions. This class describes the collection and interactions of CPV
@@ -203,7 +200,7 @@ class CPVSystem(PVSystem):
         kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
                                self.module_parameters)
 
-        return pvsystem.pvsyst_celltemp(poa_global, temp_air, wind_speed,
+        return pvlib.pvsystem.pvsyst_celltemp(poa_global, temp_air, wind_speed,
                                         model_params=self.racking_model,
                                         **kwargs)
 
@@ -463,13 +460,23 @@ class StaticCPVSystem(CPVSystem):
             Column names are: ``total, beam, sky, ground``.
         """
 
+        if self.in_tracker:
+            tracking_info = pvlib.tracking.singleaxis(
+                solar_zenith, solar_azimuth, **self.parameters_tracker)
+            
+            surface_tilt = tracking_info.surface_tilt
+            surface_azimuth = tracking_info.surface_azimuth
+        else:
+            surface_tilt = self.surface_tilt
+            surface_azimuth = self.surface_azimuth
+        
         return pvlib.irradiance.beam_component(
-            self.surface_tilt,
-            self.surface_azimuth,
-            solar_zenith,
-            solar_azimuth,
-            dni,
-            **kwargs)
+                surface_tilt,
+                surface_azimuth,
+                solar_zenith,
+                solar_azimuth,
+                dni,
+                **kwargs)
 
     def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
@@ -537,7 +544,7 @@ class StaticCPVSystem(CPVSystem):
         return uf_global
 
 
-class StaticDiffuseSystem(PVSystem):
+class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
 
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
@@ -639,6 +646,16 @@ class StaticDiffuseSystem(PVSystem):
         if airmass is None:
             airmass = pvlib.atmosphere.get_relative_airmass(solar_zenith)
 
+        if self.in_tracker:
+            tracking_info = pvlib.tracking.singleaxis(
+                solar_zenith, solar_azimuth, **self.parameters_tracker)
+            
+            surface_tilt = tracking_info.surface_tilt
+            surface_azimuth = tracking_info.surface_azimuth
+        else:
+            surface_tilt = self.surface_tilt
+            surface_azimuth = self.surface_azimuth
+
         if dii is None:
             dii = pvlib.irradiance.beam_component(
                 self.surface_tilt,
@@ -686,7 +703,7 @@ class StaticDiffuseSystem(PVSystem):
         kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
                                self.module_parameters)
 
-        return pvsystem.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed,
+        return pvlib.pvsystem.pvsyst_celltemp(poa_diffuse_static, temp_air, wind_speed,
                                         model_params=self.racking_model,
                                         **kwargs)
 
@@ -772,6 +789,7 @@ class StaticHybridSystem():
             surface_azimuth=surface_azimuth,
             module=module_cpv,
             module_parameters=module_parameters_cpv,
+            in_tracker=in_tracker,
             modules_per_string=modules_per_string,
             strings_per_inverter=strings_per_inverter,
             inverter=inverter,
@@ -786,6 +804,7 @@ class StaticHybridSystem():
             surface_azimuth=surface_azimuth,
             module=module_diffuse,
             module_parameters=module_parameters_diffuse,
+            in_tracker=in_tracker,
             modules_per_string=modules_per_string,
             strings_per_inverter=strings_per_inverter,
             inverter=inverter,
@@ -843,11 +862,7 @@ class StaticHybridSystem():
             dii = self.static_cpv_sys.get_irradiance(
                 solar_zenith, solar_azimuth, dni, **kwargs)
 
-        if self.in_tracker:
-            aoi = pvlib.tracking.singleaxis(
-                solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
-        else:
-            aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
+        aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
         poa_diffuse_static = self.static_diffuse_sys.get_irradiance(solar_zenith,
                                                                     solar_azimuth,
