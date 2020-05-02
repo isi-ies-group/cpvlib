@@ -112,6 +112,26 @@ class CPVSystem(PVSystem):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('CPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
+
+    
+    def get_aoi(self, solar_zenith, solar_azimuth):
+        """Get the angle of incidence on the system.
+
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+
+        Returns
+        -------
+        aoi : Series
+            The angle of incidence
+        """
+        aoi = pvlib.irradiance.aoi(self.surface_tilt, self.surface_azimuth,
+                             solar_zenith, solar_azimuth)
+        return aoi
     
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
                        dni_extra=None, airmass=None, model='haydavies',
@@ -151,12 +171,12 @@ class CPVSystem(PVSystem):
 
         # not needed for all models, but this is easier
         if dni_extra is None:
-            dni_extra = irradiance.get_extra_radiation(solar_zenith.index)
+            dni_extra = pvlib.irradiance.get_extra_radiation(solar_zenith.index)
 
         if airmass is None:
-            airmass = atmosphere.get_relative_airmass(solar_zenith)
+            airmass = pvlib.atmosphere.get_relative_airmass(solar_zenith)
 
-        return irradiance.get_total_irradiance(90 - solar_zenith,
+        return pvlib.irradiance.get_total_irradiance(90 - solar_zenith,
                                                solar_azimuth,
                                                solar_zenith, solar_azimuth,
                                                dni, ghi, dhi,
@@ -370,6 +390,8 @@ class StaticCPVSystem(CPVSystem):
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
+                 in_tracker=False,
+                 parameters_tracker=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
                  racking_model='freestanding',
@@ -378,6 +400,13 @@ class StaticCPVSystem(CPVSystem):
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
 
+        self.in_tracker = in_tracker
+
+        if parameters_tracker is None:
+            self.parameters_tracker = {}
+        else:
+            self.parameters_tracker = parameters_tracker
+            
         super().__init__(module, module_parameters, modules_per_string,
                          strings_per_inverter, inverter, inverter_parameters,
                          racking_model, losses_parameters, name, **kwargs)
@@ -386,6 +415,29 @@ class StaticCPVSystem(CPVSystem):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('StaticCPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
+
+    def get_aoi(self, solar_zenith, solar_azimuth):
+        """Get the angle of incidence on the system.
+
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+
+        Returns
+        -------
+        aoi : Series
+            The angle of incidence
+        """
+        if self.in_tracker:
+            aoi = pvlib.tracking.singleaxis(
+                solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
+        else:
+            aoi = pvlib.irradiance.aoi(self.surface_tilt, self.surface_azimuth,
+                             solar_zenith, solar_azimuth)
+        return aoi
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
         """
@@ -411,7 +463,7 @@ class StaticCPVSystem(CPVSystem):
             Column names are: ``total, beam, sky, ground``.
         """
 
-        return irradiance.beam_component(
+        return pvlib.irradiance.beam_component(
             self.surface_tilt,
             self.surface_azimuth,
             solar_zenith,
@@ -490,10 +542,21 @@ class StaticDiffuseSystem(PVSystem):
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
-                 modules_per_string=1, strings_per_inverter=1,
+                 modules_per_string=1,
+                 in_tracker=False,
+                 parameters_tracker=None,
+                 strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
                  racking_model='freestanding',
                  losses_parameters=None, name=None, **kwargs):
+
+        self.in_tracker = in_tracker
+        
+        
+        if parameters_tracker is None:
+            self.parameters_tracker = {}
+        else:
+            self.parameters_tracker = parameters_tracker
 
         super().__init__(surface_tilt=surface_tilt, surface_azimuth=surface_azimuth,
                          albedo=None, surface_type=None,
@@ -509,6 +572,30 @@ class StaticDiffuseSystem(PVSystem):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('StaticDiffuseSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
+
+
+    def get_aoi(self, solar_zenith, solar_azimuth):
+        """Get the angle of incidence on the system.
+
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+
+        Returns
+        -------
+        aoi : Series
+            The angle of incidence
+        """
+        if self.in_tracker:
+            aoi = pvlib.tracking.singleaxis(
+                solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
+        else:
+            aoi = pvlib.irradiance.aoi(self.surface_tilt, self.surface_azimuth,
+                             solar_zenith, solar_azimuth)
+        return aoi
 
     def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
@@ -547,13 +634,13 @@ class StaticDiffuseSystem(PVSystem):
 
         # not needed for all models, but this is easier
         if dni_extra is None:
-            dni_extra = irradiance.get_extra_radiation(solar_zenith.index)
+            dni_extra = pvlib.irradiance.get_extra_radiation(solar_zenith.index)
 
         if airmass is None:
-            airmass = atmosphere.get_relative_airmass(solar_zenith)
+            airmass = pvlib.atmosphere.get_relative_airmass(solar_zenith)
 
         if dii is None:
-            dii = irradiance.beam_component(
+            dii = pvlib.irradiance.beam_component(
                 self.surface_tilt,
                 self.surface_azimuth,
                 solar_zenith,
@@ -561,7 +648,7 @@ class StaticDiffuseSystem(PVSystem):
                 dni)
 
         if gii is None:
-            irr = irradiance.get_total_irradiance(self.surface_tilt,
+            irr = pvlib.irradiance.get_total_irradiance(self.surface_tilt,
                                                   self.surface_azimuth,
                                                   solar_zenith, solar_azimuth,
                                                   dni, ghi, dhi,

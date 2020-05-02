@@ -40,3 +40,5 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
         carpeta 'inso_mod': Solo un módulo (29) tiene corriente difusa y es 0.1 A (/10 esperado)
 * [ ] Ajustar parametros de parte difusa y tracker
 * [ ] Añadir tracker a StaticCPVSystem
+* [ ] Repasar get_aoi() CPVSystem y get_irradiance()
+* [ ] Renombrar in_tracker a in_singleaxistracker
