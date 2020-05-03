@@ -387,7 +387,7 @@ class StaticCPVSystem(CPVSystem):
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
-                 in_tracker=False,
+                 in_singleaxis_tracker=False,
                  parameters_tracker=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
@@ -397,7 +397,7 @@ class StaticCPVSystem(CPVSystem):
         self.surface_tilt = surface_tilt
         self.surface_azimuth = surface_azimuth
 
-        self.in_tracker = in_tracker
+        self.in_singleaxis_tracker = in_singleaxis_tracker
 
         if parameters_tracker is None:
             self.parameters_tracker = {}
@@ -428,7 +428,7 @@ class StaticCPVSystem(CPVSystem):
         aoi : Series
             The angle of incidence
         """
-        if self.in_tracker:
+        if self.in_singleaxis_tracker:
             aoi = pvlib.tracking.singleaxis(
                 solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
         else:
@@ -464,7 +464,7 @@ class StaticCPVSystem(CPVSystem):
             Column names are: ``total, beam, sky, ground``.
         """
 
-        if self.in_tracker:
+        if self.in_singleaxis_tracker:
             tracking_info = pvlib.tracking.singleaxis(
                 solar_zenith, solar_azimuth, **self.parameters_tracker)
             
@@ -555,14 +555,14 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
                  module=None, module_parameters=None,
                  temperature_model_parameters=None,
                  modules_per_string=1,
-                 in_tracker=False,
+                 in_singleaxis_tracker=False,
                  parameters_tracker=None,
                  strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
                  racking_model='freestanding',
                  losses_parameters=None, name=None, **kwargs):
 
-        self.in_tracker = in_tracker
+        self.in_singleaxis_tracker = in_singleaxis_tracker
         
         
         if parameters_tracker is None:
@@ -601,7 +601,7 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
         aoi : Series
             The angle of incidence
         """
-        if self.in_tracker:
+        if self.in_singleaxis_tracker:
             aoi = pvlib.tracking.singleaxis(
                 solar_zenith, solar_azimuth, **self.parameters_tracker).aoi
         else:
@@ -651,7 +651,7 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
         if airmass is None:
             airmass = pvlib.atmosphere.get_relative_airmass(solar_zenith)
 
-        if self.in_tracker:
+        if self.in_singleaxis_tracker:
             tracking_info = pvlib.tracking.singleaxis(
                 solar_zenith, solar_azimuth, **self.parameters_tracker)
             
@@ -736,7 +736,7 @@ class StaticHybridSystem():
                  module_parameters_cpv=None,
                  module_diffuse=None,
                  module_parameters_diffuse=None,
-                 in_tracker=False,
+                 in_singleaxis_tracker=False,
                  parameters_tracker=None,
                  modules_per_string=1,
                  strings_per_inverter=1,
@@ -756,7 +756,7 @@ class StaticHybridSystem():
         self.module_cpv = module_cpv
         self.module_diffuse = module_diffuse
 
-        self.in_tracker = in_tracker
+        self.in_singleaxis_tracker = in_singleaxis_tracker
 
         if module_parameters_cpv is None:
             self.module_parameters_cpv = {}
@@ -794,7 +794,7 @@ class StaticHybridSystem():
             surface_azimuth=surface_azimuth,
             module=module_cpv,
             module_parameters=module_parameters_cpv,
-            in_tracker=in_tracker,
+            in_singleaxis_tracker=in_singleaxis_tracker,
             modules_per_string=modules_per_string,
             strings_per_inverter=strings_per_inverter,
             inverter=inverter,
@@ -809,7 +809,7 @@ class StaticHybridSystem():
             surface_azimuth=surface_azimuth,
             module=module_diffuse,
             module_parameters=module_parameters_diffuse,
-            in_tracker=in_tracker,
+            in_singleaxis_tracker=in_singleaxis_tracker,
             modules_per_string=modules_per_string,
             strings_per_inverter=strings_per_inverter,
             inverter=inverter,

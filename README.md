@@ -4,8 +4,10 @@ Parte del trabajo de Marcos
 Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
 
 ## Notebooks en Binder
-* yield_pv.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=yield_pv.ipynb)
-* yield_cpv.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=yield_cpv.ipynb)
+* yield_pv.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=yield_pv.ipynb)
+* yield_cpv.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=yield_cpv.ipynb)
+* yield_static_cpv.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=yield_static_cpv.ipynb)
+* yield_static_diffuse.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=yield_static_diffuse.ipynb)
 
 * prueba_tmy_HybridSystem.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab?filepath=prueba_tmy_HybridSystem.ipynb)
 

@@ -65,7 +65,7 @@ elif modulo == 'isofoton':
 
     A = 0.85  # m2
 
-# calcula Pmp STC
+#%% calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticDiffuseSystem(
     module_parameters=pv_mod_params
 ).calcparams_pvsyst(
@@ -84,6 +84,7 @@ static_diffuse_sys = cpvlib.StaticDiffuseSystem(
     surface_azimuth=180,
     # albedo=0.2,
     module_parameters=pv_mod_params,
+    in_singleaxis_tracker=False,
     temperature_model_parameters=temp_mod_params,
     modules_per_string=1,
 )
@@ -122,6 +123,7 @@ diode_parameters = static_diffuse_sys.calcparams_pvsyst(
 power = static_diffuse_sys.singlediode(
     *diode_parameters)
 
+#%%
 Yr = irradiance.resample('M').sum() / 1000
 Yr_effective = effective_irradiance.resample('M').sum() / 1000
 Ya = power['p_mp'].resample('M').sum() / Pdc_stc
@@ -133,7 +135,8 @@ PR = Ya / Yr
 
 print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW, Yr_effective={Yr_effective.sum():.0f} kWh/kW')
 
-# %% Curvas IV vs G,Tc
+#%% Curvas IV vs G,Tc
+plt.figure()
 for G in [200, 400, 600, 800, 1000]:
     d = static_diffuse_sys.singlediode(*static_diffuse_sys.calcparams_pvsyst(
         effective_irradiance=G,
@@ -142,6 +145,8 @@ for G in [200, 400, 600, 800, 1000]:
     )
     plt.plot(d['v'], d['i'])
 
+#%%
+plt.figure()
 for t in [10, 25, 40, 55, 70]:
     d = static_diffuse_sys.singlediode(*static_diffuse_sys.calcparams_pvsyst(
         effective_irradiance=1000,
@@ -151,7 +156,9 @@ for t in [10, 25, 40, 55, 70]:
     plt.plot(d['v'], d['i'])
 
 # %% Grafica V_mp vs cell_temp
+plt.figure()
 plt.plot(cell_temp, power['v_mp'], '.')
 
 # %% Grafica I_mp vs aoi
+plt.figure()
 plt.plot(aoi, power['i_mp'], '.')

@@ -85,7 +85,7 @@ elif modulo == 'soitec':
 
     A = 7.386  # m2
 
-# calcula Pmp STC
+#%% calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticCPVSystem(
     module_parameters=cpv_mod_params
 ).calcparams_pvsyst(
@@ -104,6 +104,7 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_azimuth=180,
     # albedo=0.2,
     module_parameters=cpv_mod_params,
+    in_singleaxis_tracker=False,
     temperature_model_parameters=temp_mod_params,
     modules_per_string=1,
 )
@@ -135,6 +136,7 @@ diode_parameters = static_cpv_sys.calcparams_pvsyst(
 
 power = static_cpv_sys.singlediode(*diode_parameters)
 
+#%%
 Yr = irradiance.resample('M').sum() / 1000
 Yr_effective = effective_irradiance.resample('M').sum() / 1000
 Ya = power['p_mp'].resample('M').sum() / Pdc_stc
@@ -155,6 +157,7 @@ for G in [200, 400, 600, 800, 1000]:
     )
     plt.plot(d['v'], d['i'])
 
+#%%
 for t in [10, 25, 40, 55, 70]:
     d = static_cpv_sys.singlediode(*static_cpv_sys.calcparams_pvsyst(
         effective_irradiance=1000,
