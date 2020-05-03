@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
 import pvlib
+import cpvlib
 
 lat, lon = 40.4, -3.7
 
@@ -17,7 +18,7 @@ data_tmy = data_pvgis[0].rename(columns={
 data_tmy = data_tmy.set_index(
     data_tmy.index.map(lambda t: t.replace(year=2010)))
 
-data = data_tmy#['2010-06-01':'2010-06-01']
+data = data_tmy  # ['2010-06-01':'2010-06-01']
 
 location = pvlib.location.Location(
     latitude=lat, longitude=lon, altitude=695, tz='utc')
@@ -35,19 +36,19 @@ modulo = 'isofoton'
 if modulo == 'ejemplo':
     # https://pvpmc.sandia.gov/PVLIB_Matlab_Help/html/pvl_calcparams_PVsyst_help.html
     pv_mod_params = {
-        "alpha_sc": -0.002,# coef. temp. Isc
-        "gamma_ref": 1.1,# "Datos básicos"
-        "mu_gamma": -0.0003,# "Parámetros modelo"
-        "I_L_ref": 5.5,# Isc
-        "I_o_ref": 2.2e-9,# "Datos básicos"
-        "R_sh_ref": 200, # R paral ref "Parámetros modelo"
-        "R_sh_0": 8700,# R paral G=0 W/m2 "Parámetros modelo"
-        "R_s": 0.33,# R serie "Parámetros modelo"
+        "alpha_sc": -0.002,  # coef. temp. Isc
+        "gamma_ref": 1.1,  # "Datos básicos"
+        "mu_gamma": -0.0003,  # "Parámetros modelo"
+        "I_L_ref": 5.5,  # Isc
+        "I_o_ref": 2.2e-9,  # "Datos básicos"
+        "R_sh_ref": 200,  # R paral ref "Parámetros modelo"
+        "R_sh_0": 8700,  # R paral G=0 W/m2 "Parámetros modelo"
+        "R_s": 0.33,  # R serie "Parámetros modelo"
         "cells_in_series": 60,
     }
-    
+
     A = 1.00  # m2
-    
+
 elif modulo == 'isofoton':
     # Isofoton_I110 - PVSyst
     pv_mod_params = {
@@ -61,13 +62,13 @@ elif modulo == 'isofoton':
         "R_s": 0.248,  # R serie "Parámetros modelo"
         "cells_in_series": 36,
     }
-    
+
     A = 0.85  # m2
 
 # calcula Pmp STC
-Pdc_stc = pvlib.pvsystem.singlediode(*pvlib.pvsystem.PVSystem(
+Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticDiffuseSystem(
     module_parameters=pv_mod_params
-    ).calcparams_pvsyst(
+).calcparams_pvsyst(
     effective_irradiance=1000,
     temp_cell=25))['p_mp']
 
@@ -77,8 +78,8 @@ print(f'Pdc_stc={Pdc_stc:.0f} W, eff_a={eff_a:.2%}')
 temp_mod_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['pvsyst']['freestanding']
 # print(temp_mod_params)
 
-#%% Modelo PVSyst
-pv_sys = pvlib.pvsystem.PVSystem(
+# %% Modelo PVSyst
+static_diffuse_sys = cpvlib.StaticDiffuseSystem(
     surface_tilt=37,
     surface_azimuth=180,
     # albedo=0.2,
@@ -87,72 +88,70 @@ pv_sys = pvlib.pvsystem.PVSystem(
     modules_per_string=1,
 )
 
-pv_irr = pv_sys.get_irradiance(
+# AOI
+aoi = static_diffuse_sys.get_aoi(
     solar_zenith=solpos['zenith'],
     solar_azimuth=solpos['azimuth'],
-    ghi=data['ghi'],
-    dhi=data['dhi'],
-    dni=data['dni']
+)
+# aoi.plot()
+
+# NO equivale a static_diffuse_sys.get_irradiance(..., aoi_limit=90)!!!
+irradiance = pvlib.irradiance.get_total_irradiance(
+    static_diffuse_sys.surface_tilt, static_diffuse_sys.surface_azimuth,
+    solar_zenith=solpos['zenith'], solar_azimuth=solpos['azimuth'],
+    dni=data['dni'], ghi=data['ghi'], dhi=data['dhi']
+)['poa_diffuse']
+
+effective_irradiance = static_diffuse_sys.get_irradiance(
+    solar_zenith=solpos['zenith'], solar_azimuth=solpos['azimuth'],
+    aoi=aoi, aoi_limit=55,
+    dni=data['dni'], ghi=data['ghi'], dhi=data['dhi']
 )
 
-irradiance = pv_irr['poa_global']
-# irradiance.plot();data.ghi.plot()
-
-# AOI
-# pv_aoi = pv_sys.get_aoi(
-#     solar_zenith=solpos['zenith'],
-#     solar_azimuth=solpos['azimuth'],
-# )
-# pv_aoi.plot()
-
-cell_temp = pv_sys.pvsyst_celltemp(
-    poa_global=irradiance,
+cell_temp = static_diffuse_sys.pvsyst_celltemp(
+    poa_diffuse_static=effective_irradiance,
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
 
-# MODELO TÉRMICO SANDIA
-# temp_mod_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
-# print(temp_mod_params)
-# cell_temp_sapm = pvlib.temperature.sapm_cell(
-#     poa_global=pv_irr['poa_global'],
-#     temp_air=data['temp_air'],
-#     wind_speed=data['wind_speed'],
-#     **temp_mod_params
-# )
-
-diode_parameters = pv_sys.calcparams_pvsyst(
-    effective_irradiance=irradiance,
+diode_parameters = static_diffuse_sys.calcparams_pvsyst(
+    effective_irradiance=effective_irradiance,
     temp_cell=cell_temp,
 )
 
-power = pv_sys.singlediode(*diode_parameters)
+power = static_diffuse_sys.singlediode(
+    *diode_parameters)
 
 Yr = irradiance.resample('M').sum() / 1000
+Yr_effective = effective_irradiance.resample('M').sum() / 1000
 Ya = power['p_mp'].resample('M').sum() / Pdc_stc
 
 Lc = Yr - Ya
+Lc_effective = Yr_effective - Ya
 
 PR = Ya / Yr
 
-print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW')
+print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW, Yr_effective={Yr_effective.sum():.0f} kWh/kW')
 
-#%% Curvas IV vs G,Tc
+# %% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:
-    d = pv_sys.singlediode(*pv_sys.calcparams_pvsyst(
+    d = static_diffuse_sys.singlediode(*static_diffuse_sys.calcparams_pvsyst(
         effective_irradiance=G,
         temp_cell=25,
-        ), ivcurve_pnts=20
-        )
+    ), ivcurve_pnts=20
+    )
     plt.plot(d['v'], d['i'])
 
 for t in [10, 25, 40, 55, 70]:
-    d = pv_sys.singlediode(*pv_sys.calcparams_pvsyst(
+    d = static_diffuse_sys.singlediode(*static_diffuse_sys.calcparams_pvsyst(
         effective_irradiance=1000,
         temp_cell=t,
-        ), ivcurve_pnts=20
-        )
+    ), ivcurve_pnts=20
+    )
     plt.plot(d['v'], d['i'])
 
-#%% Grafica V_mp vs cell_temp
+# %% Grafica V_mp vs cell_temp
 plt.plot(cell_temp, power['v_mp'], '.')
+
+# %% Grafica I_mp vs aoi
+plt.plot(aoi, power['i_mp'], '.')

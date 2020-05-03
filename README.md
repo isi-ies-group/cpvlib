@@ -21,8 +21,8 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [x] Usar nombre "hybrid" para el sistema entero, no para el sistema de difusa
 * [x] Obtener funcion IAM
 * [x] Cambiar UF_AOI por IAM
-* [ ] Meter aoi_limit=55 en parametros del módulo
-* [ ] Meter parámetro de IAM en parametros del módulo
+* [ ] Meter aoi_limit=55 en parametros del módulo StaticDiffuseSystem
+* [ ] Meter parámetro de IAM en parametros del módulo StaticCPVSystem
 * [ ] Convertir funciones por tramos a tipo np.piecewise()
 * [ ] Meter parámetro de UF_aoi_difusa en parametros del módulo
 * [x] Escribir tests basados en dataset 2019-05
@@ -39,7 +39,9 @@ Dataset de prueba [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.sv
 * [x] Que medimos? Para utilizar medidas de ahora. Preguntar a Steve ->
         carpeta 'inso_mod': Solo un módulo (29) tiene corriente difusa y es 0.1 A (/10 esperado)
 * [ ] Ajustar parametros de parte difusa y tracker
-* [ ] Añadir tracker a StaticCPVSystem
-* [ ] Repasar get_aoi() CPVSystem y get_irradiance()
+* [x] Añadir tracker a StaticCPVSystem
+* [x] Repasar get_aoi() CPVSystem y get_irradiance()
 * [ ] Renombrar in_tracker a in_singleaxistracker
 * [ ] Repasar atributo albedo
+* [ ] Limitar AOI con aoi_limit en StaticCPVSystem.get_iam() ¿? Ahora supera los 55º
+* [ ] Cual sería la reference_irradiance de StaticDiffuseSystem ¿dhi, ghi, la get_irradiance(aoi_limit)?

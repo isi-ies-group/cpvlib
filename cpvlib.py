@@ -436,6 +436,10 @@ class StaticCPVSystem(CPVSystem):
                              solar_zenith, solar_azimuth)
         return aoi
 
+    def get_iam(self, aoi, iam_param):
+        
+        return pvlib.iam.ashrae(aoi, b=iam_param)
+
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
@@ -549,6 +553,7 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
+                 temperature_model_parameters=None,
                  modules_per_string=1,
                  in_tracker=False,
                  parameters_tracker=None,
@@ -658,15 +663,15 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
 
         if dii is None:
             dii = pvlib.irradiance.beam_component(
-                self.surface_tilt,
-                self.surface_azimuth,
+                surface_tilt,
+                surface_azimuth,
                 solar_zenith,
                 solar_azimuth,
                 dni)
 
         if gii is None:
-            irr = pvlib.irradiance.get_total_irradiance(self.surface_tilt,
-                                                  self.surface_azimuth,
+            irr = pvlib.irradiance.get_total_irradiance(surface_tilt,
+                                                  surface_azimuth,
                                                   solar_zenith, solar_azimuth,
                                                   dni, ghi, dhi,
                                                   dni_extra=dni_extra,
@@ -675,7 +680,7 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
                                                   albedo=self.albedo,
                                                   **kwargs)
 
-            poa_diffuse = irr['poa_sky_diffuse'] + irr['poa_ground_diffuse']
+            poa_diffuse = irr['poa_diffuse']
             gii = irr['poa_global']
 
         else:

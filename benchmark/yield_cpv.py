@@ -108,23 +108,23 @@ cpv_sys = cpvlib.CPVSystem(
     modules_per_string=1,
 )
 
-effective_irradiance = data['dni']
+irradiance = data['dni']
 
-pv_cell_temp = cpv_sys.pvsyst_celltemp(
-    poa_global=effective_irradiance,
+cpv_cell_temp = cpv_sys.pvsyst_celltemp(
+    poa_global=irradiance,
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
 
-pv_diode_parameters = cpv_sys.calcparams_pvsyst(
-    effective_irradiance=effective_irradiance,
-    temp_cell=pv_cell_temp,
+cpv_diode_parameters = cpv_sys.calcparams_pvsyst(
+    effective_irradiance=irradiance,
+    temp_cell=cpv_cell_temp,
 )
 
-pv_power = cpv_sys.singlediode(*pv_diode_parameters)
+cpv_power = cpv_sys.singlediode(*cpv_diode_parameters)
     
-Yr = effective_irradiance.resample('M').sum() / 1000
-Ya = pv_power['p_mp'].resample('M').sum() / Pdc_stc
+Yr = irradiance.resample('M').sum() / 1000
+Ya = cpv_power['p_mp'].resample('M').sum() / Pdc_stc
 
 Lc = Yr - Ya
 
@@ -150,4 +150,4 @@ for t in [10, 25, 40, 55, 70]:
     plt.plot(d['v'], d['i'])
 
 #%% Grafica V_mp vs cell_temp
-plt.plot(pv_cell_temp, pv_power['v_mp'], '.')
+plt.plot(cpv_cell_temp, cpv_power['v_mp'], '.')

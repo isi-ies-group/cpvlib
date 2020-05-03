@@ -108,30 +108,43 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     modules_per_string=1,
 )
 
-effective_irradiance = static_cpv_sys.get_irradiance(
-    solpos['zenith'], solpos['azimuth'], data['dni']) * pvlib.iam.ashrae(aoi, b=iam_param)
+# AOI
+aoi = static_cpv_sys.get_aoi(
+    solar_zenith=solpos['zenith'],
+    solar_azimuth=solpos['azimuth'],
+)
+# aoi.plot()
 
-pv_cell_temp = static_cpv_sys.pvsyst_celltemp(
+irradiance = static_cpv_sys.get_irradiance(
+    solpos['zenith'], solpos['azimuth'], data['dni'])
+
+iam_param = 0.67
+effective_irradiance = irradiance * \
+    static_cpv_sys.get_iam(aoi, iam_param)
+
+cell_temp = static_cpv_sys.pvsyst_celltemp(
     poa_global=effective_irradiance,
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
 
-pv_diode_parameters = static_cpv_sys.calcparams_pvsyst(
+diode_parameters = static_cpv_sys.calcparams_pvsyst(
     effective_irradiance=effective_irradiance,
-    temp_cell=pv_cell_temp,
+    temp_cell=cell_temp,
 )
 
-pv_power = static_cpv_sys.singlediode(*pv_diode_parameters)
+power = static_cpv_sys.singlediode(*diode_parameters)
 
-Yr = effective_irradiance.resample('M').sum() / 1000
-Ya = pv_power['p_mp'].resample('M').sum() / Pdc_stc
+Yr = irradiance.resample('M').sum() / 1000
+Yr_effective = effective_irradiance.resample('M').sum() / 1000
+Ya = power['p_mp'].resample('M').sum() / Pdc_stc
 
 Lc = Yr - Ya
+Lc_effective = Yr_effective - Ya
 
 PR = Ya / Yr
 
-print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW')
+print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW, Yr_effective={Yr_effective.sum():.0f} kWh/kW')
 
 # %% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:
@@ -151,4 +164,7 @@ for t in [10, 25, 40, 55, 70]:
     plt.plot(d['v'], d['i'])
 
 # %% Grafica V_mp vs cell_temp
-plt.plot(pv_cell_temp, pv_power['v_mp'], '.')
+plt.plot(cell_temp, power['v_mp'], '.')
+
+# %% Grafica I_mp vs aoi
+plt.plot(aoi, power['i_mp'], '.')
