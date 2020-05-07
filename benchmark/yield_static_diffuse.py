@@ -107,7 +107,7 @@ effective_irradiance = static_diffuse_sys.get_irradiance(
     solar_zenith=solpos['zenith'], solar_azimuth=solpos['azimuth'],
     aoi=aoi, aoi_limit=55,
     dni=data['dni'], ghi=data['ghi'], dhi=data['dhi']
-)
+)*pvlib.iam.martin_ruiz(aoi, a_r=0.16)
 
 cell_temp = static_diffuse_sys.pvsyst_celltemp(
     poa_diffuse_static=effective_irradiance,

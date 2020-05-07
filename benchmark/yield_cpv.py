@@ -31,7 +31,7 @@ solpos = location.get_solarposition(data.index)
 # irrad_ref = 1000,
 # temp_ref = 25
 
-modulo = 'insolight'
+modulo = 'soitec'
 
 if modulo == 'insolight':
     # Insolight (César)
