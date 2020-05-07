@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pvlib
 
 import cpvlib
-from parametros import mod_params_cpv, mod_params_diffuse, params_tracker
+from insolight_parameters import mod_params_cpv, mod_params_diffuse, params_tracker
 
 
 # In[2]:
@@ -136,7 +136,7 @@ plt.plot(airmass_absolute, UF_am, '.')
 # In[10]:
 
 
-print('\nTracker?', static_hybrid_sys.in_tracker)
+print('\nTracker?', static_hybrid_sys.in_singleaxis_tracker)
 
 energia_cpv = (dc_cpv['p_mp'] * uf_cpv).sum()
 energia_difusa = dc_diffuse['p_mp'].sum()

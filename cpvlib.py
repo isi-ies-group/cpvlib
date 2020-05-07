@@ -482,6 +482,7 @@ class StaticCPVSystem(CPVSystem):
                 dni,
                 **kwargs)
 
+    # DEPRECATED - still used in some tests
     def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
         Retrieves the utilization factor for the Angle of Incidence.
@@ -527,7 +528,8 @@ class StaticCPVSystem(CPVSystem):
 
         return aoi_uf
 
-    def get_global_utilization_factor_con_aoi(self, airmass_absolute, temp_air,
+    # DEPRECATED
+    def get_global_utilization_factor_using_aoi(self, airmass_absolute, temp_air,
                                               aoi, solar_zenith, solar_azimuth):
 
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
