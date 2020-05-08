@@ -53,7 +53,7 @@ mod_params_cpv.update(UF_parameters)
 @pytest.fixture
 def data():
     
-    data = pd.read_csv('datos/InsolightMay2019.csv', index_col='Date Time',
+    data = pd.read_csv('data/InsolightMay2019.csv', index_col='Date Time',
                        parse_dates=True, encoding='latin1')
     data.index = data.index.tz_localize('Europe/Madrid')
     
@@ -71,8 +71,8 @@ def data():
     return data
 
 test_data = [
-    ('datos/meteo2020_03_04.txt', 6377.265283689235),
-    ('datos/meteo2020_03_14.txt', 8494.147901845981),
+    ('data/meteo2020_03_04.txt', 6377.265283689235),
+    ('data/meteo2020_03_14.txt', 8494.147901845981),
 ]
 
 

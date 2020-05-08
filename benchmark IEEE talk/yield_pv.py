@@ -52,7 +52,7 @@ elif modulo == 'isofoton':
     # Isofoton_I110 - PVSyst
     pv_mod_params = {
         "alpha_sc": 2.3e-3,  # coef. temp. Isc
-        "gamma_ref": 0.970,  # "Datos básicos"
+        "gamma_ref": 0.970 * (10/0.85),  # "Datos básicos"
         "mu_gamma": 0,  # "Parámetros modelo"
         "I_L_ref": 6.76,  # Isc
         "I_o_ref": 0.23e-9,  # "Datos básicos"
@@ -62,7 +62,7 @@ elif modulo == 'isofoton':
         "cells_in_series": 36,
     }
     
-    A = 0.85  # m2
+    A = 10#0.85  # m2
 
 # calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*pvlib.pvsystem.PVSystem(
