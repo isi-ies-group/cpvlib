@@ -14,9 +14,9 @@ setup_args = dict(
         "Operating System :: Windows",
     ],
     python_requires='>=3.6',
-    packages=['meteocheck'],
+    packages=['cpvlib'],
     zip_safe=False,
-    package_data={'': ['*.ini']},
+    package_data={'': ['*.csv', '*.txt', '*.png', '*.yaml', '*.yml']},
     include_package_data=True,
 )
 
