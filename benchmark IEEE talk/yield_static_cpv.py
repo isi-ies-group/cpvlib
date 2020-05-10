@@ -4,6 +4,7 @@ Created on Fri May  8 22:49:15 2020
 
 @author: Ruben
 """
+from math import sqrt
 
 import matplotlib.pyplot as plt
 import pvlib
@@ -36,6 +37,8 @@ solpos = location.get_solarposition(data.index)
 # EgRef = 1.121, # VALOR_DEFECTO
 # irrad_ref = 1000,
 # temp_ref = 25
+
+IN_TRACKER = True
 
 A_ref = 10
 
@@ -107,7 +110,6 @@ Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticCPVSystem(
     temp_cell=25))['p_mp']
 
 eff_a = Pdc_stc / (1000 * A_ref)
-print(f'Pdc_stc={Pdc_stc:.0f} W, eff_a={eff_a:.2%}')
 
 temp_mod_params = {"eta_m": 0.32, "alpha_absorption": 0.9}
 # print(temp_mod_params)
@@ -118,7 +120,7 @@ static_cpv_sys = cpvlib.StaticCPVSystem(
     surface_azimuth=180,
     # albedo=0.2,
     module_parameters=cpv_mod_params,
-    in_singleaxis_tracker=False,
+    in_singleaxis_tracker=IN_TRACKER,
     temperature_model_parameters=temp_mod_params,
     modules_per_string=1,
 )
@@ -161,6 +163,8 @@ Lc_effective = Yr_effective - Ya
 PR = Ya / Yr
 
 print('Yield StaticCPV')
+print(f'In single_axis tracker? {IN_TRACKER}')
+print(f'Pdc_stc={Pdc_stc:.0f} W, eff_a={eff_a:.2%}')
 print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW, Yr_effective={Yr_effective.sum():.0f} kWh/kW')
 print(f'Total TMY energy per reference area={power["p_mp"].sum()/1000:.0f} kWh/year')
 
