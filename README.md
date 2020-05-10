@@ -6,7 +6,7 @@ The library is only based on one file: `cpvlib.py`, that contains the following 
 * StaticDiffuseSystem
 * StaticHybridSystem
 
-`pip install git+https://github.com/isi-ies-group/pvlib.git`
+`pip install git+https://github.com/isi-ies-group/cpvlib.git`
 
 Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
 
