@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May  8 22:49:15 2020
+
+@author: Ruben
+"""
+from math import sqrt
 
 import matplotlib.pyplot as plt
 import pvlib
@@ -31,25 +38,30 @@ solpos = location.get_solarposition(data.index)
 # irrad_ref = 1000,
 # temp_ref = 25
 
+A_ref = 10
+
 modulo = 'soitec'
 
 if modulo == 'insolight':
     # Insolight (César)
+    
+    A = 0.10  # m2
+
+    corr = A_ref / A
+    A *= corr
     cpv_mod_params = {
         "alpha_sc": 0.00,
         "gamma_ref": 5.524,
         "mu_gamma": 0.003,
-        "I_L_ref": 0.96,
+        "I_L_ref": 0.96 *sqrt(corr),
         "I_o_ref": 1.7e-10,
         "R_sh_ref": 5226,
         "R_sh_0": 21000,
         "R_s": 0.01,
         "EgRef": 3.91,
-        "cells_in_series": 12,
+        "cells_in_series": 12 *sqrt(corr),
     }
     
-    A = 0.10  # m2
-
     # UF
     # para usa los UF hay que llamar a cpv_sys.get_global_utilization_factor_cpv()
     # UF_parameters_cpv = {
@@ -68,23 +80,27 @@ if modulo == 'insolight':
 
 elif modulo == 'soitec':
     # Soitec CX-M500
+    
+    A = 7.386  # m2
+
+    corr = A_ref / A
+    A *= corr
     cpv_mod_params = {
         "alpha_sc": 0.00,
         "gamma_ref": 3.664,
         "mu_gamma": 0.003,
-        "I_L_ref": 3.861,
+        "I_L_ref": 3.861 *sqrt(corr),
         "I_o_ref": 0.005e-9,
         "R_sh_ref": 3461,
         "R_sh_0": 25000,
         "R_s": 0.61,
         "EgRef": 3.91,
-        "cells_in_series": 240,
+        "cells_in_series": 240 *sqrt(corr),
         "irrad_ref":943,
         "temp_ref":64
     }
-    
-    A = 7.386  # m2
 
+#%%
 # calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.CPVSystem(
     module_parameters=cpv_mod_params
@@ -110,27 +126,29 @@ cpv_sys = cpvlib.CPVSystem(
 
 irradiance = data['dni']
 
-cpv_cell_temp = cpv_sys.pvsyst_celltemp(
+cell_temp = cpv_sys.pvsyst_celltemp(
     poa_global=irradiance,
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
 
-cpv_diode_parameters = cpv_sys.calcparams_pvsyst(
+diode_parameters = cpv_sys.calcparams_pvsyst(
     effective_irradiance=irradiance,
-    temp_cell=cpv_cell_temp,
+    temp_cell=cell_temp,
 )
 
-cpv_power = cpv_sys.singlediode(*cpv_diode_parameters)
+power = cpv_sys.singlediode(*diode_parameters)
     
 Yr = irradiance.resample('M').sum() / 1000
-Ya = cpv_power['p_mp'].resample('M').sum() / Pdc_stc
+Ya = power['p_mp'].resample('M').sum() / Pdc_stc
 
 Lc = Yr - Ya
 
 PR = Ya / Yr
 
+print('Yield CPV')
 print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW')
+print(f'Total TMY energy per reference area={power["p_mp"].sum()/1000:.0f} kWh/year')
 
 #%% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:
@@ -150,4 +168,4 @@ for t in [10, 25, 40, 55, 70]:
     plt.plot(d['v'], d['i'])
 
 #%% Grafica V_mp vs cell_temp
-plt.plot(cpv_cell_temp, cpv_power['v_mp'], '.')
+plt.plot(cell_temp, power['v_mp'], '.')

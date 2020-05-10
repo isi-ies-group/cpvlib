@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May  8 22:49:15 2020
+
+@author: Ruben
+"""
 
 import matplotlib.pyplot as plt
 import pvlib
@@ -31,27 +37,32 @@ solpos = location.get_solarposition(data.index)
 # irrad_ref = 1000,
 # temp_ref = 25
 
+A_ref = 10
+
 modulo = 'soitec'
 
 if modulo == 'insolight':
     # Insolight (César)
+    
+    A = 0.10  # m2
+
+    corr = A_ref / A
+    A *= corr
     cpv_mod_params = {
         "alpha_sc": 0.00,
         "gamma_ref": 5.524,
         "mu_gamma": 0.003,
-        "I_L_ref": 0.96,
+        "I_L_ref": 0.96 *sqrt(corr),
         "I_o_ref": 1.7e-10,
         "R_sh_ref": 5226,
         "R_sh_0": 21000,
         "R_s": 0.01,
         "EgRef": 3.91,
-        "cells_in_series": 12,
+        "cells_in_series": 12 *sqrt(corr),
     }
-
-    A = 0.10  # m2
-
+    
     # UF
-    # para usa los UF hay que llamar a static_cpv_sys.get_global_utilization_factor_cpv()
+    # para usa los UF hay que llamar a cpv_sys.get_global_utilization_factor_cpv()
     # UF_parameters_cpv = {
     #     "IscDNI_top": 0.96 / 1000,
     #     "am_thld": 4.574231933073185,
@@ -63,27 +74,30 @@ if modulo == 'insolight':
     #     "weight_am": 0.2,
     #     "weight_temp": 0.8,
     # }
-
+    
     # cpv_mod_params.update(UF_parameters_cpv)
 
 elif modulo == 'soitec':
     # Soitec CX-M500
+    
+    A = 7.386  # m2
+
+    corr = A_ref / A
+    A *= corr
     cpv_mod_params = {
         "alpha_sc": 0.00,
         "gamma_ref": 3.664,
         "mu_gamma": 0.003,
-        "I_L_ref": 3.861,
+        "I_L_ref": 3.861 *sqrt(corr),
         "I_o_ref": 0.005e-9,
         "R_sh_ref": 3461,
         "R_sh_0": 25000,
         "R_s": 0.61,
         "EgRef": 3.91,
-        "cells_in_series": 240,
-        "irrad_ref": 943,
-        "temp_ref": 64
+        "cells_in_series": 240 *sqrt(corr),
+        "irrad_ref":943,
+        "temp_ref":64
     }
-
-    A = 7.386  # m2
 
 #%% calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticCPVSystem(
@@ -92,7 +106,7 @@ Pdc_stc = pvlib.pvsystem.singlediode(*cpvlib.StaticCPVSystem(
     effective_irradiance=1000,
     temp_cell=25))['p_mp']
 
-eff_a = Pdc_stc / (1000 * A)
+eff_a = Pdc_stc / (1000 * A_ref)
 print(f'Pdc_stc={Pdc_stc:.0f} W, eff_a={eff_a:.2%}')
 
 temp_mod_params = {"eta_m": 0.32, "alpha_absorption": 0.9}
@@ -146,7 +160,9 @@ Lc_effective = Yr_effective - Ya
 
 PR = Ya / Yr
 
+print('Yield StaticCPV')
 print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW, Yr_effective={Yr_effective.sum():.0f} kWh/kW')
+print(f'Total TMY energy per reference area={power["p_mp"].sum()/1000:.0f} kWh/year')
 
 # %% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:

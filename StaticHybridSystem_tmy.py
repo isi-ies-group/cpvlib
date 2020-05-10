@@ -14,7 +14,7 @@ from insolight_parameters import mod_params_cpv, mod_params_diffuse, params_trac
 # In[2]:
 
 
-IN_TRACKER = False
+IN_TRACKER = True
 
 lat, lon = 40.4, -3.7
 
@@ -47,7 +47,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     module_diffuse=None,
     module_parameters_cpv=mod_params_cpv,
     module_parameters_diffuse=mod_params_diffuse,
-    in_tracker=IN_TRACKER,
+    in_singleaxis_tracker=IN_TRACKER,
     parameters_tracker=params_tracker,
     modules_per_string=1,
     strings_per_inverter=1,

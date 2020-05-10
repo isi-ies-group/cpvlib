@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May  8 22:49:15 2020
+
+@author: Ruben
+"""
+from math import sqrt
 
 import matplotlib.pyplot as plt
 import pvlib
@@ -30,40 +37,47 @@ solpos = location.get_solarposition(data.index)
 # irrad_ref = 1000,
 # temp_ref = 25
 
+A_ref = 10
+
 modulo = 'isofoton'
 
 if modulo == 'ejemplo':
     # https://pvpmc.sandia.gov/PVLIB_Matlab_Help/html/pvl_calcparams_PVsyst_help.html
+    A = 1  # m2
+    
+    corr = A_ref / A
+    A *= corr
     pv_mod_params = {
         "alpha_sc": -0.002,# coef. temp. Isc
         "gamma_ref": 1.1,# "Datos básicos"
         "mu_gamma": -0.0003,# "Parámetros modelo"
-        "I_L_ref": 5.5,# Isc
+        "I_L_ref": 5.5 *sqrt(corr),# Isc
         "I_o_ref": 2.2e-9,# "Datos básicos"
         "R_sh_ref": 200, # R paral ref "Parámetros modelo"
         "R_sh_0": 8700,# R paral G=0 W/m2 "Parámetros modelo"
         "R_s": 0.33,# R serie "Parámetros modelo"
-        "cells_in_series": 60,
+        "cells_in_series": 60 *sqrt(corr),
     }
-    
-    A = 1.00  # m2
-    
+        
 elif modulo == 'isofoton':
     # Isofoton_I110 - PVSyst
+    A = 0.85  # m2
+
+    corr = A_ref / A
+    A *= corr
     pv_mod_params = {
         "alpha_sc": 2.3e-3,  # coef. temp. Isc
-        "gamma_ref": 0.970 * (10/0.85),  # "Datos básicos"
+        "gamma_ref": 0.970,  # "Datos básicos"
         "mu_gamma": 0,  # "Parámetros modelo"
-        "I_L_ref": 6.76,  # Isc
+        "I_L_ref": 6.76 *sqrt(corr),#*sqrt(10/0.85),  # Isc
         "I_o_ref": 0.23e-9,  # "Datos básicos"
         "R_sh_ref": 200,  # R paral ref "Parámetros modelo"
         "R_sh_0": 800,  # R paral G=0 W/m2 "Parámetros modelo"
         "R_s": 0.248,  # R serie "Parámetros modelo"
-        "cells_in_series": 36,
+        "cells_in_series": 36 *sqrt(corr),# *sqrt(10/0.85),
     }
-    
-    A = 10#0.85  # m2
 
+#%%
 # calcula Pmp STC
 Pdc_stc = pvlib.pvsystem.singlediode(*pvlib.pvsystem.PVSystem(
     module_parameters=pv_mod_params
@@ -135,7 +149,9 @@ Lc = Yr - Ya
 
 PR = Ya / Yr
 
+print('Yield PV')
 print(f'PR={Ya.sum()/Yr.sum():.2}, Ya={Ya.sum():.0f} kWh/kW, Yr={Yr.sum():.0f} kWh/kW')
+print(f'Total TMY energy per reference area={power["p_mp"].sum()/1000:.0f} kWh/year')
 
 #%% Curvas IV vs G,Tc
 for G in [200, 400, 600, 800, 1000]:
