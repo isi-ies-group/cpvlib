@@ -1,18 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
+# -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
 import pvlib
 
 import cpvlib
 from insolight_parameters import mod_params_cpv, mod_params_diffuse, params_tracker
-
-
-# In[2]:
-
 
 IN_TRACKER = True
 
@@ -34,12 +26,8 @@ location = pvlib.location.Location(
 solar_zenith = location.get_solarposition(data.index).zenith
 solar_azimuth = location.get_solarposition(data.index).azimuth
 
-
+#%%
 # StaticHybridSystem
-
-# In[3]:
-
-
 static_hybrid_sys = cpvlib.StaticHybridSystem(
     surface_tilt=30,
     surface_azimuth=180,
@@ -58,12 +46,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
     name=None,
 )
 
-
 # get_effective_irradiance
-
-# In[4]:
-
-
 data['dii_effective'], data['poa_diffuse_static_effective'] = static_hybrid_sys.get_effective_irradiance(
     solar_zenith,
     solar_azimuth,
@@ -75,12 +58,7 @@ data['dii_effective'], data['poa_diffuse_static_effective'] = static_hybrid_sys.
     dni=data['dni']
 )
 
-
 # pvsyst_celltemp
-
-# In[5]:
-
-
 data['temp_cell_35'], data['temp_cell_diffuse'] = static_hybrid_sys.pvsyst_celltemp(
     dii=data['dii_effective'],
     poa_diffuse_static=data['poa_diffuse_static_effective'],
@@ -88,12 +66,7 @@ data['temp_cell_35'], data['temp_cell_diffuse'] = static_hybrid_sys.pvsyst_cellt
     wind_speed=data['wind_speed']
 )
 
-
 # calcparams_pvsyst
-
-# In[6]:
-
-
 diode_parameters_cpv, diode_parameters_diffuse = static_hybrid_sys.calcparams_pvsyst(
     dii=data['dii_effective'],
     poa_diffuse_static=data['poa_diffuse_static_effective'],
@@ -101,45 +74,26 @@ diode_parameters_cpv, diode_parameters_diffuse = static_hybrid_sys.calcparams_pv
     temp_cell_diffuse=data['temp_cell_diffuse'],
 )
 
-
 # singlediode
-
-# In[7]:
-
-
 dc_cpv, dc_diffuse = static_hybrid_sys.singlediode(
     diode_parameters_cpv, diode_parameters_diffuse)
 
-
 # uf_global (uf_am, uf_temp_air)
-
-# In[8]:
-
-
 airmass_absolute = location.get_airmass(data.index).airmass_absolute
 
-uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'],
-                                                                  solar_zenith, solar_azimuth)
-
+uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'])
 
 # UF_am - Plot
+UF_am = cpvlib.get_simple_util_factor(
+    airmass_absolute, thld=mod_params_cpv['am_thld'],
+    m_low=mod_params_cpv['am_uf_m_low'], m_high=mod_params_cpv['am_uf_m_high'])
 
-# In[9]:
-
-
-UF_am = cpvlib.get_simple_util_factor(airmass_absolute, thld=mod_params_cpv['am_thld'], m_low=mod_params_cpv['am_uf_m_low'], m_high=mod_params_cpv['am_uf_m_high'])
 plt.plot(airmass_absolute, UF_am, '.')
 
-
-# Energia
-
-# In[10]:
-
-
+# Energy
 print('\nTracker?', static_hybrid_sys.in_singleaxis_tracker)
 
-energia_cpv = (dc_cpv['p_mp'] * uf_cpv).sum()
-energia_difusa = dc_diffuse['p_mp'].sum()
+energy_cpv = (dc_cpv['p_mp'] * uf_cpv).sum()
+energy_diffuse = dc_diffuse['p_mp'].sum()
 
-print(f"E_CPV={energia_cpv}", f"E_diff={energia_difusa}")
-
+print(f"E_CPV={energy_cpv:.0f} kWh", f"E_diff={energy_diffuse:.0f} kWh")

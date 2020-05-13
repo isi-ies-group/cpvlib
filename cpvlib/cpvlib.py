@@ -70,7 +70,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                  module=None, module_parameters=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
-                 racking_model='freestanding',# es solo de modelo sapm
+                 racking_model='freestanding',# only for sapm model
                  losses_parameters=None, name=None, albedo=None,
                  surface_type=None, **kwargs):
 
@@ -305,8 +305,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                                       m_low=dni_uf_m_low,
                                       m_high=dni_uf_m_high)
 
-    def get_global_utilization_factor(self, airmass_absolute, temp_air,
-                                      solar_zenith, solar_azimuth):
+    def get_global_utilization_factor(self, airmass_absolute, temp_air):
 
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
 
@@ -529,8 +528,7 @@ class StaticCPVSystem(CPVSystem):
         return aoi_uf
 
     # DEPRECATED
-    def get_global_utilization_factor_using_aoi(self, airmass_absolute, temp_air,
-                                              aoi, solar_zenith, solar_azimuth):
+    def get_global_utilization_factor_using_aoi(self, airmass_absolute, temp_air, aoi):
 
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
 
@@ -875,7 +873,7 @@ class StaticHybridSystem():
                                                                     solar_azimuth,
                                                                     aoi=aoi,
                                                                     aoi_limit=aoi_limit,
-                                                                    dii=dii,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                                    dii=dii,
                                                                     gii=gii,
                                                                     ghi=ghi,
                                                                     dhi=dhi,
@@ -971,8 +969,7 @@ class StaticHybridSystem():
 
         return diode_parameters_cpv, diode_parameters_diffuse
 
-    def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air,
-                                          solar_zenith, solar_azimuth):
+    def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air):
 
         uf_am = self.static_cpv_sys.get_am_util_factor(
             airmass=airmass_absolute)

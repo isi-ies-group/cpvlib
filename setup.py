@@ -7,7 +7,7 @@ setup_args = dict(
     version="0.1.0",
     url='http://github.com/isi-ies-group/cpvlib',
     author="IES-UPM ISI Group",
-    author_email="ruben.nunez@ies.upm.es",
+    author_email="info@ies.upm.es",
     description="CPV Systems modeling",
     classifiers=[
         "Programming Language :: Python :: 3",
