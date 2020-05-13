@@ -193,8 +193,7 @@ def test_StaticCPVSystem_energy_2019_05(data, energy=90509.11811618837):
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
     
     # OJO uf_global NO incluye uf_aoi!!
-    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
-                                                            solar_zenith, solar_azimuth)
+    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'])
     
     assert (dc_cpv['p_mp'] * uf_global).sum() == energy
     
@@ -233,8 +232,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
     
     # OJO uf_global NO incluye uf_aoi!!
-    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'],
-                                                             solar_zenith, solar_azimuth)
+    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'])
 
     
     # %% StaticDiffuseSystem
@@ -371,7 +369,6 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     # uf_global
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
     
-    uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'],
-                                                                      solar_zenith, solar_azimuth)
+    uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'])
     
     assert np.allclose(uf_global, uf_global_h, atol=0.001) is True
