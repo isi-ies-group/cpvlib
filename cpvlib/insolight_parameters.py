@@ -49,7 +49,7 @@ mod_params_cpv.update(UF_parameters_cpv)
 mod_params_diffuse = {
     "gamma_ref": 1.1,
     "mu_gamma": -0.0003,
-    "I_L_ref": 5.5/,
+    "I_L_ref": 5.5,
     "I_o_ref": 2.2e-9,
     "R_sh_ref": 200,
     "R_sh_0": 8700,
