@@ -712,14 +712,14 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
                                         model_params=self.racking_model,
                                         **kwargs)
 
-    def get_iam(self, aoi, aoi_thld, aoi_limit, a1, b1, a2, b2):
+    def get_iam(self, aoi, aoi_thld, aoi_limit, m1, b1, m2, b2):
         if isinstance(aoi, (int, float)):
             aoi = float(aoi)
         else:
             aoi = aoi.values
             
         condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
-        funclist = [lambda x:x*b1+a1, lambda x:x*b2+a2]
+        funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
         
         if isinstance(aoi, (int, float)):
             return np.piecewise(aoi, condlist, funclist)
