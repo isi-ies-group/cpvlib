@@ -714,17 +714,17 @@ class StaticDiffuseSystem(pvlib.pvsystem.PVSystem):
 
     def get_iam(self, aoi, aoi_thld, aoi_limit, m1, b1, m2, b2):
         if isinstance(aoi, (int, float)):
-            aoi = float(aoi)
+            aoi_values = float(aoi)
         else:
-            aoi = aoi.values
+            aoi_values = aoi.values
             
-        condlist = [aoi < aoi_thld, (aoi_thld <= aoi) & (aoi < aoi_limit)]
+        condlist = [aoi_values < aoi_thld, (aoi_thld <= aoi_values) & (aoi_values < aoi_limit)]
         funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
         
         if isinstance(aoi, (int, float)):
             return np.piecewise(aoi, condlist, funclist)
         else:
-            return np.piecewise(aoi, condlist, funclist)[0]
+            return pd.Series(np.piecewise(aoi_values, condlist, funclist), index=aoi.index)
 
 
 class StaticHybridSystem():
