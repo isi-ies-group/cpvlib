@@ -16,4 +16,6 @@ Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)
 ## TO DO
 * [ ] Fitting of the Insolight diffuse subsystem
 * [ ] Fitting the IAM of the Insolight diffuse subsystem
-* [ ] When the code stabilizes, put all the parameters in the class constructor
+* [ ] When the code stabilizes, put all the parameters in the class constructors
+* [ ] Homogenize piecewise functions for Utility Factors and IAM
+* [ ] Add more tests: diffuse part

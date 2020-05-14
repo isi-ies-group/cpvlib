@@ -79,16 +79,9 @@ dc_cpv, dc_diffuse = static_hybrid_sys.singlediode(
     diode_parameters_cpv, diode_parameters_diffuse)
 
 # uf_global (uf_am, uf_temp_air)
-airmass_absolute = location.get_airmass(data.index).airmass_absolute
+data['am'] = location.get_airmass(data.index).airmass_absolute
 
-uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'])
-
-# UF_am - Plot
-UF_am = cpvlib.get_simple_util_factor(
-    airmass_absolute, thld=mod_params_cpv['am_thld'],
-    m_low=mod_params_cpv['am_uf_m_low'], m_high=mod_params_cpv['am_uf_m_high'])
-
-plt.plot(airmass_absolute, UF_am, '.')
+uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(data['am'], data['temp_air'])
 
 # Energy
 print('\nTracker?', static_hybrid_sys.in_singleaxis_tracker)
@@ -97,3 +90,4 @@ energy_cpv = (dc_cpv['p_mp'] * uf_cpv).sum()
 energy_diffuse = dc_diffuse['p_mp'].sum()
 
 print(f"E_CPV={energy_cpv:.0f} kWh", f"E_diff={energy_diffuse:.0f} kWh")
+
