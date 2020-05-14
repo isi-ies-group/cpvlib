@@ -882,7 +882,7 @@ class StaticHybridSystem():
                                                                     )
 
         poa_diffuse_static_effective = poa_diffuse_static #* self.static_diffuse_sys.get_iam(
-            #aoi=aoi, aoi_thld=55, aoi_limit=80, a1=1, b1=0, a2=1, b2=0)
+            #aoi=aoi, aoi_thld=55, aoi_limit=80, m1=1, b1=0, m2=1, b2=0)
 
         dii_effective = dii * pvlib.iam.ashrae(aoi, b=iam_param)
 
