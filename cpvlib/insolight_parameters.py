@@ -44,12 +44,12 @@ UF_parameters_cpv = {
 
 mod_params_cpv.update(UF_parameters_cpv)
 
-# exmaple PV module from:
+# example (NO Insolight) PV module from:
 # https://pvpmc.sandia.gov/PVLIB_Matlab_Help/html/pvl_calcparams_PVsyst_help.html
 mod_params_diffuse = {
     "gamma_ref": 1.1,
     "mu_gamma": -0.0003,
-    "I_L_ref": 5.5,
+    "I_L_ref": 5.5/,
     "I_o_ref": 2.2e-9,
     "R_sh_ref": 200,
     "R_sh_0": 8700,
@@ -62,13 +62,4 @@ mod_params_diffuse = {
     "cells_in_series": 4, # 60,
     "eta_m": 0.1,  # pvsyst_celltemp() default value
     "alpha_absorption": 0.9,  # pvsyst_celltemp() default value
-}
-
-# https://pvlib-python.readthedocs.io/en/stable/generated/pvlib.tracking.SingleAxisTracker.html
-params_tracker = {
-    'axis_tilt':0,
-    'axis_azimuth':0,
-    'max_angle':90,
-    'backtrack':True,
-    'gcr':2.0/7.0
 }
