@@ -11,7 +11,7 @@ The library is based on file `cpvlib.py`, that contains the following classes:
 Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
 
 ## Live Jupyter notebook demo without installation (on external server)
-* StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=StaticHybridSystem_tmy.ipynb)
+* StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/cpvlib//master?filepath=StaticHybridSystem_tmy.ipynb)
 
 ## TO DO
 * [ ] Fitting of the Insolight diffuse subsystem
