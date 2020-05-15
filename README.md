@@ -6,9 +6,8 @@ The library is based on file `cpvlib.py`, that contains the following classes:
 * StaticDiffuseSystem
 * StaticHybridSystem
 
+## Library installation
 `pip install git+https://github.com/isi-ies-group/cpvlib.git`
-
-Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
 
 ## Live Jupyter notebook demo without installation (on external server)
 * StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=cpvlib/StaticHybridSystem_tmy.ipynb)
@@ -19,3 +18,5 @@ Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)
 * [ ] When the code stabilizes, put all the parameters in the class constructors
 * [ ] Homogenize piecewise functions for Utility Factors and IAM
 * [ ] Add more tests: diffuse part
+
+Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
