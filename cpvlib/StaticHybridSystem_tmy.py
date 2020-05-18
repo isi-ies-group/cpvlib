@@ -82,7 +82,7 @@ data['am'] = location.get_airmass(data.index).airmass_absolute
 uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(data['am'], data['temp_air'])
 
 # Power
-dc_cpv['2010-06-15':'2010-06-20'].p_mp.plot()
+(dc_cpv['2010-06-15':'2010-06-20'].p_mp * uf_cpv['2010-06-15':'2010-06-20']).plot()
 dc_diffuse['2010-06-15':'2010-06-20'].p_mp.plot(secondary_y=True)
 
 # Energy
