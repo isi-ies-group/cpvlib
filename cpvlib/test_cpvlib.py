@@ -235,10 +235,10 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'])
 
     
-    # %% StaticDiffuseSystem
-    # toma valores por defecto de mod_params_diffuse para método calcparams_pvsyst() en:
+    # %% StaticFlatPlateSystem
+    # toma valores por defecto de mod_params_flatplate para método calcparams_pvsyst() en:
     # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
-    mod_params_diffuse = {
+    mod_params_flatplate = {
         "gamma_ref": 1.05,  # valor de test de calcparams_pvsyst()
         "mu_gamma": 0.001,  # valor de test de calcparams_pvsyst()
         "I_L_ref": 6.0,  # valor de test de calcparams_pvsyst()
@@ -260,11 +260,11 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         # "Vmpo": 43.9, # parámetro de sapm()
     }
     
-    static_diffuse_sys = cpvlib.StaticDiffuseSystem(
+    static_flatplate_sys = cpvlib.StaticFlatPlateSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
-        module_parameters=mod_params_diffuse,
+        module_parameters=mod_params_flatplate,
         modules_per_string=1,
         strings_per_inverter=1,
         inverter=None,
@@ -275,7 +275,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     )
     
     # el aoi de difusa es el mismo que cpv
-    data['poa_diffuse_static'] = static_diffuse_sys.get_irradiance(solar_zenith,
+    data['poa_flatplate_static'] = static_flatplate_sys.get_irradiance(solar_zenith,
                                                                    solar_azimuth,
                                                                    aoi=data['aoi'],
                                                                    aoi_limit=55,
@@ -284,23 +284,23 @@ def test_StaticHybridSystem_composicion_2019_05(data):
                                                                    gii=data['gii']
                                                                    )
     
-    celltemp_diffuse = static_diffuse_sys.pvsyst_celltemp(
-        data['poa_diffuse_static'], data['temp_air'], data['wind_speed']
+    celltemp_flatplate = static_flatplate_sys.pvsyst_celltemp(
+        data['poa_flatplate_static'], data['temp_air'], data['wind_speed']
     )
     
-    diode_parameters_diffuse = static_diffuse_sys.calcparams_pvsyst(
-        data['poa_diffuse_static'], celltemp_diffuse)
+    diode_parameters_flatplate = static_flatplate_sys.calcparams_pvsyst(
+        data['poa_flatplate_static'], celltemp_flatplate)
     
-    dc_diffuse = static_diffuse_sys.singlediode(*diode_parameters_diffuse)
+    dc_flatplate = static_flatplate_sys.singlediode(*diode_parameters_flatplate)
 
     # %% StaticHybridSystem
     static_hybrid_sys = cpvlib.StaticHybridSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module_cpv=None,
-        module_diffuse=None,
+        module_flatplate=None,
         module_parameters_cpv=mod_params_cpv,
-        module_parameters_diffuse=mod_params_diffuse,
+        module_parameters_flatplate=mod_params_flatplate,
         modules_per_string=1,
         strings_per_inverter=1,
         inverter=None,
@@ -311,7 +311,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     )
     
     # get_effective_irradiance
-    dii_effective_h, poa_diffuse_static_h = static_hybrid_sys.get_effective_irradiance(
+    dii_effective_h, poa_flatplate_static_h = static_hybrid_sys.get_effective_irradiance(
         solar_zenith,
         solar_azimuth,
         iam_param=0.7,
@@ -322,27 +322,27 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     )
     
     assert np.allclose(data['dii_effective'], dii_effective_h, atol=1) is True
-    assert np.allclose(data['poa_diffuse_static'],
-                       poa_diffuse_static_h, atol=1) is True
+    assert np.allclose(data['poa_flatplate_static'],
+                       poa_flatplate_static_h, atol=1) is True
     
     # pvsyst_celltemp
-    _, celltemp_diffuse_h = static_hybrid_sys.pvsyst_celltemp(
+    _, celltemp_flatplate_h = static_hybrid_sys.pvsyst_celltemp(
         dii=dii_effective_h,
-        poa_diffuse_static=poa_diffuse_static_h,
+        poa_flatplate_static=poa_flatplate_static_h,
         temp_air=data['temp_air'],
         wind_speed=data['wind_speed']
     )
     
-    assert np.allclose(celltemp_diffuse, celltemp_diffuse_h, atol=1) is True
-    # celltemp_diffuse.plot()
-    # celltemp_diffuse_h.plot()
+    assert np.allclose(celltemp_flatplate, celltemp_flatplate_h, atol=1) is True
+    # celltemp_flatplate.plot()
+    # celltemp_flatplate_h.plot()
     
     # calcparams_pvsyst
-    diode_parameters_cpv_h, diode_parameters_diffuse_h = static_hybrid_sys.calcparams_pvsyst(
+    diode_parameters_cpv_h, diode_parameters_flatplate_h = static_hybrid_sys.calcparams_pvsyst(
         dii=dii_effective_h,
-        poa_diffuse_static=poa_diffuse_static_h,
+        poa_flatplate_static=poa_flatplate_static_h,
         temp_cell_cpv=data['temp_cell_35'],
-        temp_cell_diffuse=celltemp_diffuse_h,
+        temp_cell_flatplate=celltemp_flatplate_h,
     )
     
     for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv_h):
@@ -352,19 +352,19 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     
     # singlediode
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
-    dc_cpv_h, dc_diffuse_h = static_hybrid_sys.singlediode(
-        diode_parameters_cpv_h, diode_parameters_diffuse_h)
+    dc_cpv_h, dc_flatplate_h = static_hybrid_sys.singlediode(
+        diode_parameters_cpv_h, diode_parameters_flatplate_h)
     
     for dc_param in dc_cpv:
         assert np.allclose(dc_cpv[dc_param], dc_cpv_h[dc_param], atol=1) is True
     
     for dc_param in dc_cpv:
-        assert np.allclose(dc_diffuse[dc_param].fillna(
-            0), dc_diffuse_h[dc_param].fillna(0), atol=100) is True
+        assert np.allclose(dc_flatplate[dc_param].fillna(
+            0), dc_flatplate_h[dc_param].fillna(0), atol=100) is True
     
-    # dc_diffuse[dc_param].plot()
-    # dc_diffuse_h[dc_param].plot()
-    # (dc_diffuse[dc_param] - dc_diffuse_h[dc_param]).plot()
+    # dc_flatplate[dc_param].plot()
+    # dc_flatplate_h[dc_param].plot()
+    # (dc_flatplate[dc_param] - dc_flatplate_h[dc_param]).plot()
     
     # uf_global
     airmass_absolute = location.get_airmass(data.index).airmass_absolute

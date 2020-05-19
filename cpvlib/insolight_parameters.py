@@ -46,7 +46,7 @@ mod_params_cpv.update(UF_parameters_cpv)
 
 # example (NO Insolight) PV module from:
 # https://pvpmc.sandia.gov/PVLIB_Matlab_Help/html/pvl_calcparams_PVsyst_help.html
-mod_params_diffuse = {
+mod_params_flatplate = {
     "gamma_ref": 1.1,
     "mu_gamma": -0.0003,
     "I_L_ref": 5.5,
