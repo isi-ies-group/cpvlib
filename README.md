@@ -6,8 +6,10 @@ The library is based on file `cpvlib.py`, that contains the following classes:
 * StaticFlatPlateSystem
 * StaticHybridSystem
 
-## Library installation
+## Library installation & usage
 `pip install git+https://github.com/isi-ies-group/cpvlib.git`
+`from cpvlib import cpvlib`
+`cpvlib.StaticHybridSystem(...)`
 
 ## Live Jupyter notebook demo without installation (on external server)
 * StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=cpvlib/StaticHybridSystem_tmy.ipynb)
