@@ -610,7 +610,7 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
 
     def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
-                       airmass=None, model='haydavies', **kwargs):
+                       airmass=None, model='haydavies', spillage=0, **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Dual axis
@@ -686,6 +686,8 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         else:
             poa_diffuse = gii - dii
 
+        poa_diffuse += dii * spillage
+        
         poa_flatplate_static = pd.concat(
             [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
@@ -826,9 +828,9 @@ class StaticHybridSystem():
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, iam_param, aoi_limit, dni=None,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, theta_ref, iam_ref, aoi_limit, dni=None,
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
-                                 airmass=None, model='haydavies', **kwargs):
+                                 airmass=None, model='haydavies', spillage=0, **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Dual axis
@@ -870,8 +872,9 @@ class StaticHybridSystem():
 
         aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
 
-        dii_effective = dii * \
-            self.static_cpv_sys.get_iam(aoi, iam_param=iam_param)
+        # dii_effective = dii * \
+            # self.static_cpv_sys.get_iam(aoi, iam_param=iam_param)
+        dii_effective = dii * pvlib.iam.interp(aoi, theta_ref, iam_ref, method='linear')
 
         poa_flatplate_static = self.static_flatplate_sys.get_irradiance(solar_zenith,
                                                                         solar_azimuth,
@@ -883,10 +886,11 @@ class StaticHybridSystem():
                                                                         dhi=dhi,
                                                                         dni=dni,
                                                                         model=model,
+                                                                        spillage=spillage,
                                                                         **kwargs
                                                                         )
 
-        poa_flatplate_static_effective = poa_flatplate_static # *self.static_flatplate_sys.get_iam(
+        poa_flatplate_static_effective = poa_flatplate_static# *self.static_flatplate_sys.get_iam(
                 #aoi=aoi, aoi_limit=aoi_limit, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
 
         return dii_effective, poa_flatplate_static_effective
