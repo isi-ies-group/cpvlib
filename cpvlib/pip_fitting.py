@@ -67,8 +67,8 @@ iam_ref = [1.000, 1.007, 0.998, 0.991, 0.971, 0.966, 0.938, 0.894, 0.830, 0.790,
 data['dii_effective'], data['poa_flatplate_static_effective'] = static_hybrid_sys.get_effective_irradiance(
     solar_zenith,
     solar_azimuth,
-    theta_ref,
-    iam_ref,
+    theta_ref=theta_ref,
+    iam_ref=iam_ref,
     # iam_param=0.7,
     aoi_limit=55,
     dii=None,
@@ -104,17 +104,19 @@ data['am'] = location.get_airmass(data.index).airmass_absolute
 
 uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(data['am'], data['temp_air'])
 
+
 #%% Plot Isc - CPV
-# data['isc35'].plot()
-# (dc_cpv['i_sc'] * uf_cpv).plot()
+fig, axs = plt.subplots(3, sharex=True)
+
+data['isc35'].plot(ax=axs[0])
+(dc_cpv['i_sc'] * uf_cpv).plot(ax=axs[0], label='isc35_model', legend=True)
 
 #%% Plot Isc - diffuse
-fig, axs = plt.subplots(2, sharex=True)
-data['iscSi'].plot(ax=axs[0], ylim=[0, 5]); dc_flatplate['i_sc'].plot(ax=axs[0], )
+data['iscSi'].plot(ax=axs[1], ylim=[0, 5], label='isc');dc_flatplate['i_sc'].plot(ax=axs[1], label='isc_flat_model', legend=True)
 # (aoi/20).plot(ylim=[0, 5])
 # (data['poa_flatplate_static_effective']/120).plot(ylim=[0, 5])
 #%% Plot Pmp - diffuse
 # data['pmpSi'].plot(ylim=[0, 5]); dc_flatplate['p_mp'].plot()
 
 #%% Irradiancias
-data[['dni', 'dii', 'dii_effective', 'gii', 'poa_flatplate_static_effective']].plot(ax=axs[1], legend=True)
+data[['dni', 'dii', 'dii_effective', 'gii', 'poa_flatplate_static_effective']].plot(ax=axs[2], legend=True)

@@ -828,7 +828,8 @@ class StaticHybridSystem():
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, theta_ref, iam_ref, aoi_limit, dni=None,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi_limit, iam_param=None, 
+                                 theta_ref=None, iam_ref=None, dni=None,
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                                  airmass=None, model='haydavies', spillage=0, **kwargs):
         """
@@ -871,10 +872,13 @@ class StaticHybridSystem():
                 solar_zenith, solar_azimuth, dni, **kwargs)
 
         aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-
-        # dii_effective = dii * \
-            # self.static_cpv_sys.get_iam(aoi, iam_param=iam_param)
-        dii_effective = dii * pvlib.iam.interp(aoi, theta_ref, iam_ref, method='linear')
+        
+        if iam_param is not None:
+            dii_effective = dii * self.static_cpv_sys.get_iam(aoi, iam_param=iam_param)
+        elif theta_ref is not None and iam_ref is not None:
+            dii_effective = dii * pvlib.iam.interp(aoi, theta_ref, iam_ref, method='linear')
+        else:
+            raise SystemError('IAM missing parameter')
 
         poa_flatplate_static = self.static_flatplate_sys.get_irradiance(solar_zenith,
                                                                         solar_azimuth,
