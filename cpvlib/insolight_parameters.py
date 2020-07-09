@@ -15,7 +15,7 @@ Created on Mon Apr 20 01:39:37 2020
 mod_params_cpv = {
     "gamma_ref": 5.524,
     "mu_gamma": 0.003,
-    "I_L_ref": 0.96,
+    "I_L_ref": 0.96*0.9,
     "I_o_ref": 1.7e-10,
     "R_sh_ref": 5226,
     "R_sh_0": 21000,
@@ -49,7 +49,7 @@ mod_params_cpv.update(UF_parameters_cpv)
 mod_params_flatplate = {
     "gamma_ref": 1.1,
     "mu_gamma": -0.0003,
-    "I_L_ref": 5.5,
+    "I_L_ref": 8,
     "I_o_ref": 2.2e-9,
     "R_sh_ref": 200,
     "R_sh_0": 8700,
@@ -60,6 +60,6 @@ mod_params_flatplate = {
     "irrad_ref": 1000,
     "temp_ref": 25,
     "cells_in_series": 4, # 60,
-    "eta_m": 0.1,  # pvsyst_celltemp() default value
-    "alpha_absorption": 0.9,  # pvsyst_celltemp() default value
+    "eta_m": 0.95,  # pvsyst_celltemp() default value
+    "alpha_absorption": 0.97,  # pvsyst_celltemp() default value
 }
