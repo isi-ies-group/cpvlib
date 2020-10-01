@@ -68,6 +68,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
     def __init__(self,
                  module=None, module_parameters=None,
+                 temperature_model_parameters=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
                  racking_model='freestanding',  # only for sapm model
@@ -82,6 +83,11 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             self.module_parameters = {}
         else:
             self.module_parameters = module_parameters
+
+        if temperature_model_parameters is None:
+            self.temperature_model_parameters = {}
+        else:
+            self.temperature_model_parameters = temperature_model_parameters
 
         self.modules_per_string = modules_per_string
         self.strings_per_inverter = strings_per_inverter
@@ -200,10 +206,11 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
         kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
                                self.module_parameters)
-
-        return pvlib.pvsystem.pvsyst_celltemp(poa_global, temp_air, wind_speed,
-                                              model_params=self.racking_model,
-                                              **kwargs)
+        kwargs.update(_build_kwargs(['u_c', 'u_v'],
+                                    self.temperature_model_parameters))
+        
+        return pvlib.temperature.pvsyst_cell(poa_global, temp_air, wind_speed,
+                                       **kwargs)
 
     def get_am_util_factor(self, airmass, am_thld=None, am_uf_m_low=None, am_uf_m_high=None):
         """
@@ -387,6 +394,7 @@ class StaticCPVSystem(CPVSystem):
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
                  module=None, module_parameters=None,
+                 temperature_model_parameters=None,
                  in_singleaxis_tracker=False,
                  parameters_tracker=None,
                  modules_per_string=1, strings_per_inverter=1,
@@ -404,7 +412,7 @@ class StaticCPVSystem(CPVSystem):
         else:
             self.parameters_tracker = parameters_tracker
 
-        super().__init__(module, module_parameters, modules_per_string,
+        super().__init__(module, module_parameters, temperature_model_parameters, modules_per_string,
                          strings_per_inverter, inverter, inverter_parameters,
                          racking_model, losses_parameters, name, **kwargs)
 
@@ -709,10 +717,11 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
 
         kwargs = _build_kwargs(['eta_m', 'alpha_absorption'],
                                self.module_parameters)
-
-        return pvlib.pvsystem.pvsyst_celltemp(poa_flatplate_static, temp_air, wind_speed,
-                                              model_params=self.racking_model,
-                                              **kwargs)
+        kwargs.update(_build_kwargs(['u_c', 'u_v'],
+                                    self.temperature_model_parameters))
+        
+        return pvlib.temperature.pvsyst_cell(poa_flatplate_static, temp_air, wind_speed,
+                                       **kwargs)
 
     def get_iam(self, aoi, aoi_limit, aoi_thld, m1, b1, m2, b2):
         if isinstance(aoi, (int, float)):
