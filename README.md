@@ -7,7 +7,7 @@ The library is based on file `cpvlib.py`, that contains the following classes:
 * StaticHybridSystem
 
 ## Library installation & usage
-`pip install git+https://github.com/isi-ies-group/cpvlib.git`
+`pip install --upgrade git+https://github.com/isi-ies-group/cpvlib.git`
 
 `from cpvlib import cpvlib`
 `cpvlib.StaticHybridSystem(...)`
