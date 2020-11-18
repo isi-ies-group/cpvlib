@@ -4,6 +4,8 @@ Created on Thu Jun 11 02:34:24 2020
 
 @author: Ruben
 """
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -119,14 +121,27 @@ dia_fin = '2019-06-02'#'2019-06-01'
 def rmse(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
 
-rmse_isc35 = rmse(data[dia_ini:dia_fin]['isc35'], dc_cpv[dia_ini:dia_fin]['i_sc'] * uf_cpv[dia_ini:dia_fin])
-rmse_iscSi = rmse(data[dia_ini:dia_fin]['iscSi'], dc_flatplate[dia_ini:dia_fin]['i_sc'])
+def mbe(predictions, targets):
+    return (predictions - targets).mean()
 
-r2_isc35 = np.corrcoef(data[dia_ini:dia_fin]['isc35'], dc_cpv[dia_ini:dia_fin]['i_sc'] * uf_cpv[dia_ini:dia_fin])[0,1]**2
-r2_iscSi = np.corrcoef(data[dia_ini:dia_fin]['iscSi'], dc_flatplate[dia_ini:dia_fin]['i_sc'])[0,1]**2
+observed = data[dia_ini:dia_fin]
+model_cpv = dc_cpv[dia_ini:dia_fin]
+model_si = dc_flatplate[dia_ini:dia_fin]
 
-print('r2_isc35:', r2_isc35, 'rmse_isc35', rmse_isc35)
-print('r2_iscSi:', r2_iscSi, 'rmse_iscSi:', rmse_iscSi)
+# rmse_isc35 = rmse(observed['isc35'], model_cpv['i_sc'] * uf_cpv[dia_ini:dia_fin])
+# rmse_iscSi = rmse(observed['iscSi'], model_si['i_sc'])
+
+rmse_pmp35 = rmse(observed['pmp35'], model_cpv['p_mp'] * uf_cpv[dia_ini:dia_fin])
+rmse_pmpSi = rmse(observed['pmpSi'], model_si['p_mp'])
+
+mbe_pmp35 = mbe(observed['pmp35'], model_cpv['p_mp'] * uf_cpv[dia_ini:dia_fin])
+mbe_pmpSi = mbe(observed['pmpSi'], model_si['p_mp'])
+
+# r2_isc35 = np.corrcoef(data[dia_ini:dia_fin]['isc35'], dc_cpv[dia_ini:dia_fin]['i_sc'] * uf_cpv[dia_ini:dia_fin])[0,1]**2
+# r2_iscSi = np.corrcoef(data[dia_ini:dia_fin]['iscSi'], dc_flatplate[dia_ini:dia_fin]['i_sc'])[0,1]**2
+
+print(f'rmse_pmp35: {rmse_pmp35:.2} W; mbe_pmp35: {mbe_pmp35:.2} W')
+print(f'rmse_pmpSi: {rmse_pmpSi:.2} W; mbe_pmpSi: {mbe_pmpSi:.2} W')
 
 #%% Plot Pmp
 from matplotlib.gridspec import GridSpec
@@ -183,7 +198,6 @@ ax4.axis('equal')
 ax4.set_xlabel('Measurement')
 ax4.set_ylabel('Model')
 
-from pathlib import Path
 fig.savefig(Path.home() / 'Desktop/PiP_fitting_pmp_2dias.png', dpi=600, bbox_inches='tight')
 
 #%% Plot Isc
@@ -244,3 +258,38 @@ plt.title('G(41) vs Zenith angle')
 
 ax2 = ax1.twinx()
 ax2.scatter(solar_zenith[dia], data[dia]['smr1'], c=data[dia].temp_air)
+
+#%% Pot nominal
+# https://doi.org/10.5281/zenodo.3346823
+# 0.1 m2, 572 (12 serie x 48 parallel) micro-cells + 4x 6"(15.24 cm) Si-cells in series
+# https://doi.org/10.5281/zenodo.3349781
+# 35 range IV: 0.7 A, 35 V @DNI 900 W/m2
+# Si range IV: 1.7 A, 2.2 V @GNI 950 W/m2 & DNI/GNI=0.7
+
+A = 0.1 # m2
+
+I_cpv = 900 # W/m2
+I_flat = 950 # W/m2
+
+temp_cell_35, temp_cell_flatplate = static_hybrid_sys.pvsyst_celltemp(
+    dii=I_cpv,
+    poa_flatplate_static=I_flat,
+    temp_air=20,
+    wind_speed=1
+)
+
+diode_parameters_cpv, diode_parameters_flatplate = static_hybrid_sys.calcparams_pvsyst(
+    dii=I_cpv,
+    poa_flatplate_static=I_flat,
+    temp_cell_cpv=temp_cell_35,
+    temp_cell_flatplate=temp_cell_flatplate,
+)
+    
+p_cpv, p_flat = static_hybrid_sys.singlediode(
+    diode_parameters_cpv, diode_parameters_flatplate)
+
+eff_cpv = p_cpv['p_mp'] / (I_cpv * A)
+eff_flat = p_flat['p_mp'] / (I_flat * A)
+
+print(f"{eff_cpv:0.1%}")
+print(f"{eff_flat:0.1%}")
