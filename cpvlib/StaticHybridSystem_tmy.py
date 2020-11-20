@@ -48,7 +48,7 @@ static_hybrid_sys = cpvlib.StaticHybridSystem(
 data['dii_effective'], data['poa_flatplate_static_effective'] = static_hybrid_sys.get_effective_irradiance(
     solar_zenith,
     solar_azimuth,
-    iam_param=0.7,
+    # iam_param=0.7,
     aoi_limit=55,
     dii=None,
     ghi=data['ghi'],

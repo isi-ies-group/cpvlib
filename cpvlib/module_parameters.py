@@ -28,6 +28,7 @@ mod_params_cpv = {
     "cells_in_series": 12,
     "eta_m": 0.32,
     "alpha_absorption": 0.9,
+    "b": 0.7,
 }
 
 UF_parameters_cpv = {
