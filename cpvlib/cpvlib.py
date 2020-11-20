@@ -735,7 +735,6 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         else:
             surface_tilt = self.surface_tilt
             surface_azimuth = self.surface_azimuth
-        print('dni get_irradiance', dni)
         if dii is None:
             dii = pvlib.irradiance.beam_component(
                 surface_tilt,
