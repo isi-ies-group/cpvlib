@@ -396,6 +396,7 @@ class StaticCPVSystem(CPVSystem):
                  module=None, module_parameters=None,
                  temperature_model_parameters=None,
                  in_singleaxis_tracker=False,
+                 b=None,
                  parameters_tracker=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
@@ -444,9 +445,16 @@ class StaticCPVSystem(CPVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
-    def get_iam(self, aoi, iam_param):
+    def get_iam(self, aoi):
+        
+        if 'b' in self.module_parameters:
+            iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
+        elif 'theta_ref' in self.module_parameters and 'iam_ref' in self.module_parameters:
+            iam = pvlib.iam.interp(aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
+        else:
+            raise SystemError('Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)')
 
-        return pvlib.iam.ashrae(aoi, b=iam_param)
+        return iam
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
         """
@@ -490,6 +498,50 @@ class StaticCPVSystem(CPVSystem):
             dni,
             **kwargs)
 
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
+        """
+        Uses the :py:func:`irradiance.get_total_irradiance` function to
+        calculate the plane of array irradiance components on a Dual axis
+        tracker.
+
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+        dni : float or Series
+            Direct Normal Irradiance
+        ghi : float or Series
+            Global horizontal irradiance
+        dhi : float or Series
+            Diffuse horizontal irradiance
+        dni_extra : None, float or Series, default None
+            Extraterrestrial direct normal irradiance
+        airmass : None, float or Series, default None
+            Airmass
+        model : String, default 'haydavies'
+            Irradiance model.
+
+        **kwargs
+            Passed to :func:`irradiance.total_irrad`.
+
+        Returns
+        -------
+        irradiation : DataFrame
+        """
+
+        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
+        #                        self.parameters_tracker)
+
+        dii = self.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
+
+        aoi = self.get_aoi(solar_zenith, solar_azimuth)
+        
+        dii_effective = dii * self.get_iam(aoi)
+
+        return dii_effective
+    
     # DEPRECATED - still used in some tests
     def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
@@ -616,6 +668,21 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
+    def get_iam(self, aoi, aoi_limit, aoi_thld, m1, b1, m2, b2):
+        if isinstance(aoi, (int, float)):
+            aoi_values = float(aoi)
+        else:
+            aoi_values = aoi.values
+
+        condlist = [aoi_values < aoi_limit,
+                    (aoi_limit <= aoi_values) & (aoi_values < aoi_thld)]
+        funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
+
+        if isinstance(aoi, (int, float)):
+            return np.piecewise(aoi, condlist, funclist)
+        else:
+            return pd.Series(np.piecewise(aoi_values, condlist, funclist), index=aoi.index)
+
     def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', spillage=0, **kwargs):
@@ -668,7 +735,7 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         else:
             surface_tilt = self.surface_tilt
             surface_azimuth = self.surface_azimuth
-
+        print('dni get_irradiance', dni)
         if dii is None:
             dii = pvlib.irradiance.beam_component(
                 surface_tilt,
@@ -700,7 +767,56 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
             [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
         return poa_flatplate_static
+    
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
+                       ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
+                       airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
+        """
+        Uses the :py:func:`irradiance.get_total_irradiance` function to
+        calculate the plane of array irradiance components on a Dual axis
+        tracker.
 
+        Parameters
+        ----------
+        solar_zenith : float or Series.
+            Solar zenith angle.
+        solar_azimuth : float or Series.
+            Solar azimuth angle.
+        dni : float or Series
+            Direct Normal Irradiance
+        ghi : float or Series
+            Global horizontal irradiance
+        dhi : float or Series
+            Diffuse horizontal irradiance
+        dni_extra : None, float or Series, default None
+            Extraterrestrial direct normal irradiance
+        airmass : None, float or Series, default None
+            Airmass
+        model : String, default 'haydavies'
+            Irradiance model.
+
+        **kwargs
+            Passed to :func:`irradiance.total_irrad`.
+
+        Returns
+        -------
+        irradiation : DataFrame
+        """
+
+        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
+        #                        self.parameters_tracker)
+
+        poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, aoi, aoi_limit, dni=dni,
+                       ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
+                       airmass=airmass, model=model, spillage=spillage, **kwargs)
+
+        aoi = self.get_aoi(solar_zenith, solar_azimuth)
+        
+        poa_flatplate_static_effective = poa_flatplate_static #* self.get_iam(
+                # aoi=aoi, aoi_limit=aoi_limit, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
+
+        return poa_flatplate_static_effective
+    
     def pvsyst_celltemp(self, poa_flatplate_static, temp_air, wind_speed=1.0):
         """
         Uses :py:func:`pvsystem.pvsyst_celltemp` to calculate module
@@ -722,21 +838,6 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         
         return pvlib.temperature.pvsyst_cell(poa_flatplate_static, temp_air, wind_speed,
                                        **kwargs)
-
-    def get_iam(self, aoi, aoi_limit, aoi_thld, m1, b1, m2, b2):
-        if isinstance(aoi, (int, float)):
-            aoi_values = float(aoi)
-        else:
-            aoi_values = aoi.values
-
-        condlist = [aoi_values < aoi_limit,
-                    (aoi_limit <= aoi_values) & (aoi_values < aoi_thld)]
-        funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
-
-        if isinstance(aoi, (int, float)):
-            return np.piecewise(aoi, condlist, funclist)
-        else:
-            return pd.Series(np.piecewise(aoi_values, condlist, funclist), index=aoi.index)
 
 
 class StaticHybridSystem():
@@ -837,8 +938,7 @@ class StaticHybridSystem():
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi_limit, iam_param=None, 
-                                 theta_ref=None, iam_ref=None, dni=None,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi_limit, dni,
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                                  airmass=None, model='haydavies', spillage=0, **kwargs):
         """
@@ -876,20 +976,11 @@ class StaticHybridSystem():
         # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
         #                        self.parameters_tracker)
 
-        if dii is None:
-            dii = self.static_cpv_sys.get_irradiance(
-                solar_zenith, solar_azimuth, dni, **kwargs)
+        dii_effective = self.static_cpv_sys.get_effective_irradiance(solar_zenith, solar_azimuth, dni)
 
-        aoi = self.static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-        
-        if iam_param is not None:
-            dii_effective = dii * self.static_cpv_sys.get_iam(aoi, iam_param=iam_param)
-        elif theta_ref is not None and iam_ref is not None:
-            dii_effective = dii * pvlib.iam.interp(aoi, theta_ref, iam_ref, method='linear')
-        else:
-            raise SystemError('IAM missing parameter')
+        aoi = self.static_flatplate_sys.get_aoi(solar_zenith, solar_azimuth)
 
-        poa_flatplate_static = self.static_flatplate_sys.get_irradiance(solar_zenith,
+        poa_flatplate_static_effective = self.static_flatplate_sys.get_effective_irradiance(solar_zenith,
                                                                         solar_azimuth,
                                                                         aoi=aoi,
                                                                         aoi_limit=aoi_limit,
@@ -902,9 +993,6 @@ class StaticHybridSystem():
                                                                         spillage=spillage,
                                                                         **kwargs
                                                                         )
-
-        poa_flatplate_static_effective = poa_flatplate_static# *self.static_flatplate_sys.get_iam(
-                #aoi=aoi, aoi_limit=aoi_limit, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
 
         return dii_effective, poa_flatplate_static_effective
 

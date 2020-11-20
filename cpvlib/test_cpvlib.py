@@ -28,6 +28,7 @@ mod_params_cpv = {
     "cells_in_parallel": 48,
     "eta_m": 0.32,
     "alpha_absorption": 0.9,
+    "b": 0.7,
     # "Area": 1.2688,
     # "Impo": 8.3,
     # "Vmpo": 43.9,
@@ -316,13 +317,13 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     dii_effective_h, poa_flatplate_static_h = static_hybrid_sys.get_effective_irradiance(
         solar_zenith,
         solar_azimuth,
-        iam_param=0.7,
         aoi_limit=55,
+        dni=data['dni'],
+        # iam_param=0.7, # ahora pasa por module_params
         dii=None,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
         gii=data['gii'],
-        dni=data['dni']
     )
-    
+
     assert np.allclose(data['dii_effective'], dii_effective_h, atol=1) is True
     assert np.allclose(data['poa_flatplate_static'],
                        poa_flatplate_static_h, atol=1) is True
