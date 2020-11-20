@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pvlib
 
 import cpvlib
-from insolight_parameters import mod_params_cpv, mod_params_flatplate
+from module_parameters import mod_params_cpv, mod_params_flatplate
 
 lat, lon = 40.4, -3.7
 
