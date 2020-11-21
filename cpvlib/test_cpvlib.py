@@ -258,6 +258,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         "cells_in_parallel": 48,
         "eta_m": 0.1,  # valor por defecto de pvsyst_celltemp()
         "alpha_absorption": 0.9,  # valor por defecto de pvsyst_celltemp()
+        "aoi_limit": 55,
         # "Area": 1.2688,
         # "Impo": 8.3, # parámetro de sapm()
         # "Vmpo": 43.9, # parámetro de sapm()
@@ -281,7 +282,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     data['poa_flatplate_static'] = static_flatplate_sys.get_irradiance(solar_zenith,
                                                                    solar_azimuth,
                                                                    aoi=data['aoi'],
-                                                                   aoi_limit=55,
+                                                                   # aoi_limit=55, # ahora pasa por module_params
                                                                    # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
                                                                    dii=data['dii'],
                                                                    gii=data['gii']
@@ -317,7 +318,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     dii_effective_h, poa_flatplate_static_h = static_hybrid_sys.get_effective_irradiance(
         solar_zenith,
         solar_azimuth,
-        aoi_limit=55,
+        # aoi_limit=55, # ahora pasa por module_params
         dni=data['dni'],
         # iam_param=0.7, # ahora pasa por module_params
         dii=None,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!

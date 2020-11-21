@@ -452,7 +452,7 @@ class StaticCPVSystem(CPVSystem):
         elif 'theta_ref' in self.module_parameters and 'iam_ref' in self.module_parameters:
             iam = pvlib.iam.interp(aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
         else:
-            raise SystemError('Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)')
+            raise AttributeError('Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)  in "module_parameters"')
 
         return iam
 
@@ -668,22 +668,27 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
-    def get_iam(self, aoi, aoi_limit, aoi_thld, m1, b1, m2, b2):
+    def get_iam(self, aoi, aoi_thld, m1, b1, m2, b2):
         if isinstance(aoi, (int, float)):
             aoi_values = float(aoi)
         else:
             aoi_values = aoi.values
 
+        if 'aoi_limit' in self.module_parameters:
+            aoi_limit = self.module_parameters['aoi_limit']
+        else:
+            raise AttributeError('Missing "aoi_limit" parameter in "module_parameters"')
+
         condlist = [aoi_values < aoi_limit,
                     (aoi_limit <= aoi_values) & (aoi_values < aoi_thld)]
         funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
-
+        
         if isinstance(aoi, (int, float)):
             return np.piecewise(aoi, condlist, funclist)
         else:
             return pd.Series(np.piecewise(aoi_values, condlist, funclist), index=aoi.index)
 
-    def get_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
+    def get_irradiance(self, solar_zenith, solar_azimuth, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', spillage=0, **kwargs):
         """
@@ -762,12 +767,19 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
 
         poa_diffuse += dii * spillage
         
+        aoi = self.get_aoi(solar_zenith, solar_azimuth)
+        
+        if 'aoi_limit' in self.module_parameters:
+            aoi_limit = self.module_parameters['aoi_limit']
+        else:
+            raise AttributeError('Missing "aoi_limit" parameter in "module_parameters"')       
+            
         poa_flatplate_static = pd.concat(
             [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
         return poa_flatplate_static
     
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi, aoi_limit, dni=None,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
         """
@@ -805,14 +817,12 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
         #                        self.parameters_tracker)
 
-        poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, aoi, aoi_limit, dni=dni,
+        poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, dni=dni,
                        ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
                        airmass=airmass, model=model, spillage=spillage, **kwargs)
 
-        aoi = self.get_aoi(solar_zenith, solar_azimuth)
-        
         poa_flatplate_static_effective = poa_flatplate_static #* self.get_iam(
-                # aoi=aoi, aoi_limit=aoi_limit, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
+                # aoi=aoi, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
 
         return poa_flatplate_static_effective
     
@@ -937,7 +947,7 @@ class StaticHybridSystem():
         return ('StaticHybridSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, aoi_limit, dni,
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni,
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                                  airmass=None, model='haydavies', spillage=0, **kwargs):
         """
@@ -982,7 +992,6 @@ class StaticHybridSystem():
         poa_flatplate_static_effective = self.static_flatplate_sys.get_effective_irradiance(solar_zenith,
                                                                         solar_azimuth,
                                                                         aoi=aoi,
-                                                                        aoi_limit=aoi_limit,
                                                                         dii=dii,
                                                                         gii=gii,
                                                                         ghi=ghi,

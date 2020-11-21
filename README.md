@@ -1,5 +1,7 @@
 # cpvlib ![Python package](https://github.com/isi-ies-group/cpvlib/workflows/Python%20package/badge.svg)
-The library is based on file `cpvlib.py`, that contains the following classes:
+The `cpvlib` library is a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python) that models CPV systems.
+
+It is built in file `cpvlib.py`, that contains the following classes:
 
 * CPVSystem
 * StaticCPVSystem
@@ -18,7 +20,8 @@ The library is based on file `cpvlib.py`, that contains the following classes:
 ## TO DO
 * [x] Fitting of the Insolight flat plate subsystem
 * [ ] Fitting the IAM of the Insolight flat plate subsystem
-* [ ] When the code stabilizes, put all the parameters in the class constructors
+* [x] When the code stabilizes, put all the parameters in the class constructors
+* [ ] Put 'spillage' parameter in class constructor
 * [ ] Homogenize piecewise functions for Utility Factors and IAM
 * [ ] Add more tests: flat plate part
 

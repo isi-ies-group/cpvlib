@@ -49,7 +49,7 @@ data['dii_effective'], data['poa_flatplate_static_effective'] = static_hybrid_sy
     solar_zenith,
     solar_azimuth,
     # iam_param=0.7,
-    aoi_limit=55,
+    # aoi_limit=55,
     dii=None,
     ghi=data['ghi'],
     dhi=data['dhi'],
