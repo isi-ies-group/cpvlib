@@ -15,7 +15,7 @@ It is built in file `cpvlib.py`, that contains the following classes:
 `cpvlib.StaticHybridSystem(...)`
 
 ## Live Jupyter notebook demo without installation (on external server)
-* StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?urlpath=lab/tree/cpvlib/StaticHybridSystem_tmy.ipynb)
+* StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=cpvlib/StaticHybridSystem_tmy.ipynb)
 
 ## TO DO
 * [x] Fitting of the Insolight flat plate subsystem
