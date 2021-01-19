@@ -72,7 +72,7 @@ def data():
     return data
 
 test_data = [
-    ('data/meteo2020_03_04.txt', 6377.265283689235),
+    ('data/meteo2020_03_04.txt', 6377.265283689234),
     ('data/meteo2020_03_14.txt', 8494.147901845981),
 ]
 
