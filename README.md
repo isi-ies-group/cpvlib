@@ -9,7 +9,7 @@ It is built in file `cpvlib.py`, that contains the following classes:
 * StaticHybridSystem
 
 ## Library installation & usage
-`pip install --upgrade git+https://github.com/isi-ies-group/cpvlib.git`
+`pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
 `from cpvlib import cpvlib`
 `cpvlib.StaticHybridSystem(...)`
