@@ -7,9 +7,10 @@ Created on Wed Mar 11 18:18:09 2020
 import pandas as pd
 import numpy as np
 import pytest
+from pathlib import Path
 
 import pvlib
-import cpvlib
+from cpvlib import cpvsystem
 
 mod_params_cpv = {
     "gamma_ref": 5.524,
@@ -53,8 +54,10 @@ mod_params_cpv.update(UF_parameters)
 
 @pytest.fixture
 def data():
-    
-    data = pd.read_csv('data/InsolightMay2019.csv', index_col='Date Time',
+
+    filename = Path(__file__).resolve().parent / 'data' /'InsolightMay2019.csv'
+
+    data = pd.read_csv(filename, index_col='Date Time',
                        parse_dates=True, encoding='latin1')
     data.index = data.index.tz_localize('Europe/Madrid')
     
@@ -79,15 +82,17 @@ test_data = [
 
 @pytest.mark.parametrize("dia, energy", test_data)
 def test_StaticCPVSystem_energy_daily(dia, energy):
+    
+    filename = Path(__file__).resolve().parent / dia
 
     meteo = pd.read_csv(
-        dia, sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
+        filename, sep='\t', index_col='yyyy/mm/dd hh:mm', parse_dates=True)
     meteo.index = meteo.index.tz_localize('Europe/Madrid')
 
     location = pvlib.location.Location(
         latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
 
-    static_cpv_sys = cpvlib.StaticCPVSystem(
+    static_cpv_sys = cpvsystem.StaticCPVSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
@@ -169,7 +174,7 @@ def test_StaticCPVSystem_energy_2019_05(data, energy=90509.11811618837):
     solar_zenith = location.get_solarposition(data.index).zenith
     solar_azimuth = location.get_solarposition(data.index).azimuth
        
-    static_cpv_sys = cpvlib.StaticCPVSystem(
+    static_cpv_sys = cpvsystem.StaticCPVSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
@@ -208,7 +213,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     solar_azimuth = location.get_solarposition(data.index).azimuth
        
     # %% StaticCPVSystem
-    static_cpv_sys = cpvlib.StaticCPVSystem(
+    static_cpv_sys = cpvsystem.StaticCPVSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
@@ -264,7 +269,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         # "Vmpo": 43.9, # parámetro de sapm()
     }
     
-    static_flatplate_sys = cpvlib.StaticFlatPlateSystem(
+    static_flatplate_sys = cpvsystem.StaticFlatPlateSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
@@ -298,7 +303,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     dc_flatplate = static_flatplate_sys.singlediode(*diode_parameters_flatplate)
 
     # %% StaticHybridSystem
-    static_hybrid_sys = cpvlib.StaticHybridSystem(
+    static_hybrid_sys = cpvsystem.StaticHybridSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module_cpv=None,

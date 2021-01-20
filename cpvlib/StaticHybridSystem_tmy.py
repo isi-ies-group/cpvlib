@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import pvlib
 
-import cpvlib
+from cpvlib import cpvsystem
 from module_parameters import mod_params_cpv, mod_params_flatplate
 
 lat, lon = 40.4, -3.7
@@ -28,7 +28,7 @@ solar_azimuth = location.get_solarposition(data.index).azimuth
 
 #%%
 # StaticHybridSystem
-static_hybrid_sys = cpvlib.StaticHybridSystem(
+static_hybrid_sys = cpvsystem.StaticHybridSystem(
     surface_tilt=30,
     surface_azimuth=180,
     module_cpv=None,
