@@ -1,7 +1,7 @@
 # cpvlib ![Python package](https://github.com/isi-ies-group/cpvlib/workflows/Python%20package/badge.svg)
 The `cpvlib` library is a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python) that models CPV systems.
 
-It is built in file `cpvlib.py`, that contains the following classes:
+It is built in file `cpvlib.py`, that contains the `cpvsystem` module with following classes:
 
 * CPVSystem
 * StaticCPVSystem
@@ -11,8 +11,8 @@ It is built in file `cpvlib.py`, that contains the following classes:
 ## Library installation & usage
 `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
-`from cpvlib import cpvlib`
-`cpvlib.StaticHybridSystem(...)`
+`from cpvlib import cpvsystem`
+`cpvsystem.StaticHybridSystem(...)`
 
 ## Live Jupyter notebook demo without installation (on external server)
 * StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=cpvlib/StaticHybridSystem_tmy.ipynb)
