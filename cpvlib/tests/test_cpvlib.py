@@ -381,3 +381,27 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'])
     
     assert np.allclose(uf_global, uf_global_h, atol=0.001) is True
+
+
+##############################
+
+def test_StaticCPVSystem_get_aoi():
+    static_cpvsystem = cpvsystem.StaticCPVSystem(surface_tilt=32, surface_azimuth=135)
+    aoi = static_cpvsystem.get_aoi(30, 225)
+    assert np.round(aoi, 4) == 42.7408
+
+def test_StaticCPVSystem_get_irradiance():
+    static_cpvsystem = cpvsystem.StaticCPVSystem(surface_tilt=32, surface_azimuth=135)
+    times = pd.date_range(start='20160101 1200-0700',
+                          end='20160101 1800-0700', freq='6H')
+    location = pvlib.location.Location(latitude=32, longitude=-111)
+    solar_position = location.get_solarposition(times)
+    dni = pd.Series([900, 0], index=times)
+
+    irradiance = static_cpvsystem.get_irradiance(solar_position['apparent_zenith'],
+                                       solar_position['azimuth'],
+                                       dni)
+
+    expected = pd.Series(data=np.array([745.861417,  0.0]), index=times)
+
+    pd.testing.assert_series_equal(irradiance, expected, rtol=0.0001)
