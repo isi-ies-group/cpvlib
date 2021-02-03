@@ -2,6 +2,7 @@
 The ``cpvsystem`` module contains functions for modeling the output and
 performance of CPV modules.
 """
+
 import numpy as np
 import pandas as pd
 
@@ -15,22 +16,33 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
     functions. This class describes the collection and interactions of CPV
     system components installed on a Dual Axis Tracker.
 
-    The class supports basic system topologies consisting of:
-
-        * `N` total modules arranged in series
-          (`modules_per_string=N`, `strings_per_inverter=1`).
-        * `M` total modules arranged in parallel
-          (`modules_per_string=1`, `strings_per_inverter=M`).
-        * `NxM` total modules arranged in `M` strings of `N` modules each
-          (`modules_per_string=N`, `strings_per_inverter=M`).
-
-    The attributes should generally be things that don't change about
-    the system, such the type of module and the inverter. The instance
-    methods accept arguments for things that do change, such as
-    irradiance and temperature.
+    It inheritates from pvlib.pvsystem.PVSystem, modifying those methods that
+    are specific for a CPV system following the PVSyst implementation.
+    Besides, specific CPV utilization factors are added as defined in 
+    https://doi.org/10.1063/1.3509185 as new methods and new specific CPV parameters
+    are passes to these methods.
+    
 
     Parameters
     ----------
+    surface_tilt: float or array-like, default 0
+        Surface tilt angles in decimal degrees.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
+
+    surface_azimuth: float or array-like, default 180
+        Azimuth angle of the module surface.
+        North=0, East=90, South=180, West=270.
+
+    albedo : None or float, default None
+        The ground albedo. If ``None``, will attempt to use
+        ``surface_type`` and ``irradiance.SURFACE_ALBEDOS``
+        to lookup albedo.
+
+    surface_type : None or string, default None
+        The ground surface type. See ``irradiance.SURFACE_ALBEDOS``
+        for valid values.
+
     module : None or string, default None
         The model name of the modules.
         May be used to look up the module_parameters dictionary
@@ -38,6 +50,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
     module_parameters : None, dict or Series, default None
         Module parameters as defined by the SAPM, CEC, or other.
+        
 
     modules_per_string: int or float, default 1
         See system topology discussion above.
@@ -77,8 +90,8 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
         self.name = name
 
-        # could tie these together with @property
         self.module = module
+        
         if module_parameters is None:
             self.module_parameters = {}
         else:
@@ -238,14 +251,15 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             the utilization factor for airmass.
         """
         if am_thld is not None:
-            return get_simple_util_factor(x=airmass, thld=am_thld,
+            am_uf = get_simple_util_factor(x=airmass, thld=am_thld,
                                           m_low=am_uf_m_low,
                                           m_high=am_uf_m_high)
         else:
-            return get_simple_util_factor(x=airmass, thld=self.module_parameters['am_thld'],
+            am_uf = get_simple_util_factor(x=airmass, thld=self.module_parameters['am_thld'],
                                           m_low=self.module_parameters['am_uf_m_low'] /
                                           self.module_parameters['IscDNI_top'],
                                           m_high=self.module_parameters['am_uf_m_high']/self.module_parameters['IscDNI_top'])
+        return am_uf
 
     def get_tempair_util_factor(self, temp_air, ta_thld=None, ta_uf_m_low=None,
                                 ta_uf_m_high=None):
@@ -274,14 +288,15 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             the utilization factor for ambient temperature.
         """
         if ta_thld is not None:
-            return get_simple_util_factor(x=temp_air, thld=ta_thld,
+            ta_uf = get_simple_util_factor(x=temp_air, thld=ta_thld,
                                           m_low=ta_uf_m_low,
                                           m_high=ta_uf_m_high)
         else:
-            return get_simple_util_factor(x=temp_air, thld=self.module_parameters['ta_thld'],
+            ta_uf = get_simple_util_factor(x=temp_air, thld=self.module_parameters['ta_thld'],
                                           m_low=self.module_parameters['ta_uf_m_low'] /
                                           self.module_parameters['IscDNI_top'],
                                           m_high=self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
+        return ta_uf
 
     def get_dni_util_factor(self, dni, dni_thld, dni_uf_m_low, dni_uf_m_high):
         """
@@ -309,9 +324,10 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             the utilization factor for DNI.
         """
 
-        return get_simple_util_factor(x=dni, thld=dni_thld,
+        dni_uf = get_simple_util_factor(x=dni, thld=dni_thld,
                                       m_low=dni_uf_m_low,
                                       m_high=dni_uf_m_high)
+        return dni_uf
 
     def get_global_utilization_factor(self, airmass_absolute, temp_air):
 
