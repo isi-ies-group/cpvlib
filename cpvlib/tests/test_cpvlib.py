@@ -52,15 +52,17 @@ UF_parameters = {
 
 mod_params_cpv.update(UF_parameters)
 
+
 @pytest.fixture
 def data():
 
-    filename = Path(__file__).resolve().parent / 'data' /'InsolightMay2019.csv'
+    filename = Path(__file__).resolve().parent / \
+        'data' / 'InsolightMay2019.csv'
 
     data = pd.read_csv(filename, index_col='Date Time',
                        parse_dates=True, encoding='latin1')
     data.index = data.index.tz_localize('Europe/Madrid')
-    
+
     data = data.rename(columns={
         'DNI (W/m2)': 'dni',
         'DII (W/m2)': 'dii',
@@ -68,11 +70,12 @@ def data():
         'T_Amb (°C)': 'temp_air',
         'Wind Speed (m/s)': 'wind_speed',
         'T_Backplane (°C)': 'temp_cell_35',
-        'ISC_measured_IIIV (A)':'isc35',
-        'ISC_measured_Si (A)':'iscSi',
+        'ISC_measured_IIIV (A)': 'isc35',
+        'ISC_measured_Si (A)': 'iscSi',
     })
-    
+
     return data
+
 
 test_data = [
     ('data/meteo2020_03_04.txt', 6377.265283689234),
@@ -82,7 +85,7 @@ test_data = [
 
 @pytest.mark.parametrize("dia, energy", test_data)
 def test_StaticCPVSystem_energy_daily(dia, energy):
-    
+
     filename = Path(__file__).resolve().parent / dia
 
     meteo = pd.read_csv(
@@ -97,7 +100,8 @@ def test_StaticCPVSystem_energy_daily(dia, energy):
         surface_azimuth=180,
         module=None,
         module_parameters=mod_params_cpv,
-        temperature_model_parameters=pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['pvsyst']['insulated'],
+        temperature_model_parameters=pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS[
+            'pvsyst']['insulated'],
         modules_per_string=1,
         strings_per_inverter=1,
         inverter=None,
@@ -166,14 +170,15 @@ def test_StaticCPVSystem_energy_daily(dia, energy):
 
     assert (dc['p_mp'] * uf_global).sum() == energy
 
+
 def test_StaticCPVSystem_energy_2019_05(data, energy=90509.11811618837):
-    
+
     location = pvlib.location.Location(
         latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
-    
+
     solar_zenith = location.get_solarposition(data.index).zenith
     solar_azimuth = location.get_solarposition(data.index).azimuth
-       
+
     static_cpv_sys = cpvsystem.StaticCPVSystem(
         surface_tilt=30,
         surface_azimuth=180,
@@ -187,38 +192,41 @@ def test_StaticCPVSystem_energy_2019_05(data, energy=90509.11811618837):
         losses_parameters=None,
         name=None,
     )
-    
+
     data['aoi'] = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-    
+
     data['dii_effective'] = data['dii'] * pvlib.iam.ashrae(data['aoi'], b=0.7)
-    
+
     diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
         data['dii_effective'], data['temp_cell_35'])
-    
+
     dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
-    
+
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
-    
+
     # OJO uf_global NO incluye uf_aoi!!
-    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'])
-    
+    uf_global = static_cpv_sys.get_global_utilization_factor(
+        airmass_absolute, data['temp_air'])
+
     assert (dc_cpv['p_mp'] * uf_global).sum() == energy
-    
+
+
 def test_StaticHybridSystem_composicion_2019_05(data):
-   
+
     location = pvlib.location.Location(
         latitude=40.4, longitude=-3.7, altitude=695, tz='Europe/Madrid')
-    
+
     solar_zenith = location.get_solarposition(data.index).zenith
     solar_azimuth = location.get_solarposition(data.index).azimuth
-       
+
     # %% StaticCPVSystem
     static_cpv_sys = cpvsystem.StaticCPVSystem(
         surface_tilt=30,
         surface_azimuth=180,
         module=None,
         module_parameters=mod_params_cpv,
-        temperature_model_parameters=pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['pvsyst']['insulated'],
+        temperature_model_parameters=pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS[
+            'pvsyst']['insulated'],
         modules_per_string=1,
         strings_per_inverter=1,
         inverter=None,
@@ -227,22 +235,22 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         losses_parameters=None,
         name=None,
     )
-    
+
     data['aoi'] = static_cpv_sys.get_aoi(solar_zenith, solar_azimuth)
-    
+
     data['dii_effective'] = data['dii'] * pvlib.iam.ashrae(data['aoi'], b=0.7)
-    
+
     diode_parameters_cpv = static_cpv_sys.calcparams_pvsyst(
         data['dii_effective'], data['temp_cell_35'])
-    
-    dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
-    
-    airmass_absolute = location.get_airmass(data.index).airmass_absolute
-    
-    # OJO uf_global NO incluye uf_aoi!!
-    uf_global = static_cpv_sys.get_global_utilization_factor(airmass_absolute, data['temp_air'])
 
-    
+    dc_cpv = static_cpv_sys.singlediode(*diode_parameters_cpv)
+
+    airmass_absolute = location.get_airmass(data.index).airmass_absolute
+
+    # OJO uf_global NO incluye uf_aoi!!
+    uf_global = static_cpv_sys.get_global_utilization_factor(
+        airmass_absolute, data['temp_air'])
+
     # %% StaticFlatPlateSystem
     # toma valores por defecto de mod_params_flatplate para método calcparams_pvsyst() en:
     # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
@@ -268,7 +276,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         # "Impo": 8.3, # parámetro de sapm()
         # "Vmpo": 43.9, # parámetro de sapm()
     }
-    
+
     static_flatplate_sys = cpvsystem.StaticFlatPlateSystem(
         surface_tilt=30,
         surface_azimuth=180,
@@ -282,25 +290,26 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         losses_parameters=None,
         name=None,
     )
-    
+
     # el aoi de difusa es el mismo que cpv
     data['poa_flatplate_static'] = static_flatplate_sys.get_irradiance(solar_zenith,
-                                                                   solar_azimuth,
-                                                                   aoi=data['aoi'],
-                                                                   # aoi_limit=55, # ahora pasa por module_params
-                                                                   # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
-                                                                   dii=data['dii'],
-                                                                   gii=data['gii']
-                                                                   )
-    
+                                                                       solar_azimuth,
+                                                                       aoi=data['aoi'],
+                                                                       # aoi_limit=55, # ahora pasa por module_params
+                                                                       # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
+                                                                       dii=data['dii'],
+                                                                       gii=data['gii']
+                                                                       )
+
     celltemp_flatplate = static_flatplate_sys.pvsyst_celltemp(
         data['poa_flatplate_static'], data['temp_air'], data['wind_speed']
     )
-    
+
     diode_parameters_flatplate = static_flatplate_sys.calcparams_pvsyst(
         data['poa_flatplate_static'], celltemp_flatplate)
-    
-    dc_flatplate = static_flatplate_sys.singlediode(*diode_parameters_flatplate)
+
+    dc_flatplate = static_flatplate_sys.singlediode(
+        *diode_parameters_flatplate)
 
     # %% StaticHybridSystem
     static_hybrid_sys = cpvsystem.StaticHybridSystem(
@@ -318,7 +327,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         losses_parameters=None,
         name=None,
     )
-    
+
     # get_effective_irradiance
     dii_effective_h, poa_flatplate_static_h = static_hybrid_sys.get_effective_irradiance(
         solar_zenith,
@@ -333,7 +342,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     assert np.allclose(data['dii_effective'], dii_effective_h, atol=1) is True
     assert np.allclose(data['poa_flatplate_static'],
                        poa_flatplate_static_h, atol=1) is True
-    
+
     # pvsyst_celltemp
     _, celltemp_flatplate_h = static_hybrid_sys.pvsyst_celltemp(
         dii=dii_effective_h,
@@ -341,11 +350,12 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         temp_air=data['temp_air'],
         wind_speed=data['wind_speed']
     )
-    
-    assert np.allclose(celltemp_flatplate, celltemp_flatplate_h, atol=1) is True
+
+    assert np.allclose(celltemp_flatplate,
+                       celltemp_flatplate_h, atol=1) is True
     # celltemp_flatplate.plot()
     # celltemp_flatplate_h.plot()
-    
+
     # calcparams_pvsyst
     diode_parameters_cpv_h, diode_parameters_flatplate_h = static_hybrid_sys.calcparams_pvsyst(
         dii=dii_effective_h,
@@ -353,45 +363,76 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         temp_cell_cpv=data['temp_cell_35'],
         temp_cell_flatplate=celltemp_flatplate_h,
     )
-    
+
     for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv_h):
         assert np.allclose(diode_param, diode_param_h, atol=10) is True
-    
+
     # (diode_param - diode_param_h).plot()
-    
+
     # singlediode
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
     dc_cpv_h, dc_flatplate_h = static_hybrid_sys.singlediode(
         diode_parameters_cpv_h, diode_parameters_flatplate_h)
-    
+
     for dc_param in dc_cpv:
-        assert np.allclose(dc_cpv[dc_param], dc_cpv_h[dc_param], atol=1) is True
-    
+        assert np.allclose(
+            dc_cpv[dc_param], dc_cpv_h[dc_param], atol=1) is True
+
     for dc_param in dc_cpv:
         assert np.allclose(dc_flatplate[dc_param].fillna(
             0), dc_flatplate_h[dc_param].fillna(0), atol=100) is True
-    
+
     # dc_flatplate[dc_param].plot()
     # dc_flatplate_h[dc_param].plot()
     # (dc_flatplate[dc_param] - dc_flatplate_h[dc_param]).plot()
-    
+
     # uf_global
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
-    
-    uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(airmass_absolute, data['temp_air'])
-    
+
+    uf_global_h = static_hybrid_sys.get_global_utilization_factor_cpv(
+        airmass_absolute, data['temp_air'])
+
     assert np.allclose(uf_global, uf_global_h, atol=0.001) is True
 
 
 ##############################
 
+def test_CPVSystem_get_irradiance():
+    cpv_system = cpvsystem.CPVSystem()
+    times = pd.date_range(start='20160101 1200-0700',
+                          end='20160101 1800-0700', freq='6H')
+    location = pvlib.location.Location(latitude=32, longitude=-111)
+    solar_position = location.get_solarposition(times)
+    irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
+                          index=times)
+
+    irradiance = cpv_system.get_irradiance(solar_position['apparent_zenith'],
+                                           solar_position['azimuth'],
+                                           irrads['dni'],
+                                           irrads['ghi'],
+                                           irrads['dhi'])
+
+    expected = pd.DataFrame(data=np.array(
+        [[992.902225, 841.741664, 151.160560, 137.869177, 13.291383],
+         [0.,   -0.,    0.,    0.,    0.]]),
+        columns=['poa_global', 'poa_direct',
+                 'poa_diffuse', 'poa_sky_diffuse',
+                 'poa_ground_diffuse'],
+        index=times)
+
+    pd.testing.assert_frame_equal(irradiance, expected, rtol=0.0001)
+
+
 def test_StaticCPVSystem_get_aoi():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(surface_tilt=32, surface_azimuth=135)
+    static_cpvsystem = cpvsystem.StaticCPVSystem(
+        surface_tilt=32, surface_azimuth=135)
     aoi = static_cpvsystem.get_aoi(30, 225)
     assert np.round(aoi, 4) == 42.7408
 
+
 def test_StaticCPVSystem_get_irradiance():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(surface_tilt=32, surface_azimuth=135)
+    static_cpvsystem = cpvsystem.StaticCPVSystem(
+        surface_tilt=32, surface_azimuth=135)
     times = pd.date_range(start='20160101 1200-0700',
                           end='20160101 1800-0700', freq='6H')
     location = pvlib.location.Location(latitude=32, longitude=-111)
@@ -399,8 +440,8 @@ def test_StaticCPVSystem_get_irradiance():
     dni = pd.Series([900, 0], index=times)
 
     irradiance = static_cpvsystem.get_irradiance(solar_position['apparent_zenith'],
-                                       solar_position['azimuth'],
-                                       dni)
+                                                 solar_position['azimuth'],
+                                                 dni)
 
     expected = pd.Series(data=np.array([745.861417,  0.0]), index=times)
 
