@@ -25,14 +25,6 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
     Parameters
     ----------
-    surface_tilt: float or array-like, default 0
-        Surface tilt angles in decimal degrees.
-        The tilt angle is defined as degrees from horizontal
-        (e.g. surface facing up = 0, surface facing horizon = 90)
-
-    surface_azimuth: float or array-like, default 180
-        Azimuth angle of the module surface.
-        North=0, East=90, South=180, West=270.
 
     albedo : None or float, default None
         The ground albedo. If ``None``, will attempt to use
@@ -130,24 +122,6 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         return ('CPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
 
-    def get_aoi(self, solar_zenith, solar_azimuth):
-        """Get the angle of incidence on the system.
-
-        Parameters
-        ----------
-        solar_zenith : float or Series.
-            Solar zenith angle.
-        solar_azimuth : float or Series.
-            Solar azimuth angle.
-
-        Returns
-        -------
-        aoi : Series
-            The angle of incidence
-        """
-        aoi = pvlib.irradiance.aoi(self.surface_tilt, self.surface_azimuth,
-                                   solar_zenith, solar_azimuth)
-        return aoi
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
                        dni_extra=None, airmass=None, model='haydavies',
