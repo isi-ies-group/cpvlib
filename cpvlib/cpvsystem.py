@@ -1111,7 +1111,7 @@ def get_simple_util_factor(x, thld, m_low, m_high):
     single_uf : numeric
         utilization factor for the x variable.
     """
-    simple_uf = pd.Series()
+    simple_uf = pd.Series(dtype='float64')
 
     if isinstance(x, (int, float)):
         simple_uf = 1 + (x - thld) * m_low
