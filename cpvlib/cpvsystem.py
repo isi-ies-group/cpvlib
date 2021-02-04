@@ -272,6 +272,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                                           m_high=self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
         return ta_uf
 
+    # NO SE USA!!! REVISAR!
     def get_dni_util_factor(self, dni, dni_thld, dni_uf_m_low, dni_uf_m_high):
         """
         Retrieves the utilization factor for DNI.
@@ -435,11 +436,11 @@ class StaticCPVSystem(CPVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
-    def get_iam(self, aoi):
+    def get_iam(self, aoi, iam_model):
         
-        if 'b' in self.module_parameters:
+        if iam_model == 'ashrae':
             iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
-        elif 'theta_ref' in self.module_parameters and 'iam_ref' in self.module_parameters:
+        elif iam_model == 'interp':
             iam = pvlib.iam.interp(aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
         else:
             raise AttributeError('Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)  in "module_parameters"')
@@ -528,7 +529,10 @@ class StaticCPVSystem(CPVSystem):
 
         aoi = self.get_aoi(solar_zenith, solar_azimuth)
         
-        dii_effective = dii * self.get_iam(aoi)
+        if 'iam_model' not in self.module_parameters:
+            self.module_parameters['iam_model'] = 'ashrae'
+        
+        dii_effective = dii * self.get_iam(aoi, iam_model=self.module_parameters['iam_model'])
 
         return dii_effective
     
