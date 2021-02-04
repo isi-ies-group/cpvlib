@@ -662,6 +662,7 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
+    # TO BE VALIDATED
     def get_iam(self, aoi, aoi_thld, m1, b1, m2, b2):
         if isinstance(aoi, (int, float)):
             aoi_values = float(aoi)
