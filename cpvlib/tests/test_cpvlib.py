@@ -6,8 +6,8 @@ Created on Wed Mar 11 18:18:09 2020
 """
 import pandas as pd
 import numpy as np
-import pytest
 from pathlib import Path
+import pytest
 
 import pvlib
 from cpvlib import cpvsystem
@@ -53,29 +53,29 @@ UF_parameters = {
 
 mod_params_cpv.update(UF_parameters)
 
-# toma valores por defecto de mod_params_flatplate para método calcparams_pvsyst() en:
+# takes default values from mod_params_flatplate for calcparams_pvsyst() method in:
 # https://github.com/pvlib/pvlib-python/blob/e526b55365ab0f4c473b40b24ae8a82c7e42f892/pvlib/tests/conftest.py#L171-L191
 mod_params_flatplate = {
-    "gamma_ref": 1.05,  # valor de test de calcparams_pvsyst()
-    "mu_gamma": 0.001,  # valor de test de calcparams_pvsyst()
-    "I_L_ref": 6.0,  # valor de test de calcparams_pvsyst()
-    "I_o_ref": 5e-9,  # valor de test de calcparams_pvsyst()
-    "R_sh_ref": 300,  # valor de test de calcparams_pvsyst()
-    "R_sh_0": 1000,  # valor de test de calcparams_pvsyst()
-    "R_sh_exp": 5.5,  # valor de test de calcparams_pvsyst()
-    "R_s": 0.5,  # valor de test de calcparams_pvsyst()
-    "alpha_sc": 0.001,  # valor de test de calcparams_pvsyst()
-    "EgRef": 1.121,  # valor de test de calcparams_pvsyst()
+    "gamma_ref": 1.05,  # test value of calcparams_pvsyst()
+    "mu_gamma": 0.001,  # test value of calcparams_pvsyst()
+    "I_L_ref": 6.0,  # test value of calcparams_pvsyst()
+    "I_o_ref": 5e-9,  # test value of calcparams_pvsyst()
+    "R_sh_ref": 300,  # test value of calcparams_pvsyst()
+    "R_sh_0": 1000,  # test value of calcparams_pvsyst()
+    "R_sh_exp": 5.5,  # test value of calcparams_pvsyst()
+    "R_s": 0.5,  # test value of calcparams_pvsyst()
+    "alpha_sc": 0.001,  # test value of calcparams_pvsyst()
+    "EgRef": 1.121,  # test value of calcparams_pvsyst()
     "irrad_ref": 1000,  # calcparams_pvsyst()
     "temp_ref": 25,  # calcparams_pvsyst()
     "cells_in_series": 12,  # calcparams_pvsyst()
     "cells_in_parallel": 48,
-    "eta_m": 0.1,  # valor por defecto de pvsyst_celltemp()
-    "alpha_absorption": 0.9,  # valor por defecto de pvsyst_celltemp()
+    "eta_m": 0.1,  # defult value of pvsyst_celltemp()
+    "alpha_absorption": 0.9,  # defult value of pvsyst_celltemp()
     "aoi_limit": 55,
     # "Area": 1.2688,
-    # "Impo": 8.3, # parámetro de sapm()
-    # "Vmpo": 43.9, # parámetro de sapm()
+    # "Impo": 8.3, # parameter of sapm()
+    # "Vmpo": 43.9, # parameter of sapm()
 }
 
 
@@ -156,38 +156,24 @@ def test_StaticCPVSystem_energy_daily(dia, energy):
 
     uf_am = static_cpv_sys.get_am_util_factor(
         airmass=location.get_airmass(meteo.index).airmass_absolute,
-        # am_thld=mod_params_cpv['am_thld'],
-        # am_uf_m_low=mod_params_cpv['am_uf_m_low']/mod_params_cpv['IscDNI_top'],
-        # am_uf_m_high=mod_params_cpv['am_uf_m_high']/mod_params_cpv['IscDNI_top']
     )
 
     uf_ta = static_cpv_sys.get_tempair_util_factor(
         temp_air=meteo['Temp. Ai 1'],
-        # ta_thld=mod_params_cpv['ta_thld'] ,
-        # ta_uf_m_low=mod_params_cpv['ta_uf_m_low']/mod_params_cpv['IscDNI_top'],
-        # ta_uf_m_high=mod_params_cpv['ta_uf_m_high']/mod_params_cpv['IscDNI_top']
     )
 
     uf_am_at = uf_am * mod_params_cpv['weight_am'] + \
         uf_ta * mod_params_cpv['weight_temp']
-
-    # ax=meteo['dii'].plot();meteo['Bn'].plot(ax=ax)
 
     uf_aoi = static_cpv_sys.get_aoi_util_factor(
         aoi=static_cpv_sys.get_aoi(
             solar_zenith=location.get_solarposition(meteo.index).zenith,
             solar_azimuth=location.get_solarposition(meteo.index).azimuth,
         ),
-        # aoi_thld=mod_params_cpv['aoi_thld'],
-        # aoi_uf_m_low=mod_params_cpv['aoi_uf_m_low']/mod_params_cpv['IscDNI_top'],
-        # aoi_uf_m_high=mod_params_cpv['aoi_uf_m_high']/mod_params_cpv['IscDNI_top']
     )
 
     uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
         aoi=0,
-        # aoi_thld=mod_params_cpv['aoi_thld'],
-        # aoi_uf_m_low=mod_params_cpv['aoi_uf_m_low']/mod_params_cpv['IscDNI_top'],
-        # aoi_uf_m_high=mod_params_cpv['aoi_uf_m_high']/mod_params_cpv['IscDNI_top']
     )
 
     uf_aoi_norm = uf_aoi / uf_aoi_ast
@@ -333,9 +319,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     dii_effective_h, poa_flatplate_static_h = static_hybrid_sys.get_effective_irradiance(
         solar_zenith,
         solar_azimuth,
-        # aoi_limit=55, # ahora pasa por module_params
         dni=data['dni'],
-        # iam_param=0.7, # ahora pasa por module_params
         dii=None,  # dii_effective no aplica, ya que si no el calculo de difusa es artificialmente alto!
         gii=data['gii'],
     )
@@ -354,8 +338,6 @@ def test_StaticHybridSystem_composicion_2019_05(data):
 
     assert np.allclose(celltemp_flatplate,
                        celltemp_flatplate_h, atol=1) is True
-    # celltemp_flatplate.plot()
-    # celltemp_flatplate_h.plot()
 
     # calcparams_pvsyst
     diode_parameters_cpv_h, diode_parameters_flatplate_h = static_hybrid_sys.calcparams_pvsyst(
@@ -367,8 +349,6 @@ def test_StaticHybridSystem_composicion_2019_05(data):
 
     for diode_param, diode_param_h in zip(diode_parameters_cpv, diode_parameters_cpv_h):
         assert np.allclose(diode_param, diode_param_h, atol=10) is True
-
-    # (diode_param - diode_param_h).plot()
 
     # singlediode
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
@@ -383,10 +363,6 @@ def test_StaticHybridSystem_composicion_2019_05(data):
         assert np.allclose(dc_flatplate[dc_param].fillna(
             0), dc_flatplate_h[dc_param].fillna(0), atol=100) is True
 
-    # dc_flatplate[dc_param].plot()
-    # dc_flatplate_h[dc_param].plot()
-    # (dc_flatplate[dc_param] - dc_flatplate_h[dc_param]).plot()
-
     # uf_global
     airmass_absolute = location.get_airmass(data.index).airmass_absolute
 
@@ -395,234 +371,3 @@ def test_StaticHybridSystem_composicion_2019_05(data):
 
     assert np.allclose(uf_global, uf_global_h, atol=0.001) is True
 
-
-##############################
-
-def test_CPVSystem_get_irradiance():
-    cpv_system = cpvsystem.CPVSystem()
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
-                          index=times)
-
-    irradiance = cpv_system.get_irradiance(solar_position['apparent_zenith'],
-                                           solar_position['azimuth'],
-                                           irrads['dni'],
-                                           irrads['ghi'],
-                                           irrads['dhi'])
-
-    expected = pd.DataFrame(data=np.array(
-        [[992.902225, 841.741664, 151.160560, 137.869177, 13.291383],
-         [0.,   -0.,    0.,    0.,    0.]]),
-        columns=['poa_global', 'poa_direct',
-                 'poa_diffuse', 'poa_sky_diffuse',
-                 'poa_ground_diffuse'],
-        index=times)
-
-    pd.testing.assert_frame_equal(irradiance, expected, rtol=0.0001)
-
-
-def test_CPVSystem_pvsyst_celltemp(mocker):
-    parameter_set = 'freestanding'
-    temp_model_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['pvsyst'][
-        parameter_set]
-    alpha_absorption = 0.85
-    eta_m = 0.17
-    module_parameters = {'alpha_absorption': alpha_absorption, 'eta_m': eta_m}
-    cpv_system = cpvsystem.CPVSystem(module_parameters=module_parameters,
-                                     temperature_model_parameters=temp_model_params)
-    irrad = 800
-    temp = 45
-    wind = 0.5
-
-    mocker.spy(pvlib.temperature, 'pvsyst_cell')
-    out = cpv_system.pvsyst_celltemp(irrad, temp, wind_speed=wind)
-
-    pvlib.temperature.pvsyst_cell.assert_called_once_with(
-        irrad, temp, wind, temp_model_params['u_c'], temp_model_params['u_v'],
-        eta_m, alpha_absorption)
-    assert np.round(out, 4) == 64.4621
-
-
-def test_CPVSystem_get_am_util_factor():
-    cpv_system = cpvsystem.CPVSystem(module_parameters=mod_params_cpv)
-
-    times = pd.date_range(start='20160101 1200',
-                          end='20160101 1500', freq='3H')
-
-    airmass_absolute = pd.Series(
-        data=np.array([2.056997, 3.241064]), index=times)
-
-    am_uf = cpv_system.get_am_util_factor(airmass_absolute)
-
-    expected = pd.Series(data=np.array([0.989757, 0.994575]), index=times)
-
-    pd.testing.assert_series_equal(am_uf, expected, rtol=0.0001)
-
-
-def test_CPVSystem_get_tempair_util_factor():
-    cpv_system = cpvsystem.CPVSystem(module_parameters=mod_params_cpv)
-
-    times = pd.date_range(start='20160101 1200',
-                          end='20160101 1500', freq='3H')
-
-    temp_air = pd.Series(data=np.array([5, 35]), index=times)
-
-    ta_uf = cpv_system.get_am_util_factor(temp_air)
-
-    expected = pd.Series(data=np.array([0.986546, 0.038553]), index=times)
-
-    pd.testing.assert_series_equal(ta_uf, expected, rtol=0.0001)
-
-
-def test_CPVSystem_get_global_utilization_factor():
-    cpv_system = cpvsystem.CPVSystem(module_parameters=mod_params_cpv)
-
-    times = pd.date_range(start='20160101 1200',
-                          end='20160101 1500', freq='3H')
-
-    airmass_absolute = pd.Series(
-        data=np.array([2.056997, 3.241064]), index=times)
-    temp_air = pd.Series(data=np.array([5, 35]), index=times)
-
-    uf_global = cpv_system.get_global_utilization_factor(
-        airmass_absolute, temp_air)
-
-    expected = pd.Series(data=np.array([0.822522, 0.940439]), index=times)
-
-    pd.testing.assert_series_equal(uf_global, expected, rtol=0.0001)
-
-##############################
-
-
-def test_StaticCPVSystem_get_aoi():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(
-        surface_tilt=32, surface_azimuth=135)
-    aoi = static_cpvsystem.get_aoi(30, 225)
-    assert np.round(aoi, 4) == 42.7408
-
-
-def test_StaticCPVSystem_get_iam():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(
-        module_parameters=mod_params_cpv)
-    aoi = static_cpvsystem.get_aoi(30, 225)
-    iam = static_cpvsystem.get_iam(aoi, iam_model=mod_params_cpv['iam_model'])
-    assert np.round(iam, 4) == 0.8917
-
-
-def test_StaticCPVSystem_get_irradiance():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(
-        surface_tilt=32, surface_azimuth=135)
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    dni = pd.Series([900, 0], index=times)
-
-    irradiance = static_cpvsystem.get_irradiance(solar_position['apparent_zenith'],
-                                                 solar_position['azimuth'],
-                                                 dni)
-
-    expected = pd.Series(data=np.array([745.861417,  0.0]), index=times)
-
-    pd.testing.assert_series_equal(irradiance, expected, rtol=0.0001)
-
-
-def test_StaticCPVSystem_get_effective_irradiance():
-    static_cpvsystem = cpvsystem.StaticCPVSystem(
-        surface_tilt=32, surface_azimuth=135, module_parameters=mod_params_cpv)
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    dni = pd.Series([900, 0], index=times)
-
-    eff_irr = static_cpvsystem.get_effective_irradiance(solar_position['apparent_zenith'],
-                                                        solar_position['azimuth'],
-                                                        dni)
-
-    expected = pd.Series(data=np.array([637.964408,  0.0]), index=times)
-
-    pd.testing.assert_series_equal(eff_irr, expected, rtol=0.0001)
-
-##############################
-
-
-def test_StaticFlatPlateSystem_get_aoi():
-    static_flatsystem = cpvsystem.StaticFlatPlateSystem(
-        surface_tilt=32, surface_azimuth=135)
-    aoi = static_flatsystem.get_aoi(30, 225)
-    assert np.round(aoi, 4) == 42.7408
-
-# FUNCTION TO BE VALIDATED
-# def test_StaticFlatPlateSystem_get_iam():
-#     static_flatsystem = cpvsystem.StaticFlatPlateSystem(
-# module_parameters=mod_params_cpv)
-#     aoi = static_flatsystem.get_aoi(30, 225)
-#     iam = static_flatsystem.get_iam(aoi, iam_model=mod_params_cpv['iam_model'])
-#     assert np.round(iam, 4) == 0.8917
-
-
-def test_StaticFlatPlateSystem_get_irradiance():
-    static_flatsystem = cpvsystem.StaticFlatPlateSystem(
-        surface_tilt=32, surface_azimuth=135, module_parameters=mod_params_flatplate)
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
-                          index=times)
-    irradiance = static_flatsystem.get_irradiance(solar_position['apparent_zenith'],
-                                                  solar_position['azimuth'],
-                                                  irrads['dni'],
-                                                  irrads['ghi'],
-                                                  irrads['dhi'])
-
-    expected = pd.Series(data=np.array([137.794154,  0.0]), index=times)
-
-    pd.testing.assert_series_equal(irradiance, expected, rtol=0.0001)
-
-
-def test_StaticFlatPlateystem_get_effective_irradiance():
-    static_flatsystem = cpvsystem.StaticFlatPlateSystem(
-        surface_tilt=32, surface_azimuth=135, module_parameters=mod_params_flatplate)
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
-                          index=times)
-    eff_irr = static_flatsystem.get_effective_irradiance(solar_position['apparent_zenith'],
-                                                         solar_position['azimuth'],
-                                                         irrads['dni'],
-                                                         irrads['ghi'],
-                                                         irrads['dhi'])
-
-    expected = pd.Series(data=np.array([137.794154,  0.0]), index=times)
-
-    pd.testing.assert_series_equal(eff_irr, expected, rtol=0.0001)
-
-
-def test_StaticFlatPlateystem_pvsyst_celltemp(mocker):
-    parameter_set = 'freestanding'
-    temp_model_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['pvsyst'][
-        parameter_set]
-    alpha_absorption = 0.85
-    eta_m = 0.17
-    module_parameters = {'alpha_absorption': alpha_absorption, 'eta_m': eta_m}
-    static_flatsystem = cpvsystem.StaticFlatPlateSystem(module_parameters=module_parameters,
-                                     temperature_model_parameters=temp_model_params)
-    irrad = 800
-    temp = 45
-    wind = 0.5
-
-    mocker.spy(pvlib.temperature, 'pvsyst_cell')
-    out = static_flatsystem.pvsyst_celltemp(irrad, temp, wind_speed=wind)
-
-    pvlib.temperature.pvsyst_cell.assert_called_once_with(
-        irrad, temp, wind, temp_model_params['u_c'], temp_model_params['u_v'],
-        eta_m, alpha_absorption)
-    assert np.round(out, 4) == 64.4621
-##############################
