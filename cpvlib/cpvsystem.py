@@ -1076,13 +1076,13 @@ class StaticHybridSystem():
         See pvsystem.singlediode for details
         """
 
-        diode_parameters_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
+        dc_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
                                                                ivcurve_pnts=ivcurve_pnts)
 
-        diode_parameters_flatplate = self.static_flatplate_sys.singlediode(*diode_parameters_flatplate,
+        dc_flatplate = self.static_flatplate_sys.singlediode(*diode_parameters_flatplate,
                                                                          ivcurve_pnts=ivcurve_pnts)
 
-        return diode_parameters_cpv, diode_parameters_flatplate
+        return dc_cpv, dc_flatplate
 
     def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air):
 
