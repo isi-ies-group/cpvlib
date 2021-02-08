@@ -22,7 +22,20 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
     https://doi.org/10.1063/1.3509185 as new methods and new specific CPV parameters
     are passes to these methods.
 
+    The class supports basic system topologies consisting of:
 
+        * `N` total modules arranged in series
+          (`modules_per_string=N`, `strings_per_inverter=1`).
+        * `M` total modules arranged in parallel
+          (`modules_per_string=1`, `strings_per_inverter=M`).
+        * `NxM` total modules arranged in `M` strings of `N` modules each
+          (`modules_per_string=N`, `strings_per_inverter=M`).
+
+    The attributes should generally be things that don't change about
+    the system, such the type of module and the inverter. The instance
+    methods accept arguments for things that do change, such as
+    irradiance and temperature.
+    
     Parameters
     ----------
 
@@ -326,6 +339,9 @@ class StaticCPVSystem(CPVSystem):
     modeling functions. This class describes the collection and interactions of
     Static CPV system components installed on a Fixed Panel.
 
+    It inheritates from CPVSystem, modifying those methods that
+    are specific for a Static CPV system following the PVSyst implementation.
+    
     The class supports basic system topologies consisting of:
 
         * `N` total modules arranged in series
@@ -378,6 +394,10 @@ class StaticCPVSystem(CPVSystem):
 
     losses_parameters : None, dict or Series, default None
         Losses parameters as defined by PVWatts or other.
+        
+    in_singleaxis_tracker : None or bool, defult False
+        Conttros if the system is mounted in a NS single axis tracker
+        If true, it affects get_aoi() and get_irradiance()
 
     name : None or string, default None
 
@@ -441,15 +461,45 @@ class StaticCPVSystem(CPVSystem):
         return aoi
 
     def get_iam(self, aoi, iam_model):
+        """
+        Determine the incidence angle modifier using the method specified by
+        ``iam_model``.
+
+        Parameters for the selected IAM model are expected to be in
+        ``StaticCPVSystem.module_parameters``. Default parameters are available for
+        the 'physical', 'ashrae' and 'martin_ruiz' models.
+
+        Parameters
+        ----------
+        aoi : numeric
+            The angle of incidence in degrees.
+
+        aoi_model : string
+            The IAM model to be used. Valid strings are 'ashrae' and 'interp'.
+
+        Returns
+        -------
+        iam : numeric
+            The AOI modifier.
+
+        Raises
+        ------
+        ValueError if `iam_model` is not a valid model name.
+        """
 
         if iam_model == 'ashrae':
-            iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
+            if self.module_parameters['b'] is None:
+                raise AttributeError('Missing IAM parameter (ASHRAE:b) in "module_parameters"')
+            else:
+                iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
         elif iam_model == 'interp':
-            iam = pvlib.iam.interp(
+            if self.module_parameters['theta_ref'] is None or self.module_parameters['iam_ref'] is None:
+                raise AttributeError('Missing IAM parameter (interp:theta_ref or iam_red) in "module_parameters"')
+            else:
+                iam = pvlib.iam.interp(
                 aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
         else:
-            raise AttributeError(
-                'Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)  in "module_parameters"')
+            raise ValueError(iam_model + ' is not a valid IAM model')
 
         return iam
 
