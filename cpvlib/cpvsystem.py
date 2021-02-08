@@ -322,7 +322,21 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         return dni_uf
 
     def get_global_utilization_factor(self, airmass_absolute, temp_air):
+        """
+        Retrieves the global utilization factor (Air mass and Air temperature CPV effects)
 
+        Parameters
+        ----------
+        airmass : numeric
+            absolute airmass.
+        temp_air : numeric
+            Ambient dry bulb temperature in degrees C.
+            
+        Returns
+        -------
+        uf_global : numeric
+            the global utilization factor.
+        """
         uf_am = self.get_am_util_factor(airmass=airmass_absolute)
 
         uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
@@ -921,7 +935,78 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
 
 
 class StaticHybridSystem():
+    """
+    The StaticHybridSystem class defines a set of Static Hybrid system attributes and
+    modeling functions. This class describes the collection and interactions of
+    Static CPV system components installed on a Fixed Panel or a Single Axis tracker.
 
+    It is the composition of two subsystems: StaticCPVSystem and StaticFlatPlateSystem
+
+    The class supports basic system topologies consisting of:
+
+        * `N` total modules arranged in series
+          (`modules_per_string=N`, `strings_per_inverter=1`).
+        * `M` total modules arranged in parallel
+          (`modules_per_string=1`, `strings_per_inverter=M`).
+        * `NxM` total modules arranged in `M` strings of `N` modules each
+          (`modules_per_string=N`, `strings_per_inverter=M`).
+
+    The attributes should generally be things that don't change about
+    the system, such the type of module and the inverter. The instance
+    methods accept arguments for things that do change, such as
+    irradiance and temperature.
+    
+    See https://doi.org/10.1002/pip.3387
+
+    Parameters
+    ----------
+    surface_tilt: float or array-like, default 0
+        Surface tilt angles in decimal degrees.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
+
+    surface_azimuth: float or array-like, default 180
+        Azimuth angle of the module surface.
+        North=0, East=90, South=180, West=270.
+
+    module : None or string, default None
+        The model name of the modules.
+        May be used to look up the module_parameters dictionary
+        via some other method.
+
+    module_parameters : None, dict or Series, default None
+        Module parameters as defined by the SAPM, CEC, or other.
+
+    modules_per_string: int or float, default 1
+        See system topology discussion above.
+
+    strings_per_inverter: int or float, default 1
+        See system topology discussion above.
+
+    inverter : None or string, default None
+        The model name of the inverters.
+        May be used to look up the inverter_parameters dictionary
+        via some other method.
+
+    inverter_parameters : None, dict or Series, default None
+        Inverter parameters as defined by the SAPM, CEC, or other.
+
+    racking_model : None or string, default 'freestanding'
+        Used for cell and module temperature calculations.
+
+    losses_parameters : None, dict or Series, default None
+        Losses parameters as defined by PVWatts or other.
+
+    in_singleaxis_tracker : None or bool, defult False
+        Conttros if the system is mounted in a NS single axis tracker
+        If true, it affects get_aoi() and get_irradiance()
+
+    name : None or string, default None
+
+    **kwargs
+        Arbitrary keyword arguments.
+        Included for compatibility, but not used.
+    """
     def __init__(self,
                  surface_tilt=30,
                  surface_azimuth=180,
@@ -1026,9 +1111,8 @@ class StaticHybridSystem():
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                                  airmass=None, model='haydavies', spillage=0, **kwargs):
         """
-        Uses the :py:func:`irradiance.get_total_irradiance` function to
-        calculate the plane of array irradiance components on a Dual axis
-        tracker.
+        Calculates the effective irradiance (taking into account the IAM)
+        TO BE VALIDATED
 
         Parameters
         ----------
@@ -1036,29 +1120,34 @@ class StaticHybridSystem():
             Solar zenith angle.
         solar_azimuth : float or Series.
             Solar azimuth angle.
-        dni : float or Series
+        dni : numeric
             Direct Normal Irradiance
-        ghi : float or Series
+        ghi : numeric
             Global horizontal irradiance
-        dhi : float or Series
+        dhi : numeric
             Diffuse horizontal irradiance
-        dni_extra : None, float or Series, default None
+        dii : numeric
+            Direct (on the) Inclinated (plane) Irradiance
+        gii : numeric
+            Global (on the) Inclinated (plane) Irradiance
+        dni_extra : None or numeric, default None
             Extraterrestrial direct normal irradiance
-        airmass : None, float or Series, default None
+        airmass : None or numeric, default None
             Airmass
-        model : String, default 'haydavies'
+        model : String, default 'isotropic'
             Irradiance model.
-
-        **kwargs
-            Passed to :func:`irradiance.total_irrad`.
+        spillage : float
+            Percentage of dii allowed to pass into the system
 
         Returns
         -------
-        irradiation : DataFrame
+        dii_effective : float or Series
+            Effective Direct (on the) Inclinated (plane) Irradiance [StaticCPVSystem]
+            Beam component of the plane of array irradiance plus the effect of AOI
+        poa_flatplate_static_effective : float or Series
+            Effective Direct (on the) Inclinated (plane) Irradiance [StaticFlatPlateSystem]
+            Plane of array irradiance plus the effect of AOI
         """
-
-        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
-        #                        self.parameters_tracker)
 
         dii_effective = self.static_cpv_sys.get_effective_irradiance(
             solar_zenith, solar_azimuth, dni)
@@ -1087,8 +1176,13 @@ class StaticHybridSystem():
 
         Parameters
         ----------
+        dii : numeric
+            Direct (on the) Inclinated (plane) Irradiance [StaticCPVSystem]
+        poa_flatplate_static : numeric
+            Plane of Array Irradiance [StaticFlatPlateSystem]
+        
         See pvsystem.pvsyst_celltemp for details
-
+            
         Returns
         -------
         See pvsystem.pvsyst_celltemp for details
@@ -1110,8 +1204,10 @@ class StaticHybridSystem():
 
         Parameters
         ----------
-        effective_irradiance : numeric
-            The irradiance (W/m2) that is converted to photocurrent.
+        dii : numeric
+            Direct (on the) Inclinated (plane) Irradiance [StaticCPVSystem]
+        poa_flatplate_static : numeric
+            Plane of Array Irradiance [StaticFlatPlateSystem]
 
         temp_cell : float or Series
             The average cell temperature of cells within a module in C.
@@ -1121,21 +1217,9 @@ class StaticHybridSystem():
         See pvsystem.calcparams_pvsyst for details
         """
 
-        # kwargs_cpv = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
-        #                         'R_sh_ref', 'R_sh_0', 'R_sh_exp',
-        #                         'R_s', 'alpha_sc', 'EgRef',
-        #                         'irrad_ref', 'temp_ref',
-        #                         'cells_in_series'],
-        #                        self.static_cpv_sys.module_parameters)
         diode_parameters_cpv = self.static_cpv_sys.calcparams_pvsyst(
             dii, temp_cell_cpv)
 
-        # kwargs_flatplate = _build_kwargs(['gamma_ref', 'mu_gamma', 'I_L_ref', 'I_o_ref',
-        #                         'R_sh_ref', 'R_sh_0', 'R_sh_exp',
-        #                         'R_s', 'alpha_sc', 'EgRef',
-        #                         'irrad_ref', 'temp_ref',
-        #                         'cells_in_series'],
-        #                        self.static_cpv_sys.module_parameters)
         diode_parameters_flatplate = self.static_flatplate_sys.calcparams_pvsyst(
             poa_flatplate_static, temp_cell_flatplate)
 
@@ -1146,7 +1230,7 @@ class StaticHybridSystem():
 
         Parameters
         ----------
-        See pvsystem.singlediode for details
+        See pvsystem.singlediode for details [StaticCPVSystem & StaticFlatPlateSystem()]
 
         Returns
         -------
@@ -1162,7 +1246,23 @@ class StaticHybridSystem():
         return dc_cpv, dc_flatplate
 
     def get_global_utilization_factor_cpv(self, airmass_absolute, temp_air):
+        """
+        Retrieves the global utilization factor (Air mass and Air temperature CPV effects)
+        for the StaticCPVSystem subsystem
 
+        Parameters
+        ----------
+        airmass : numeric
+            absolute airmass.
+        temp_air : numeric
+            Ambient dry bulb temperature in degrees C.
+            
+        Returns
+        -------
+        uf_global : numeric
+            the global utilization factor.
+        """
+        
         uf_am = self.static_cpv_sys.get_am_util_factor(
             airmass=airmass_absolute)
 
@@ -1201,13 +1301,7 @@ def get_simple_util_factor(x, thld, m_low, m_high):
 
     if isinstance(x, (int, float)):
         simple_uf = 1 + (x - thld) * m_low
-#
-#    else:
-#        for index, value in x.items():
-#            if value <= thld:
-#                simple_uf.index = 1 + (value - thld) * m_low
-#            else:
-#                simple_uf.index = 1 + (value - thld) * m_high
+
     else:
         def f(value):
             if value <= thld:
