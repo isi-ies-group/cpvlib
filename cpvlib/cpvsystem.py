@@ -335,9 +335,9 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
 class StaticCPVSystem(CPVSystem):
     """
-    The StaticCPVSystem class defines a set of CPV system attributes and
+    The StaticCPVSystem class defines a set of Static CPV system attributes and
     modeling functions. This class describes the collection and interactions of
-    Static CPV system components installed on a Fixed Panel.
+    Static CPV system components installed on a Fixed Panel or a Single Axis tracker.
 
     It inheritates from CPVSystem, modifying those methods that
     are specific for a Static CPV system following the PVSyst implementation.
@@ -547,9 +547,7 @@ class StaticCPVSystem(CPVSystem):
 
     def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni):
         """
-        Uses the :py:func:`irradiance.get_total_irradiance` function to
-        calculate the plane of array irradiance components on a Dual axis
-        tracker.
+        Calculates the effective irradiance (taking into account the IAM)
 
         Parameters
         ----------
@@ -578,6 +576,77 @@ class StaticCPVSystem(CPVSystem):
 
 
 class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
+    """
+    The StaticFlatPlateSystem class defines a set of Static FlatPlate system attributes and
+    modeling functions. This class describes the collection and interactions of
+    Static FlatPlate system components installed on a Fixed Panel or a Single Axis tracker.
+
+    It inheritates from PVSystem, modifying those methods that
+    are specific for a Static FlatPlate system following the PVSyst implementation.
+
+    The class supports basic system topologies consisting of:
+
+        * `N` total modules arranged in series
+          (`modules_per_string=N`, `strings_per_inverter=1`).
+        * `M` total modules arranged in parallel
+          (`modules_per_string=1`, `strings_per_inverter=M`).
+        * `NxM` total modules arranged in `M` strings of `N` modules each
+          (`modules_per_string=N`, `strings_per_inverter=M`).
+
+    The attributes should generally be things that don't change about
+    the system, such the type of module and the inverter. The instance
+    methods accept arguments for things that do change, such as
+    irradiance and temperature.
+
+    Parameters
+    ----------
+    surface_tilt: float or array-like, default 0
+        Surface tilt angles in decimal degrees.
+        The tilt angle is defined as degrees from horizontal
+        (e.g. surface facing up = 0, surface facing horizon = 90)
+
+    surface_azimuth: float or array-like, default 180
+        Azimuth angle of the module surface.
+        North=0, East=90, South=180, West=270.
+
+    module : None or string, default None
+        The model name of the modules.
+        May be used to look up the module_parameters dictionary
+        via some other method.
+
+    module_parameters : None, dict or Series, default None
+        Module parameters as defined by the SAPM, CEC, or other.
+
+    modules_per_string: int or float, default 1
+        See system topology discussion above.
+
+    strings_per_inverter: int or float, default 1
+        See system topology discussion above.
+
+    inverter : None or string, default None
+        The model name of the inverters.
+        May be used to look up the inverter_parameters dictionary
+        via some other method.
+
+    inverter_parameters : None, dict or Series, default None
+        Inverter parameters as defined by the SAPM, CEC, or other.
+
+    racking_model : None or string, default 'freestanding'
+        Used for cell and module temperature calculations.
+
+    losses_parameters : None, dict or Series, default None
+        Losses parameters as defined by PVWatts or other.
+
+    in_singleaxis_tracker : None or bool, defult False
+        Conttros if the system is mounted in a NS single axis tracker
+        If true, it affects get_aoi() and get_irradiance()
+
+    name : None or string, default None
+
+    **kwargs
+        Arbitrary keyword arguments.
+        Included for compatibility, but not used.
+    """
 
     def __init__(self,
                  surface_tilt=0, surface_azimuth=180,
@@ -636,8 +705,37 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
-    # TO BE VALIDATED
     def get_iam(self, aoi, aoi_thld, m1, b1, m2, b2):
+        """
+        Determines the angle of incidence modifier using a two-step piecewise regression function.
+        TO BE VALIDATED
+
+        Parameters
+        ----------
+        aoi : numeric
+            The angle of incidence in degrees.
+
+        aoi_thld : numeric
+            limit between the two regression lines of the IAM.
+
+        m1 : numeric
+            slope of the first regression line of the IAM.
+
+        b1 : numeric
+            intercept of the first regression line of the IAM.
+
+        m2 : numeric
+            slope of the second regression line of the IAM.
+
+        b2 : numeric
+            intercept of the first regression line of the IAM.
+
+        Returns
+        -------
+        iam : numeric
+            The AOI modifier.
+
+        """
         if isinstance(aoi, (int, float)):
             aoi_values = float(aoi)
         else:
@@ -654,17 +752,28 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
 
         if isinstance(aoi, (int, float)):
-            return np.piecewise(aoi, condlist, funclist)
+            iam = np.piecewise(aoi, condlist, funclist)
         else:
-            return pd.Series(np.piecewise(aoi_values, condlist, funclist), index=aoi.index)
+            iam = pd.Series(np.piecewise(
+                aoi_values, condlist, funclist), index=aoi.index)
+
+        return iam
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', spillage=0, **kwargs):
         """
-        Uses the :py:func:`irradiance.get_total_irradiance` function to
-        calculate the plane of array irradiance components on a Dual axis
-        tracker.
+        Calculates the plane of array irradiance of a Static Flat Plate system
+        from dii and gii. If any is missing then is calculated from ghi, dhi and dhi
+        using corresponding pvlib function.
+        
+        Internal `aoi_limit` parameter from `module_parameters` sets the limit
+        of tracking of the Static CPV system and therefore when the dii irradiance
+        is added to the poa_diffuse.
+        
+        Spillage factor accounts for the dii fraction that is allowed to pass into the system
+        
+        See https://doi.org/10.1002/pip.3387 for details
 
         Parameters
         ----------
@@ -672,25 +781,29 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
             Solar zenith angle.
         solar_azimuth : float or Series.
             Solar azimuth angle.
-        dni : float or Series
+        dni : numeric
             Direct Normal Irradiance
-        ghi : float or Series
+        ghi : numeric
             Global horizontal irradiance
-        dhi : float or Series
+        dhi : numeric
             Diffuse horizontal irradiance
-        dni_extra : None, float or Series, default None
+        dii : numeric
+            Direct (on the) Inclinated (plane) Irradiance
+        gii : numeric
+            Global (on the) Inclinated (plane) Irradiance
+        dni_extra : None or numeric, default None
             Extraterrestrial direct normal irradiance
-        airmass : None, float or Series, default None
+        airmass : None or numeric, default None
             Airmass
-        model : String, default 'haydavies'
+        model : String, default 'isotropic'
             Irradiance model.
-
-        **kwargs
-            Passed to :func:`irradiance.total_irrad`.
+        spillage : float
+            Percentage of dii allowed to pass into the system
 
         Returns
         -------
-        irradiation : DataFrame
+        poa_flatplate_static : numeric
+            Plane of Array Irradiance
         """
 
         # not needed for all models, but this is easier
@@ -710,6 +823,7 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         else:
             surface_tilt = self.surface_tilt
             surface_azimuth = self.surface_azimuth
+
         if dii is None:
             dii = pvlib.irradiance.beam_component(
                 surface_tilt,
@@ -754,39 +868,24 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                  ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                                  airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
         """
-        Uses the :py:func:`irradiance.get_total_irradiance` function to
-        calculate the plane of array irradiance components on a Dual axis
-        tracker.
+        Calculates the effective irradiance (taking into account the IAM)
+        TO BE VALIDATED
 
         Parameters
         ----------
-        solar_zenith : float or Series.
+        solar_zenith : float or Series
             Solar zenith angle.
-        solar_azimuth : float or Series.
+        solar_azimuth : float or Series
             Solar azimuth angle.
         dni : float or Series
             Direct Normal Irradiance
-        ghi : float or Series
-            Global horizontal irradiance
-        dhi : float or Series
-            Diffuse horizontal irradiance
-        dni_extra : None, float or Series, default None
-            Extraterrestrial direct normal irradiance
-        airmass : None, float or Series, default None
-            Airmass
-        model : String, default 'haydavies'
-            Irradiance model.
-
-        **kwargs
-            Passed to :func:`irradiance.total_irrad`.
 
         Returns
         -------
-        irradiation : DataFrame
+        poa_flatplate_static_effective : float or Series
+            Effective Direct (on the) Inclinated (plane) Irradiance
+            Plane of array irradiance plus the effect of AOI
         """
-
-        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
-        #                        self.parameters_tracker)
 
         poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, dni=dni,
                                                    ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
