@@ -21,7 +21,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
     Besides, specific CPV utilization factors are added as defined in 
     https://doi.org/10.1063/1.3509185 as new methods and new specific CPV parameters
     are passes to these methods.
-    
+
 
     Parameters
     ----------
@@ -42,7 +42,6 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
 
     module_parameters : None, dict or Series, default None
         Module parameters as defined by the SAPM, CEC, or other.
-        
 
     modules_per_string: int or float, default 1
         See system topology discussion above.
@@ -76,14 +75,14 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                  temperature_model_parameters=None,
                  modules_per_string=1, strings_per_inverter=1,
                  inverter=None, inverter_parameters=None,
-                 racking_model='freestanding',  # only for sapm model
+                 racking_model='freestanding',
                  losses_parameters=None, name=None, albedo=None,
                  surface_type=None, **kwargs):
 
         self.name = name
 
         self.module = module
-        
+
         if module_parameters is None:
             self.module_parameters = {}
         else:
@@ -121,7 +120,6 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         attrs = ['name', 'module', 'inverter', 'racking_model']
         return ('CPVSystem: \n  ' + '\n  '.join(
             ('{}: {}'.format(attr, getattr(self, attr)) for attr in attrs)))
-
 
     def get_irradiance(self, solar_zenith, solar_azimuth, dni, ghi, dhi,
                        dni_extra=None, airmass=None, model='haydavies',
@@ -195,9 +193,9 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                                self.module_parameters)
         kwargs.update(_build_kwargs(['u_c', 'u_v'],
                                     self.temperature_model_parameters))
-        
+
         return pvlib.temperature.pvsyst_cell(poa_global, temp_air, wind_speed,
-                                       **kwargs)
+                                             **kwargs)
 
     def get_am_util_factor(self, airmass, am_thld=None, am_uf_m_low=None, am_uf_m_high=None):
         """
@@ -212,11 +210,11 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             limit between the two regression lines of the utilization factor.
 
         am_uf_m_low : numeric
-            inclination of the first regression line of the utilization factor
+            slope of the first regression line of the utilization factor
             for airmass.
 
         am_uf_m_high : numeric
-            inclination of the second regression line of the utilization factor
+            slope of the second regression line of the utilization factor
             for airmass.
 
         Returns
@@ -226,13 +224,13 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         """
         if am_thld is not None:
             am_uf = get_simple_util_factor(x=airmass, thld=am_thld,
-                                          m_low=am_uf_m_low,
-                                          m_high=am_uf_m_high)
+                                           m_low=am_uf_m_low,
+                                           m_high=am_uf_m_high)
         else:
             am_uf = get_simple_util_factor(x=airmass, thld=self.module_parameters['am_thld'],
-                                          m_low=self.module_parameters['am_uf_m_low'] /
-                                          self.module_parameters['IscDNI_top'],
-                                          m_high=self.module_parameters['am_uf_m_high']/self.module_parameters['IscDNI_top'])
+                                           m_low=self.module_parameters['am_uf_m_low'] /
+                                           self.module_parameters['IscDNI_top'],
+                                           m_high=self.module_parameters['am_uf_m_high']/self.module_parameters['IscDNI_top'])
         return am_uf
 
     def get_tempair_util_factor(self, temp_air, ta_thld=None, ta_uf_m_low=None,
@@ -249,11 +247,11 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             limit between the two regression lines of the utilization factor.
 
         ta_uf_m_low : numeric
-            inclination of the first regression line of the utilization factor
+            slope of the first regression line of the utilization factor
             for ambient temperature.
 
         ta_uf_m_high : numeric
-            inclination of the second regression line of the utilization factor
+            slope of the second regression line of the utilization factor
             for ambient temperature.
 
         Returns
@@ -263,13 +261,13 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         """
         if ta_thld is not None:
             ta_uf = get_simple_util_factor(x=temp_air, thld=ta_thld,
-                                          m_low=ta_uf_m_low,
-                                          m_high=ta_uf_m_high)
+                                           m_low=ta_uf_m_low,
+                                           m_high=ta_uf_m_high)
         else:
             ta_uf = get_simple_util_factor(x=temp_air, thld=self.module_parameters['ta_thld'],
-                                          m_low=self.module_parameters['ta_uf_m_low'] /
-                                          self.module_parameters['IscDNI_top'],
-                                          m_high=self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
+                                           m_low=self.module_parameters['ta_uf_m_low'] /
+                                           self.module_parameters['IscDNI_top'],
+                                           m_high=self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
         return ta_uf
 
     # NO SE USA!!! REVISAR!
@@ -286,11 +284,11 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             limit between the two regression lines of the utilization factor.
 
         dni_uf_m_low : numeric
-            inclination of the first regression line of the utilization factor
+            slope of the first regression line of the utilization factor
             for DNI.
 
         dni_uf_m_low_uf_m_high : numeric
-            inclination of the second regression line of the utilization factor
+            slope of the second regression line of the utilization factor
             for DNI.
 
         Returns
@@ -300,8 +298,8 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
         """
 
         dni_uf = get_simple_util_factor(x=dni, thld=dni_thld,
-                                      m_low=dni_uf_m_low,
-                                      m_high=dni_uf_m_high)
+                                        m_low=dni_uf_m_low,
+                                        m_high=dni_uf_m_high)
         return dni_uf
 
     def get_global_utilization_factor(self, airmass_absolute, temp_air):
@@ -437,13 +435,15 @@ class StaticCPVSystem(CPVSystem):
         return aoi
 
     def get_iam(self, aoi, iam_model):
-        
+
         if iam_model == 'ashrae':
             iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
         elif iam_model == 'interp':
-            iam = pvlib.iam.interp(aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
+            iam = pvlib.iam.interp(
+                aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
         else:
-            raise AttributeError('Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)  in "module_parameters"')
+            raise AttributeError(
+                'Missing any IAM parameter (ASHRAE:b or interp:theta_ref, iam_red)  in "module_parameters"')
 
         return iam
 
@@ -528,14 +528,15 @@ class StaticCPVSystem(CPVSystem):
         dii = self.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
 
         aoi = self.get_aoi(solar_zenith, solar_azimuth)
-        
+
         if 'iam_model' not in self.module_parameters:
             self.module_parameters['iam_model'] = 'ashrae'
-        
-        dii_effective = dii * self.get_iam(aoi, iam_model=self.module_parameters['iam_model'])
+
+        dii_effective = dii * \
+            self.get_iam(aoi, iam_model=self.module_parameters['iam_model'])
 
         return dii_effective
-    
+
     # DEPRECATED - still used in some tests
     def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
         """
@@ -550,11 +551,11 @@ class StaticCPVSystem(CPVSystem):
             limit between the two regression lines of the utilization factor.
 
         aoi_uf_m_low : numeric
-            inclination of the first regression line of the utilization factor
+            slope of the first regression line of the utilization factor
             for AOI.
 
         aoi_uf_m_low_uf_m_high : numeric
-            inclination of the second regression line of the utilization factor
+            slope of the second regression line of the utilization factor
             for AOI.
 
         Returns
@@ -672,12 +673,13 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         if 'aoi_limit' in self.module_parameters:
             aoi_limit = self.module_parameters['aoi_limit']
         else:
-            raise AttributeError('Missing "aoi_limit" parameter in "module_parameters"')
+            raise AttributeError(
+                'Missing "aoi_limit" parameter in "module_parameters"')
 
         condlist = [aoi_values < aoi_limit,
                     (aoi_limit <= aoi_values) & (aoi_values < aoi_thld)]
         funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
-        
+
         if isinstance(aoi, (int, float)):
             return np.piecewise(aoi, condlist, funclist)
         else:
@@ -761,22 +763,23 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
             poa_diffuse = gii - dii
 
         poa_diffuse += dii * spillage
-        
+
         aoi = self.get_aoi(solar_zenith, solar_azimuth)
-        
+
         if 'aoi_limit' in self.module_parameters:
             aoi_limit = self.module_parameters['aoi_limit']
         else:
-            raise AttributeError('Missing "aoi_limit" parameter in "module_parameters"')       
-            
+            raise AttributeError(
+                'Missing "aoi_limit" parameter in "module_parameters"')
+
         poa_flatplate_static = pd.concat(
             [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
 
         return poa_flatplate_static
-    
+
     def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni=None,
-                       ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
-                       airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
+                                 ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
+                                 airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Dual axis
@@ -813,14 +816,15 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         #                        self.parameters_tracker)
 
         poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, dni=dni,
-                       ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
-                       airmass=airmass, model=model, spillage=spillage, **kwargs)
+                                                   ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
+                                                   airmass=airmass, model=model, spillage=spillage, **kwargs)
 
-        poa_flatplate_static_effective = poa_flatplate_static #* self.get_iam(
-                # aoi=aoi, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
+        # * self.get_iam(
+        poa_flatplate_static_effective = poa_flatplate_static
+        # aoi=aoi, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
 
         return poa_flatplate_static_effective
-    
+
     def pvsyst_celltemp(self, poa_flatplate_static, temp_air, wind_speed=1.0):
         """
         Uses :py:func:`pvsystem.pvsyst_celltemp` to calculate module
@@ -839,9 +843,9 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                self.module_parameters)
         kwargs.update(_build_kwargs(['u_c', 'u_v'],
                                     self.temperature_model_parameters))
-        
+
         return pvlib.temperature.pvsyst_cell(poa_flatplate_static, temp_air, wind_speed,
-                                       **kwargs)
+                                             **kwargs)
 
 
 class StaticHybridSystem():
@@ -984,22 +988,23 @@ class StaticHybridSystem():
         # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
         #                        self.parameters_tracker)
 
-        dii_effective = self.static_cpv_sys.get_effective_irradiance(solar_zenith, solar_azimuth, dni)
+        dii_effective = self.static_cpv_sys.get_effective_irradiance(
+            solar_zenith, solar_azimuth, dni)
 
         aoi = self.static_flatplate_sys.get_aoi(solar_zenith, solar_azimuth)
 
         poa_flatplate_static_effective = self.static_flatplate_sys.get_effective_irradiance(solar_zenith,
-                                                                        solar_azimuth,
-                                                                        aoi=aoi,
-                                                                        dii=dii,
-                                                                        gii=gii,
-                                                                        ghi=ghi,
-                                                                        dhi=dhi,
-                                                                        dni=dni,
-                                                                        model=model,
-                                                                        spillage=spillage,
-                                                                        **kwargs
-                                                                        )
+                                                                                            solar_azimuth,
+                                                                                            aoi=aoi,
+                                                                                            dii=dii,
+                                                                                            gii=gii,
+                                                                                            ghi=ghi,
+                                                                                            dhi=dhi,
+                                                                                            dni=dni,
+                                                                                            model=model,
+                                                                                            spillage=spillage,
+                                                                                            **kwargs
+                                                                                            )
 
         return dii_effective, poa_flatplate_static_effective
 
@@ -1077,10 +1082,10 @@ class StaticHybridSystem():
         """
 
         dc_cpv = self.static_cpv_sys.singlediode(*diode_parameters_cpv,
-                                                               ivcurve_pnts=ivcurve_pnts)
+                                                 ivcurve_pnts=ivcurve_pnts)
 
         dc_flatplate = self.static_flatplate_sys.singlediode(*diode_parameters_flatplate,
-                                                                         ivcurve_pnts=ivcurve_pnts)
+                                                             ivcurve_pnts=ivcurve_pnts)
 
         return dc_cpv, dc_flatplate
 
@@ -1110,10 +1115,10 @@ def get_simple_util_factor(x, thld, m_low, m_high):
         limit between the two regression lines of the utilization factor.
 
     m_low : numeric
-        inclination of the first regression line of the utilization factor.
+        slope of the first regression line of the utilization factor.
 
     m_high : numeric
-        inclination of the second regression line of the utilization factor.
+        slope of the second regression line of the utilization factor.
 
     Returns
     -------
