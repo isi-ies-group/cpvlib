@@ -29,6 +29,8 @@ mod_params_cpv = {
     "alpha_absorption": 0.9,
     "b": 0.7,
     "iam_model": 'ashrae',
+    "theta_ref": [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
+    "iam_ref": [1.000, 1.007, 0.998, 0.991, 0.971, 0.966, 0.938, 0.894, 0.830, 0.790, 0.740, 0.649, 0.387],
     # "Area": 1.2688,
     # "Impo": 8.3,
     # "Vmpo": 43.9,
@@ -77,6 +79,7 @@ mod_params_flatplate = {
 }
 
 ##############################
+
 
 def test_CPVSystem_get_irradiance():
     cpv_system = cpvsystem.CPVSystem()
@@ -180,15 +183,26 @@ def test_StaticCPVSystem_get_aoi():
     static_cpvsystem = cpvsystem.StaticCPVSystem(
         surface_tilt=32, surface_azimuth=135)
     aoi = static_cpvsystem.get_aoi(30, 225)
+
     assert np.round(aoi, 4) == 42.7408
 
 
-def test_StaticCPVSystem_get_iam():
+def test_StaticCPVSystem_get_iam_ashrae():
     static_cpvsystem = cpvsystem.StaticCPVSystem(
         module_parameters=mod_params_cpv)
     aoi = static_cpvsystem.get_aoi(30, 225)
-    iam = static_cpvsystem.get_iam(aoi, iam_model=mod_params_cpv['iam_model'])
+    iam = static_cpvsystem.get_iam(aoi, iam_model='ashrae')
+
     assert np.round(iam, 4) == 0.8917
+
+
+def test_StaticCPVSystem_get_iam_interp():
+
+    static_cpvsystem = cpvsystem.StaticCPVSystem(
+        module_parameters=mod_params_cpv)
+    iam = static_cpvsystem.get_iam(42, iam_model='interp')
+
+    assert np.round(iam, 4) == 0.814
 
 
 def test_StaticCPVSystem_get_irradiance():
