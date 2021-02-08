@@ -35,7 +35,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
     the system, such the type of module and the inverter. The instance
     methods accept arguments for things that do change, such as
     irradiance and temperature.
-    
+
     Parameters
     ----------
 
@@ -341,7 +341,7 @@ class StaticCPVSystem(CPVSystem):
 
     It inheritates from CPVSystem, modifying those methods that
     are specific for a Static CPV system following the PVSyst implementation.
-    
+
     The class supports basic system topologies consisting of:
 
         * `N` total modules arranged in series
@@ -394,7 +394,7 @@ class StaticCPVSystem(CPVSystem):
 
     losses_parameters : None, dict or Series, default None
         Losses parameters as defined by PVWatts or other.
-        
+
     in_singleaxis_tracker : None or bool, defult False
         Conttros if the system is mounted in a NS single axis tracker
         If true, it affects get_aoi() and get_irradiance()
@@ -466,8 +466,7 @@ class StaticCPVSystem(CPVSystem):
         ``iam_model``.
 
         Parameters for the selected IAM model are expected to be in
-        ``StaticCPVSystem.module_parameters``. Default parameters are available for
-        the 'physical', 'ashrae' and 'martin_ruiz' models.
+        ``StaticCPVSystem.module_parameters``.
 
         Parameters
         ----------
@@ -484,29 +483,32 @@ class StaticCPVSystem(CPVSystem):
 
         Raises
         ------
+        AttributeError if `b` for 'ashrae' or `theta_ref` or `iam_red` for 'interp' are missing
         ValueError if `iam_model` is not a valid model name.
         """
 
         if iam_model == 'ashrae':
             if self.module_parameters['b'] is None:
-                raise AttributeError('Missing IAM parameter (ASHRAE:b) in "module_parameters"')
+                raise AttributeError(
+                    'Missing IAM parameter (ASHRAE:b) in "module_parameters"')
             else:
                 iam = pvlib.iam.ashrae(aoi, b=self.module_parameters['b'])
         elif iam_model == 'interp':
             if self.module_parameters['theta_ref'] is None or self.module_parameters['iam_ref'] is None:
-                raise AttributeError('Missing IAM parameter (interp:theta_ref or iam_red) in "module_parameters"')
+                raise AttributeError(
+                    'Missing IAM parameter (interp:theta_ref or iam_red) in "module_parameters"')
             else:
                 iam = pvlib.iam.interp(
-                aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
+                    aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
         else:
             raise ValueError(iam_model + ' is not a valid IAM model')
 
         return iam
 
-    def get_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
+    def get_irradiance(self, solar_zenith, solar_azimuth, dni):
         """
-        Uses the :py:func:`irradiance.get_total_irradiance` function to
-        calculate the plane of array irradiance components on a Fixed panel.
+        Uses the :py:func:`pvlib.irradiance.beam_component` function to
+        calculate the beam component of the plane of array irradiance.
 
         Parameters
         ----------
@@ -516,15 +518,12 @@ class StaticCPVSystem(CPVSystem):
             Solar azimuth angle.
         dni : float or Series
             Direct Normal Irradiance
-        dhi : float or Series
-            Diffuse horizontal irradiance
-        **kwargs
-            Passed to :func:`irradiance.total_irrad`.
 
         Returns
         -------
-        poa_irradiance : DataFrame
-            Column names are: ``total, beam, sky, ground``.
+        dii : numeric
+            Direct (on the) Inclinated (plane) Irradiance
+            Beam component of the plane of array irradiance
         """
 
         if self.in_singleaxis_tracker:
@@ -537,15 +536,16 @@ class StaticCPVSystem(CPVSystem):
             surface_tilt = self.surface_tilt
             surface_azimuth = self.surface_azimuth
 
-        return pvlib.irradiance.beam_component(
+        dii = pvlib.irradiance.beam_component(
             surface_tilt,
             surface_azimuth,
             solar_zenith,
             solar_azimuth,
-            dni,
-            **kwargs)
+            dni)
 
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni, **kwargs):
+        return dii
+
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni):
         """
         Uses the :py:func:`irradiance.get_total_irradiance` function to
         calculate the plane of array irradiance components on a Dual axis
@@ -553,111 +553,28 @@ class StaticCPVSystem(CPVSystem):
 
         Parameters
         ----------
-        solar_zenith : float or Series.
+        solar_zenith : float or Series
             Solar zenith angle.
-        solar_azimuth : float or Series.
+        solar_azimuth : float or Series
             Solar azimuth angle.
         dni : float or Series
             Direct Normal Irradiance
-        ghi : float or Series
-            Global horizontal irradiance
-        dhi : float or Series
-            Diffuse horizontal irradiance
-        dni_extra : None, float or Series, default None
-            Extraterrestrial direct normal irradiance
-        airmass : None, float or Series, default None
-            Airmass
-        model : String, default 'haydavies'
-            Irradiance model.
-
-        **kwargs
-            Passed to :func:`irradiance.total_irrad`.
 
         Returns
         -------
-        irradiation : DataFrame
+        dii_effective : float or Series
+            Effective Direct (on the) Inclinated (plane) Irradiance
+            Beam component of the plane of array irradiance plus the effect of AOI
         """
 
-        # kwargs = _build_kwargs(['axis_tilt', 'axis_azimuth', 'max_angle', 'backtrack', 'gcr'],
-        #                        self.parameters_tracker)
-
-        dii = self.get_irradiance(solar_zenith, solar_azimuth, dni, **kwargs)
+        dii = self.get_irradiance(solar_zenith, solar_azimuth, dni)
 
         aoi = self.get_aoi(solar_zenith, solar_azimuth)
-
-        if 'iam_model' not in self.module_parameters:
-            self.module_parameters['iam_model'] = 'ashrae'
 
         dii_effective = dii * \
             self.get_iam(aoi, iam_model=self.module_parameters['iam_model'])
 
         return dii_effective
-
-    # DEPRECATED - still used in some tests
-    def get_aoi_util_factor(self, aoi, aoi_thld=None, aoi_uf_m_low=None, aoi_uf_m_high=None):
-        """
-        Retrieves the utilization factor for the Angle of Incidence.
-
-        Parameters
-        ----------
-        aoi : numeric
-            Angle of Incidence
-
-        aoi_thld : numeric
-            limit between the two regression lines of the utilization factor.
-
-        aoi_uf_m_low : numeric
-            slope of the first regression line of the utilization factor
-            for AOI.
-
-        aoi_uf_m_low_uf_m_high : numeric
-            slope of the second regression line of the utilization factor
-            for AOI.
-
-        Returns
-        -------
-        aoi_uf : numeric
-            the utilization factor for AOI.
-        """
-        if aoi_thld is not None:
-            aoi_uf = get_simple_util_factor(x=aoi, thld=aoi_thld,
-                                            m_low=aoi_uf_m_low,
-                                            m_high=aoi_uf_m_high)
-        else:
-            aoi_uf = get_simple_util_factor(x=aoi, thld=self.module_parameters['aoi_thld'],
-                                            m_low=self.module_parameters['aoi_uf_m_low'] /
-                                            self.module_parameters['IscDNI_top'],
-                                            m_high=self.module_parameters['aoi_uf_m_high']/self.module_parameters['IscDNI_top'])
-
-        if isinstance(aoi_uf, (int, float)):
-            if aoi_uf < 0:
-                aoi_uf = 0
-        else:
-            # if aoi_uf < 0:
-            #     return 0
-            aoi_uf[aoi_uf < 0] = 0
-
-        return aoi_uf
-
-    # DEPRECATED
-    def get_global_utilization_factor_using_aoi(self, airmass_absolute, temp_air, aoi):
-
-        uf_am = self.get_am_util_factor(airmass=airmass_absolute)
-
-        uf_ta = self.get_tempair_util_factor(temp_air=temp_air)
-
-        uf_am_at = (uf_am * self.module_parameters['weight_am'] +
-                    uf_ta * self.module_parameters['weight_temp'])
-
-        uf_aoi = self.get_aoi_util_factor(aoi=aoi)
-
-        uf_aoi_ast = self.get_aoi_util_factor(aoi=0)
-
-        uf_aoi_norm = uf_aoi / uf_aoi_ast
-
-        uf_global = uf_am_at * uf_aoi_norm
-
-        return uf_global
 
 
 class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):

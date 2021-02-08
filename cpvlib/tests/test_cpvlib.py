@@ -104,8 +104,8 @@ def data():
 
 
 test_data = [
-    ('data/meteo2020_03_04.txt', 6377.265283689234),
-    ('data/meteo2020_03_14.txt', 8494.147901845981),
+    ('data/meteo2020_03_04.txt', 6456.331093402812),
+    ('data/meteo2020_03_14.txt', 8625.09165160281),
 ]
 
 
@@ -165,20 +165,7 @@ def test_StaticCPVSystem_energy_daily(dia, energy):
     uf_am_at = uf_am * mod_params_cpv['weight_am'] + \
         uf_ta * mod_params_cpv['weight_temp']
 
-    uf_aoi = static_cpv_sys.get_aoi_util_factor(
-        aoi=static_cpv_sys.get_aoi(
-            solar_zenith=location.get_solarposition(meteo.index).zenith,
-            solar_azimuth=location.get_solarposition(meteo.index).azimuth,
-        ),
-    )
-
-    uf_aoi_ast = static_cpv_sys.get_aoi_util_factor(
-        aoi=0,
-    )
-
-    uf_aoi_norm = uf_aoi / uf_aoi_ast
-
-    uf_global = uf_am_at * uf_aoi_norm
+    uf_global = uf_am_at # since uf_aoi was deprecated, it's no more applied in this test
 
     assert (dc['p_mp'] * uf_global).sum() == energy
 
