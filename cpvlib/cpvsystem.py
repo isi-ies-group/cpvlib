@@ -270,8 +270,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
                                            m_high=self.module_parameters['ta_uf_m_high']/self.module_parameters['IscDNI_top'])
         return ta_uf
 
-    # NO SE USA!!! REVISAR!
-    def get_dni_util_factor(self, dni, dni_thld, dni_uf_m_low, dni_uf_m_high):
+    def get_dni_util_factor(self, dni, dni_thld=None, dni_uf_m_low=None, dni_uf_m_high=None):
         """
         Retrieves the utilization factor for DNI.
 
@@ -297,9 +296,16 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             the utilization factor for DNI.
         """
 
-        dni_uf = get_simple_util_factor(x=dni, thld=dni_thld,
-                                        m_low=dni_uf_m_low,
-                                        m_high=dni_uf_m_high)
+        if dni_thld is not None:
+            dni_uf = get_simple_util_factor(x=dni, thld=dni_thld,
+                                            m_low=dni_uf_m_low,
+                                            m_high=dni_uf_m_high)
+        else:
+            dni_uf = get_simple_util_factor(x=dni, thld=self.module_parameters['dni_thld'],
+                                            m_low=self.module_parameters['dni_uf_m_low'] /
+                                            self.module_parameters['IscDNI_top'],
+                                            m_high=self.module_parameters['dni_uf_m_high']/self.module_parameters['IscDNI_top'])
+
         return dni_uf
 
     def get_global_utilization_factor(self, airmass_absolute, temp_air):
