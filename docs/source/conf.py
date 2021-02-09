@@ -36,7 +36,7 @@ extensions = ['IPython.sphinxext.ipython_console_highlighting',
               'sphinxcontrib.apidoc',
               'sphinx.ext.napoleon']
 
-# napoleon_use_rtype = False  # group rtype on same line together with return
+napoleon_use_rtype = False  # group rtype on same line together with return
 
 # APIdoc auto
 apidoc_module_dir = '../../cpvlib'
