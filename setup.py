@@ -21,10 +21,10 @@ setup_args = dict(
 )
 
 INSTALL_REQUIRES = [
-    'numpy=1.20',
-    'pandas=1.2',
-    'pvlib=0.8',
-    'matplotlib=3.3'
+    'numpy==1.20',
+    'pandas==1.2',
+    'pvlib==0.8',
+    'matplotlib==3.3'
 ]
 
 EXTRAS_REQUIRE = {
