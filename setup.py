@@ -20,11 +20,24 @@ setup_args = dict(
     include_package_data=True,
 )
 
-install_requires = [
-    'numpy',
-    'pandas',
-    'pvlib'
+INSTALL_REQUIRES = [
+    'numpy=1.20',
+    'pandas=1.2',
+    'pvlib=0.8',
+    'matplotlib=3.3'
 ]
 
+EXTRAS_REQUIRE = {
+    'doc': ['ipython', 'matplotlib', 'sphinx == 3.1.2',
+            'sphinx_rtd_theme==0.5.0', 'sphinx-gallery']
+}
+
+TESTS_REQUIRE = ['pytest', 'pytest-mock']
+
 if __name__ == '__main__':
-    setup(**setup_args, install_requires=install_requires)
+    setup(
+    **setup_args,
+    install_requires=INSTALL_REQUIRES,
+    extras_require=EXTRAS_REQUIRE,
+    tests_require=TESTS_REQUIRE
+    )
