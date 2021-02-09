@@ -17,4 +17,4 @@ __pycache__/
 
 # docs
 *.tests.rst
-docs/
+docs/build
