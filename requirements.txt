@@ -21,4 +21,4 @@ pytest == 6.2.2
 pytest-mock == 3.5.1
 
 # C:\Users\Ruben\Documents\GitHub\cpvlib\setup.py: 3
-setuptools == 49.6.0.post20210108
+setuptools == 49
