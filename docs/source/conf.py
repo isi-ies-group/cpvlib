@@ -32,7 +32,17 @@ release = '0.1'
 # ones.
 extensions = ['IPython.sphinxext.ipython_console_highlighting',
               'IPython.sphinxext.ipython_directive',
-              'sphinx.ext.autodoc']
+              'sphinx.ext.autodoc',
+              'sphinxcontrib.apidoc',
+              'sphinx.ext.napoleon']
+
+# napoleon_use_rtype = False  # group rtype on same line together with return
+
+# APIdoc auto
+apidoc_module_dir = '../../cpvlib'
+apidoc_output_dir = '.'
+apidoc_excluded_paths = ['tests', 'StaticHybridSystem_tmy.py', 'module_parameters.py']
+apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

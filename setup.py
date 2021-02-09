@@ -29,7 +29,8 @@ INSTALL_REQUIRES = [
 
 EXTRAS_REQUIRE = {
     'doc': ['ipython', 'matplotlib', 'sphinx == 3.1.2',
-            'sphinx_rtd_theme==0.5.0', 'sphinx-gallery']
+            'sphinx_rtd_theme==0.5.0', 'sphinx-gallery',
+            'sphinxcontrib-apidoc']
 }
 
 TESTS_REQUIRE = ['pytest', 'pytest-mock']
