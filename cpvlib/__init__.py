@@ -1,1 +1,1 @@
-from . import cpvsystem
+from cpvlib import cpvsystem
