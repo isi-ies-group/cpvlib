@@ -1,0 +1,46 @@
+.. _whatsnew_0100:
+
+v0.1.0 (XXXX XX, XXX)
+-----------------------
+
+This is the first official release of the cpvlib project.
+
+
+API changes
+~~~~~~~~~~~
+
+
+New features
+~~~~~~~~~~~~
+
+* Everything ;)
+
+Other changes
+~~~~~~~~~~~~~
+
+
+Documentation
+~~~~~~~~~~~~~
+
+* Using readthedocs for documentation hosting.
+
+
+Testing
+~~~~~~~
+
+
+
+Bug fixes
+~~~~~~~~~
+
+
+
+Contributors
+~~~~~~~~~~~~
+
+This list includes the contributors, in alphabetical order, to 
+`cpvlib <https://github.com/isi-ies-group/cpvlib>`_
+
+* César Domínguez
+* Marcos Moreno
+* Rubén Núñez
