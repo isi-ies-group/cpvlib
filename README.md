@@ -3,7 +3,6 @@
 <a href="http://cpvlib.readthedocs.org/">
   <img src="https://readthedocs.org/projects/cpvlib/badge/?style=plastic" alt="RTD doc" />
 </a>
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/isi-ies-group/cpvlib/blob/master/docs/examples/StaticHybridSystem_tmy.ipynb)
 
 The `cpvlib` library is a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python) that models CPV systems.
 
