@@ -14,7 +14,7 @@ The source code for cpvlib python is hosted on `github
 
 Please see the :ref:`installation` page for installation help.
 
-For examples of how to use cpvlib, please see :ref:`package_overview.
+For examples of how to use cpvlib, please see :ref:`package_overview`.
 
 ..
     and our `Jupyter Notebook tutorials
