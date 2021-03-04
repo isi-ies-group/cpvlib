@@ -10,7 +10,7 @@ It is built in file `cpvlib.py`, that contains the `cpvsystem` module with follo
 
 <img src="docs/source/_images/cpvlib_schema.png" width="600" alt="cpvlib classes schema">
 
-A more detailed description can be found in the Documentation at [readthedocs](http://cpvlib.readthedocs.io/en/stable/).
+A more detailed description can be found in the Documentation at [readthedocs](http://cpvlib.readthedocs.io).
 
 ## Library installation & usage
 
