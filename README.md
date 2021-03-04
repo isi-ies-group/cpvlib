@@ -8,13 +8,25 @@ It is built in file `cpvlib.py`, that contains the `cpvsystem` module with follo
 * StaticFlatPlateSystem
 * StaticHybridSystem
 
+<img src="docs/source/_images/cpvlib_schema.png" width="600" alt="cpvlib classes schema">
+
+A more detailed description can be found in the Documentation at [readthedocs](http://cpvlib.readthedocs.io/en/stable/).
+
 ## Library installation & usage
+
+*Pre-release installation*
 `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
 `from cpvlib import cpvsystem`
 `cpvsystem.StaticHybridSystem(...)`
 
-## Live Jupyter notebook demo without installation (on Binder)
-* StaticHybridSystem_tmy.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=docs/examples/StaticHybridSystem_tmy.ipynb)
+## License
+
+TBD
+
+## Live Jupyter notebook demo
+StaticHybridSystem_tmy.ipynb
+* Binder [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=docs/examples/StaticHybridSystem_tmy.ipynb)
+* Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/isi-ies-group/cpvlib/blob/master/docs/examples/StaticHybridSystem_tmy.ipynb)
 
 Testing dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3346823.svg)](https://doi.org/10.5281/zenodo.3346823)
