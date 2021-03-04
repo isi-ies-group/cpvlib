@@ -14,11 +14,13 @@ The source code for cpvlib python is hosted on `github
 
 Please see the :ref:`installation` page for installation help.
 
-For examples of how to use cpvlib, please see
-:ref:`package_overview` and our `Jupyter Notebook tutorials
-<http://jupyter.ipython.org/github/isi-ies-group/cpvlib/tree/master/docs/
-tutorials/>`_. The documentation assumes general familiarity with
-Python, NumPy, and Pandas.
+For examples of how to use cpvlib, please see :ref:`package_overview.
+
+..
+    and our `Jupyter Notebook tutorials
+    <https://nbviewer.jupyter.org/github/isi-ies-group/cpvlib/tree/master/docs/examples/>`_.
+
+The documentation assumes general familiarity with Python, NumPy, and Pandas.
 
 
 Contents
