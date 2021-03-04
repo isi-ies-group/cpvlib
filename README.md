@@ -26,7 +26,8 @@ TBD
 
 ## Live Jupyter notebook demo
 StaticHybridSystem_tmy.ipynb
-* Binder [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=docs/examples/StaticHybridSystem_tmy.ipynb)
+<!---* Binder [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/isi-ies-group/cpvlib/master?filepath=docs/examples/StaticHybridSystem_tmy.ipynb)
+--->
 * Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/isi-ies-group/cpvlib/blob/master/docs/examples/StaticHybridSystem_tmy.ipynb)
 
 <!---

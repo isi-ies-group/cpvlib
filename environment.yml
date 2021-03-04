@@ -1,8 +1,0 @@
-# env file for Binder
-name: cpvlib-environment
-channels:
-  - conda-forge
-dependencies:
-  - pvlib::pvlib
-  - matplotlib
-  - pandas
