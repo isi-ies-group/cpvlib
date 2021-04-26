@@ -19,7 +19,7 @@ A more detailed description can be found in the Documentation at [readthedocs](h
 
 ## Library installation & usage
 
-*Pre-release installation*
+*Installation from source*
 `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
 `from cpvlib import cpvsystem`

@@ -12,7 +12,8 @@ photovoltaic energy systems.
 The source code for cpvlib python is hosted on `github
 <https://github.com/isi-ies-group/cpvlib/>`_.
 
-Please see the :ref:`installation` page for installation help.
+Installation from source
+    `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
 For examples of how to use cpvlib, please see :ref:`package_overview`.
 
