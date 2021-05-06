@@ -4,7 +4,7 @@
   <img src="https://readthedocs.org/projects/cpvlib/badge/?style=plastic" alt="RTD doc" />
 </a>
 
-The `cpvlib` library is a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python) that models CPV systems.
+`cpvlib` is a python package for modeling CPV systems built as a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python).
 
 It is built in file `cpvlib.py`, that contains the `cpvsystem` module with following classes:
 
@@ -25,9 +25,19 @@ A more detailed description can be found in the Documentation at [readthedocs](h
 `from cpvlib import cpvsystem`
 `cpvsystem.StaticHybridSystem(...)`
 
+## Contributing
+
+Please see the [Contributing page](http://cpvlib.readthedocs.io/en/latest/contributing.html) for more on how you can contribute.
+
 ## License
 
 TBD
+
+## Getting support
+
+If you suspect that you may have discovered a bug or if you'd like to
+change something about cpvlib, then please make an issue on the
+[GitHub issues page](https://github.com/isi-ies-group/issues).
 
 ## Live Jupyter notebook demo
 StaticHybridSystem_tmy.ipynb

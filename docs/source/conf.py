@@ -22,7 +22,7 @@ copyright = '2021, ISI-IES group at UPM'
 author = 'ISI-IES group at UPM'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------

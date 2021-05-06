@@ -32,6 +32,7 @@ Contents
 
    package_overview
    introtutorial
+   contributing
    whatsnew
    cpvlib.cpvsystem
 

@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup_args = dict(
     name="cpvlib",
-    version="0.1.0",
+    use_scm_version=True,
     url='http://github.com/isi-ies-group/cpvlib',
     author="IES-UPM ISI Group",
     author_email="info@ies.upm.es",
@@ -40,5 +40,6 @@ if __name__ == '__main__':
     **setup_args,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
-    tests_require=TESTS_REQUIRE
+    tests_require=TESTS_REQUIRE,
+    setup_requires=['setuptools_scm'],
     )
