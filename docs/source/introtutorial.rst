@@ -5,8 +5,11 @@ Intro Tutorial
 
 This page contains introductory examples of cpvlib usage.
 
+.. image:: _images/cpvlib_mods.png
+  :width: 800
+
 .. image:: _images/cpvlib_schema.png
-  :width: 600
+  :width: 800
 
 Here you can find an example based on a Jupyter notebook ready to be launched:
 
