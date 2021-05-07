@@ -13,8 +13,8 @@ It is built in file `cpvlib.py`, that contains the `cpvsystem` module with follo
 * StaticFlatPlateSystem
 * StaticHybridSystem
 
-<img src="docs/source/_images/cpvlib_mods.png" width="600" alt="cpvlib classes">
-<img src="docs/source/_images/cpvlib_schema.png" width="600" alt="cpvlib classes schema">
+<img src="docs/source/_images/cpvlib_mods.png" width="800" alt="cpvlib classes">
+<img src="docs/source/_images/cpvlib_schema.png" width="800" alt="cpvlib classes schema">
 
 A more detailed description can be found in the Documentation at [readthedocs](http://cpvlib.readthedocs.io).
 

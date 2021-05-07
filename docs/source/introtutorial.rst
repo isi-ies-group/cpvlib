@@ -5,9 +5,6 @@ Intro Tutorial
 
 This page contains introductory examples of cpvlib usage.
 
-.. image:: _images/cpvlib_mods.png
-  :width: 600
-  
 .. image:: _images/cpvlib_schema.png
   :width: 600
 
