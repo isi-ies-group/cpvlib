@@ -2,6 +2,6 @@ cpvlib.cpvsystem module
 =======================
 
 .. automodule:: cpvlib.cpvsystem
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
