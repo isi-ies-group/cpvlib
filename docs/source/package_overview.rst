@@ -15,6 +15,6 @@ Getting support
 ---------------
 
 If you suspect that you may have discovered a bug or if you'd like to
-change something about cpvlib, then please make an issue on our
+change something about pcvlib, then please make an issue on our
 `GitHub issues page <https://github.com/isi-ies-group/cpvlib/issues>`_ .
 
