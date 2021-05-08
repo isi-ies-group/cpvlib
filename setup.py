@@ -13,8 +13,11 @@ setup_args = dict(
     author_email="info@ies.upm.es",
     description="CPV Systems modeling",
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
-        "Operating System :: Windows",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering",
     ],
     python_requires='>=3.6',
     packages=['cpvlib'],
