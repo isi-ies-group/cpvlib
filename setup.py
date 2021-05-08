@@ -2,9 +2,12 @@
 
 from setuptools import setup
 
+def local_scheme(version):
+    return ""
+
 setup_args = dict(
     name="cpvlib",
-    use_scm_version=True,
+    use_scm_version={"local_scheme": local_scheme},
     url='http://github.com/isi-ies-group/cpvlib',
     author="IES-UPM ISI Group",
     author_email="info@ies.upm.es",
