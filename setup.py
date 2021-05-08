@@ -2,6 +2,18 @@
 
 from setuptools import setup
 
+LONG_DESCRIPTION = """
+`cpvlib` is an open source tool that provides a set of functions and classes 
+for simulating the performance of concentrator photovoltaic (CPV) systems,
+a specific type of photovoltiac systems composed of lenses and/or
+mirrors that focus sunlight onto small cells. It makes special emphasys on
+static micro CPV systems with internal tracking.
+
+Documentation: http://cpvlib.readthedocs.io
+Source code: https://github.com/isi-ies-group/cpvlib
+"""
+
+# monkey patch to make compatible setuptools_scm and publishing on TestPyPI
 def local_scheme(version):
     return ""
 
@@ -9,9 +21,10 @@ setup_args = dict(
     name="cpvlib",
     use_scm_version={"local_scheme": local_scheme},
     url='http://github.com/isi-ies-group/cpvlib',
-    author="IES-UPM ISI Group",
+    author="IES-UPM ISI Group & cpvlib Development Team",
     author_email="info@ies.upm.es",
     description="CPV Systems modeling",
+    long_description=LONG_DESCRIPTION,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
