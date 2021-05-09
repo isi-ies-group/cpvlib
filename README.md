@@ -4,6 +4,8 @@
   <img src="https://readthedocs.org/projects/cpvlib/badge/?style=plastic" alt="RTD doc" />
 </a>
 
+<img src="docs/source/_images/cpvlib_logo.png" width="800" alt="cpvlib logo">
+
 `cpvlib` is a python package for modeling CPV systems built as a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python).
 
 It is built in file `cpvlib.py`, that contains the `cpvsystem` module with following classes:
