@@ -22,11 +22,13 @@ A more detailed description can be found in the Documentation at [readthedocs](h
 
 ## Library installation & usage
 
-*Installation from source*
-`pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
+`pip install cpvlib`
 
 `from cpvlib import cpvsystem`
 `cpvsystem.StaticHybridSystem(...)`
+
+*Installation from source*
+`pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
 ## Contributing
 
