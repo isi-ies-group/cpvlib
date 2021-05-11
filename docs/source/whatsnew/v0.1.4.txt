@@ -1,9 +1,9 @@
 .. _whatsnew_0100:
 
-v0.1.0 (XXXX XX, XXX)
+v0.1.4 (2021-05-10)
 -----------------------
 
-This is the first official release of the cpvlib project.
+This is the first official release of the cpvlib project that is published on PyPI
 
 
 API changes
