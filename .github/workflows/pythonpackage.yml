@@ -55,6 +55,9 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
         
+    - name: Test tag name
+      run: echo "Hello tag ${{ github.ref }}"
+        
     - name: Publish package to PyPI
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@release/v1
