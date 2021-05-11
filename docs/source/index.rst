@@ -13,7 +13,7 @@ The source code for cpvlib python is hosted on `github
 <https://github.com/isi-ies-group/cpvlib/>`_.
 
 Installation
-`pip install cpvlib`
+    `pip install cpvlib`
 
 Installation from source
     `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
