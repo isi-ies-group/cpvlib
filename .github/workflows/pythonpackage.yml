@@ -5,10 +5,10 @@ name: Python package
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  create:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+#  create:
 
 jobs:
   build-n-publish:
