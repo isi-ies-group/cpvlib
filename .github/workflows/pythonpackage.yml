@@ -4,9 +4,8 @@
 name: Python package
 
 on:
-  push:
-    tags:
-      - "*"
+  create:
+
 jobs:
   build-n-publish:
     runs-on: ubuntu-latest
