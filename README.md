@@ -30,6 +30,9 @@ A more detailed description can be found in the Documentation at [readthedocs](h
 *Installation from source*
 `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
+## Changelog
+[What’s New list](https://cpvlib.readthedocs.io/en/latest/whatsnew.html)
+
 ## Contributing
 
 Please see the [Contributing page](http://cpvlib.readthedocs.io/en/latest/contributing.html) for more on how you can contribute.
