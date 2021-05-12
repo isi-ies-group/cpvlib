@@ -17,7 +17,7 @@ authors:
     orcid: 0000-0002-2751-7208
     affiliation: "1,2"
 affiliations:
- - name: Instituto de Energía Solar, Universidad Politécnica de Madrid
+ - name: Instituto de Energía Solar, Universidad Politécnica de Madrid (IES-UPM)
    index: 1
  - name: Escuela Técnica Superior de Ingeniería y Diseño Industrial, Universidad Politécnica de Madrid
    index: 2
@@ -66,7 +66,7 @@ complete `StaticHybridSystem` as described in [@askins_performance_2019],
 [@nardin_2020]. The campaign data used in this validation can be found in
 [@askins_dataset_2019].
 The project started as a final degree's thesis in 2019 and it has been
-extended by the ISI-IES research group since then.
+extended since then by the ISI-IES research group at UPM.
 
 # Acknowledgements
 
