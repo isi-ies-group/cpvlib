@@ -14,6 +14,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
+# for generating GH links with linenumbers
+import inspect
 
 # -- Project information -----------------------------------------------------
 
@@ -68,6 +70,20 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# settings for sphinx-gallery
+sphinx_gallery_conf = {
+    'examples_dirs': ['../../examples'],  # location of gallery scripts
+    'gallery_dirs': ['auto_examples'],  # location of generated output
+    # sphinx-gallery only shows plots from plot_*.py files by default:
+    # 'filename_pattern': '*.py',
+
+    # directory where function/class granular galleries are stored
+    'backreferences_dir': 'generated/gallery_backreferences',
+
+    # Modules for which function/class level galleries are created. In
+    # this case only cpvlib, could include others though.  must be tuple of str
+    'doc_module': ('cpvlib',),
+}
 
 # %% helper functions for intelligent "View on Github" linking
 # based on
@@ -128,7 +144,7 @@ def make_github_url(pagename):
     will have pagename = "auto_examples/plot_singlediode".
     """
 
-    URL_BASE = "https://github.com/pvlib/pvlib-python/blob/master/"
+    URL_BASE = "https://github.com/isi-ies-group/cpvlib/blob/master/"
 
     # is it a gallery page?
     if any(d in pagename for d in sphinx_gallery_conf['gallery_dirs']):
