@@ -1,0 +1,22 @@
+.. _whatsnew_0150:
+
+v0.1.5 (2022-02-18)
+-----------------------
+
+* Update of StaticFlatPlateSystem
+	- Rename get_irradiance -> get_effective_irradiance
+	- add get_iam() for dii
+	- add get_spillage_iam(), Spillage increases with aoi!
+	- all the irradiance components are effective
+
+* Fix and update .py & .ipynb example files.
+
+Contributors
+~~~~~~~~~~~~
+
+This list includes the contributors, in alphabetical order, to 
+`cpvlib <https://github.com/isi-ies-group/cpvlib>`_
+
+* César Domínguez
+* Marcos Moreno
+* Rubén Núñez
