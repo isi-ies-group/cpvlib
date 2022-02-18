@@ -5,6 +5,9 @@ import pvlib
 from cpvlib import cpvsystem
 from module_parameters import mod_params_cpv, mod_params_flatplate
 
+heat_dissipation_params_CPV = {'model': 'pvsyst', 'u_c': 29, 'u_v': 0.05} # insulated is 15, freestanding is 29
+heat_dissipation_params_flatplate = {'model': 'pvsyst', 'u_c': 24, 'u_v': 0.05}
+
 lat, lon = 40.4, -3.7
 
 data_pvgis = pvlib.iotools.get_pvgis_tmy(lat, lon)
@@ -26,7 +29,7 @@ location = pvlib.location.Location(
 solar_zenith = location.get_solarposition(data.index).zenith
 solar_azimuth = location.get_solarposition(data.index).azimuth
 
-#%%
+# %%
 # StaticHybridSystem
 static_hybrid_sys = cpvsystem.StaticHybridSystem(
     surface_tilt=30,
@@ -39,7 +42,9 @@ static_hybrid_sys = cpvsystem.StaticHybridSystem(
     strings_per_inverter=1,
     inverter=None,
     inverter_parameters=None,
-    racking_model="insulated",
+    temperature_model_parameters_cpv=heat_dissipation_params_CPV,
+    temperature_model_parameters_flatplate=heat_dissipation_params_flatplate,
+    # racking_model="freestanding", #not used because temp model parameters are already defined
     losses_parameters=None,
     name=None,
 )
@@ -48,18 +53,18 @@ static_hybrid_sys = cpvsystem.StaticHybridSystem(
 data['dii_effective'], data['poa_flatplate_static_effective'] = static_hybrid_sys.get_effective_irradiance(
     solar_zenith,
     solar_azimuth,
-    # iam_param=0.7,
-    # aoi_limit=55,
     dii=None,
     ghi=data['ghi'],
     dhi=data['dhi'],
-    dni=data['dni']
+    dni=data['dni'],
+    spillage=0.15 # Percentage of direct irradiance allowed to the flat plate within AOI range. This number comes from module 120.
+    # Spillage is highly dependent on the tracking accuracy of each module.
 )
 
 # pvsyst_celltemp
 data['temp_cell_35'], data['temp_cell_flatplate'] = static_hybrid_sys.pvsyst_celltemp(
     dii=data['dii_effective'],
-    poa_flatplate_static=data['poa_flatplate_static_effective'],
+    poa_flatplate_static=data['poa_flatplate_static_effective'] + data['dii_effective'], # It is very important to add direct light as well
     temp_air=data['temp_air'],
     wind_speed=data['wind_speed']
 )
@@ -78,8 +83,8 @@ dc_cpv, dc_flatplate = static_hybrid_sys.singlediode(
 
 # uf_global (uf_am, uf_temp_air)
 data['am'] = location.get_airmass(data.index).airmass_absolute
-
-uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(data['am'], data['temp_air'])
+uf_cpv = static_hybrid_sys.get_global_utilization_factor_cpv(
+    data['am'], data['temp_air'])
 
 # Power
 cpv_days = dc_cpv['2010-06-15':'2010-06-20']
@@ -90,7 +95,8 @@ data_days = data['2010-06-15':'2010-06-20']
 fig, axs = plt.subplots(2)
 
 (cpv_days.p_mp * uf_cpv_days).plot(ax=axs[0], legend=True, label="CPV")
-flatplate_days.p_mp.plot(ax=axs[0], secondary_y=True, legend=True, label="Flat plate")
+flatplate_days.p_mp.plot(
+    ax=axs[0], secondary_y=True, legend=True, label="Flat plate")
 data_days[['dni', 'dhi']].plot(ax=axs[1], linewidth=1)
 
 # Energy

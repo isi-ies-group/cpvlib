@@ -73,6 +73,10 @@ mod_params_flatplate = {
     "eta_m": 0.1,  # valor por defecto de pvsyst_celltemp()
     "alpha_absorption": 0.9,  # valor por defecto de pvsyst_celltemp()
     "aoi_limit": 55,
+    "theta_ref": [0, 90],
+    "iam_ref": [1, 1],
+    "theta_ref_spillage": [0, 90],
+    "iam_ref_spillage": [1, 1],
     # "Area": 1.2688,
     # "Impo": 8.3, # parámetro de sapm()
     # "Vmpo": 43.9, # parámetro de sapm()
@@ -258,26 +262,6 @@ def test_StaticFlatPlateSystem_get_aoi():
 #     assert np.round(iam, 4) == 0.8917
 
 
-def test_StaticFlatPlateSystem_get_irradiance():
-    static_flatsystem = cpvsystem.StaticFlatPlateSystem(
-        surface_tilt=32, surface_azimuth=135, module_parameters=mod_params_flatplate)
-    times = pd.date_range(start='20160101 1200-0700',
-                          end='20160101 1800-0700', freq='6H')
-    location = pvlib.location.Location(latitude=32, longitude=-111)
-    solar_position = location.get_solarposition(times)
-    irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
-                          index=times)
-    irradiance = static_flatsystem.get_irradiance(solar_position['apparent_zenith'],
-                                                  solar_position['azimuth'],
-                                                  irrads['dni'],
-                                                  irrads['ghi'],
-                                                  irrads['dhi'])
-
-    expected = pd.Series(data=np.array([137.794154,  0.0]), index=times)
-
-    pd.testing.assert_series_equal(irradiance, expected, rtol=0.0001)
-
-
 def test_StaticFlatPlateSystem_get_effective_irradiance():
     static_flatsystem = cpvsystem.StaticFlatPlateSystem(
         surface_tilt=32, surface_azimuth=135, module_parameters=mod_params_flatplate)
@@ -287,15 +271,15 @@ def test_StaticFlatPlateSystem_get_effective_irradiance():
     solar_position = location.get_solarposition(times)
     irrads = pd.DataFrame({'dni': [900, 0], 'ghi': [600, 0], 'dhi': [100, 0]},
                           index=times)
-    eff_irr = static_flatsystem.get_effective_irradiance(solar_position['apparent_zenith'],
-                                                         solar_position['azimuth'],
-                                                         irrads['dni'],
-                                                         irrads['ghi'],
-                                                         irrads['dhi'])
+    irradiance = static_flatsystem.get_effective_irradiance(solar_position['apparent_zenith'],
+                                                  solar_position['azimuth'],
+                                                  irrads['dni'],
+                                                  irrads['ghi'],
+                                                  irrads['dhi'])
 
     expected = pd.Series(data=np.array([137.794154,  0.0]), index=times)
 
-    pd.testing.assert_series_equal(eff_irr, expected, rtol=0.0001)
+    pd.testing.assert_series_equal(irradiance, expected, rtol=0.0001)
 
 
 def test_StaticFlatPlateSystem_pvsyst_celltemp(mocker):

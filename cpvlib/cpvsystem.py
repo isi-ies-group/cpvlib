@@ -331,7 +331,7 @@ class CPVSystem(pvlib.pvsystem.PVSystem):
             absolute airmass.
         temp_air : numeric
             Ambient dry bulb temperature in degrees C.
-            
+
         Returns
         -------
         uf_global : numeric
@@ -719,30 +719,15 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
                                        solar_zenith, solar_azimuth)
         return aoi
 
-    def get_iam(self, aoi, aoi_thld, m1, b1, m2, b2):
+    def get_iam(self, aoi):
         """
-        Determines the angle of incidence modifier using a two-step piecewise regression function.
-        TO BE VALIDATED
+        Determines the angle of incidence modifier for the dii part
 
         Parameters
         ----------
         aoi : numeric
             The angle of incidence in degrees.
 
-        aoi_thld : numeric
-            limit between the two regression lines of the IAM.
-
-        m1 : numeric
-            slope of the first regression line of the IAM.
-
-        b1 : numeric
-            intercept of the first regression line of the IAM.
-
-        m2 : numeric
-            slope of the second regression line of the IAM.
-
-        b2 : numeric
-            intercept of the first regression line of the IAM.
 
         Returns
         -------
@@ -750,43 +735,57 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
             The AOI modifier.
 
         """
-        if isinstance(aoi, (int, float)):
-            aoi_values = float(aoi)
-        else:
-            aoi_values = aoi.values
-
-        if 'aoi_limit' in self.module_parameters:
-            aoi_limit = self.module_parameters['aoi_limit']
-        else:
+        if self.module_parameters['theta_ref'] is None or self.module_parameters['iam_ref'] is None:
             raise AttributeError(
-                'Missing "aoi_limit" parameter in "module_parameters"')
-
-        condlist = [aoi_values < aoi_limit,
-                    (aoi_limit <= aoi_values) & (aoi_values < aoi_thld)]
-        funclist = [lambda x:x*m1+b1, lambda x:x*m2+b2]
-
-        if isinstance(aoi, (int, float)):
-            iam = np.piecewise(aoi, condlist, funclist)
+                'Missing IAM parameter (interp:theta_ref or iam_ref) in "module_parameters"')
         else:
-            iam = pd.Series(np.piecewise(
-                aoi_values, condlist, funclist), index=aoi.index)
+            iam = pvlib.iam.interp(
+                aoi, self.module_parameters['theta_ref'], self.module_parameters['iam_ref'], method='linear')
 
         return iam
 
-    def get_irradiance(self, solar_zenith, solar_azimuth, dni=None,
+
+    def get_spillage_iam(self, aoi):
+        """
+        Determines the spillage using an specific IAM that accounts for the spot size.
+        Since the spot increases, IAM values shoud be > 1
+
+        Parameters
+        ----------
+        aoi : numeric
+            The angle of incidence in degrees.
+
+
+        Returns
+        -------
+        iam : numeric
+            The AOI modifier.
+
+        """
+        if self.module_parameters['theta_ref_spillage'] is None or self.module_parameters['iam_ref_spillage'] is None:
+            raise AttributeError(
+                'Missing IAM parameter (interp:theta_ref_spillage or iam_ref_spillage) in "module_parameters"')
+        else:
+            spillage_iam = pvlib.iam.interp(
+                aoi, self.module_parameters['theta_ref_spillage'], self.module_parameters['iam_ref_spillage'], method='linear')
+
+        return spillage_iam
+    
+    
+    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni=None,
                        ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
                        airmass=None, model='haydavies', spillage=0, **kwargs):
         """
         Calculates the plane of array irradiance of a Static Flat Plate system
         from dii and gii. If any is missing then is calculated from ghi, dhi and dhi
         using corresponding pvlib function.
-        
+
         Internal `aoi_limit` parameter from `module_parameters` sets the limit
         of tracking of the Static CPV system and therefore when the dii irradiance
         is added to the poa_diffuse.
-        
+
         Spillage factor accounts for the dii fraction that is allowed to pass into the system
-        
+
         See https://doi.org/10.1002/pip.3387 for details
 
         Parameters
@@ -863,9 +862,14 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
         else:
             poa_diffuse = gii - dii
 
-        poa_diffuse += dii * spillage
-
         aoi = self.get_aoi(solar_zenith, solar_azimuth)
+
+        dii_effective = dii * self.get_iam(aoi)
+        gii_effective = dii_effective + poa_diffuse
+        
+        spillage_effective = spillage * self.get_spillage_iam(aoi)
+        
+        poa_diffuse_dii_effective_spillage = poa_diffuse + (dii_effective * spillage_effective)
 
         if 'aoi_limit' in self.module_parameters:
             aoi_limit = self.module_parameters['aoi_limit']
@@ -873,41 +877,8 @@ class StaticFlatPlateSystem(pvlib.pvsystem.PVSystem):
             raise AttributeError(
                 'Missing "aoi_limit" parameter in "module_parameters"')
 
-        poa_flatplate_static = pd.concat(
-            [poa_diffuse[aoi < aoi_limit], gii[aoi > aoi_limit]]).sort_index()
-
-        return poa_flatplate_static
-
-    def get_effective_irradiance(self, solar_zenith, solar_azimuth, dni=None,
-                                 ghi=None, dhi=None, dii=None, gii=None, dni_extra=None,
-                                 airmass=None, model='haydavies', spillage=0, aoi_thld=None, **kwargs):
-        """
-        Calculates the effective irradiance (taking into account the IAM)
-        TO BE VALIDATED
-
-        Parameters
-        ----------
-        solar_zenith : float or Series
-            Solar zenith angle.
-        solar_azimuth : float or Series
-            Solar azimuth angle.
-        dni : float or Series
-            Direct Normal Irradiance
-
-        Returns
-        -------
-        poa_flatplate_static_effective : float or Series
-            Effective Direct (on the) Inclinated (plane) Irradiance
-            Plane of array irradiance plus the effect of AOI
-        """
-
-        poa_flatplate_static = self.get_irradiance(solar_zenith, solar_azimuth, dni=dni,
-                                                   ghi=ghi, dhi=dhi, dii=dii, gii=gii, dni_extra=dni_extra,
-                                                   airmass=airmass, model=model, spillage=spillage, **kwargs)
-
-        # * self.get_iam(
-        poa_flatplate_static_effective = poa_flatplate_static
-        # aoi=aoi, aoi_thld=aoi_thld, m1=1, b1=0, m2=1, b2=0)
+        poa_flatplate_static_effective = pd.concat(
+            [poa_diffuse_dii_effective_spillage[aoi < aoi_limit], gii_effective[aoi > aoi_limit]]).sort_index()
 
         return poa_flatplate_static_effective
 
@@ -955,7 +926,7 @@ class StaticHybridSystem():
     the system, such the type of module and the inverter. The instance
     methods accept arguments for things that do change, such as
     irradiance and temperature.
-    
+
     See https://doi.org/10.1002/pip.3387
 
     Parameters
@@ -1007,6 +978,7 @@ class StaticHybridSystem():
         Arbitrary keyword arguments.
         Included for compatibility, but not used.
     """
+
     def __init__(self,
                  surface_tilt=30,
                  surface_azimuth=180,
@@ -1180,9 +1152,9 @@ class StaticHybridSystem():
             Direct (on the) Inclinated (plane) Irradiance [StaticCPVSystem]
         poa_flatplate_static : numeric
             Plane of Array Irradiance [StaticFlatPlateSystem]
-        
+
         See pvsystem.pvsyst_celltemp for details
-            
+
         Returns
         -------
         See pvsystem.pvsyst_celltemp for details
@@ -1256,13 +1228,13 @@ class StaticHybridSystem():
             absolute airmass.
         temp_air : numeric
             Ambient dry bulb temperature in degrees C.
-            
+
         Returns
         -------
         uf_global : numeric
             the global utilization factor.
         """
-        
+
         uf_am = self.static_cpv_sys.get_am_util_factor(
             airmass=airmass_absolute)
 

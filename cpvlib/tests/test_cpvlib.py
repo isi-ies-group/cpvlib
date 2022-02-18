@@ -73,6 +73,10 @@ mod_params_flatplate = {
     "eta_m": 0.1,  # defult value of pvsyst_celltemp()
     "alpha_absorption": 0.9,  # defult value of pvsyst_celltemp()
     "aoi_limit": 55,
+    "theta_ref": [0, 90],
+    "iam_ref": [1, 1],
+    "theta_ref_spillage": [0, 90],
+    "iam_ref_spillage": [1, 1],
     # "Area": 1.2688,
     # "Impo": 8.3, # parameter of sapm()
     # "Vmpo": 43.9, # parameter of sapm()
@@ -266,7 +270,7 @@ def test_StaticHybridSystem_composicion_2019_05(data):
     )
 
     # el aoi de difusa es el mismo que cpv
-    data['poa_flatplate_static'] = static_flatplate_sys.get_irradiance(solar_zenith,
+    data['poa_flatplate_static'] = static_flatplate_sys.get_effective_irradiance(solar_zenith,
                                                                        solar_azimuth,
                                                                        aoi=data['aoi'],
                                                                        # aoi_limit=55, # ahora pasa por module_params
