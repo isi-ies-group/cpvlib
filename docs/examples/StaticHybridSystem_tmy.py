@@ -100,7 +100,4 @@ flatplate_days.p_mp.plot(
 data_days[['dni', 'dhi']].plot(ax=axs[1], linewidth=1)
 
 # Energy
-energy_cpv = (dc_cpv['p_mp'] * uf_cpv).sum()
-energy_flatplate = dc_flatplate['p_mp'].sum()
 
-print(f"E_CPV={energy_cpv:.0f} Wh", f"E_diff={energy_flatplate:.0f} Wh")
