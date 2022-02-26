@@ -5,8 +5,8 @@ import pvlib
 from cpvlib import cpvsystem
 from module_parameters import mod_params_cpv, mod_params_flatplate
 
-heat_dissipation_params_CPV = {'model': 'pvsyst', 'u_c': 29, 'u_v': 0.05} # insulated is 15, freestanding is 29
-heat_dissipation_params_flatplate = {'model': 'pvsyst', 'u_c': 24, 'u_v': 0.05}
+heat_dissipation_params_CPV = {'model': 'pvsyst', 'u_c': 9.5, 'u_v': 0}
+heat_dissipation_params_flatplate = {'model': 'pvsyst', 'u_c': 24, 'u_v': 0.05} # insulated is 15, freestanding is 29
 
 lat, lon = 40.4, -3.7
 
