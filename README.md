@@ -43,9 +43,7 @@ TBD
 
 ## Getting support
 
-If you suspect that you may have discovered a bug or if you'd like to
-change something about cpvlib, then please make an issue on the
-[GitHub issues page](https://github.com/isi-ies-group/issues).
+If you suspect that you may have discovered a bug or if you'd like to change something about cpvlib, then please make an issue on the [GitHub issues page](https://github.com/isi-ies-group/issues).
 
 ## Live Jupyter notebook demo
 StaticHybridSystem_tmy.ipynb
