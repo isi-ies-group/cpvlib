@@ -31,19 +31,19 @@ A more detailed description can be found in the Documentation at [readthedocs](h
 *Installation from source*
 `pip install --force-reinstall --no-deps git+https://github.com/isi-ies-group/cpvlib.git`
 
+## Reference Publication
+> R. Núñez, M. Moreno, R. Herrero, S. Askins, I. Antón, and C. Domínguez, “cpvlib: A comprehensive open-source tool for modeling CPV systems,” Solar Energy Materials and Solar Cells, vol. 279, p. 113245, Jan. 2025, doi: [10.1016/j.solmat.2024.113245](https://doi.org/10.1016/j.solmat.2024.113245)
+
 ## Changelog
 [What’s New list](https://cpvlib.readthedocs.io/en/latest/whatsnew.html)
 
 ## Contributing
-
 Please see the [Contributing page](http://cpvlib.readthedocs.io/en/latest/contributing.html) for more on how you can contribute.
  
 ## License
-
 BSD 3-Clause [License](https://github.com/isi-ies-group/cpvlib/blob/master/LICENSE)
 
 ## Getting support
-
 If you suspect that you may have discovered a bug or if you'd like to change something about cpvlib, then please make an issue on the [GitHub issues page](https://github.com/isi-ies-group/issues).
 
 ## Live Jupyter notebook demo
