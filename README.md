@@ -6,7 +6,8 @@
 
 <img src="docs/source/_images/cpvlib_logo.png" width="800" alt="cpvlib logo">
 
-`cpvlib` is a python package for modeling CPV systems built as a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python).
+`cpvlib` is a python package for modeling CPV systems built as a layer over [`pvlib-python`](https://github.com/pvlib/pvlib-python).  
+>`cpvlib` is an idependent project not affiliated with `pvlib`
 
 It is built in file `cpvlib.py`, that contains the `cpvsystem` module with following classes:
 
@@ -39,7 +40,7 @@ Please see the [Contributing page](http://cpvlib.readthedocs.io/en/latest/contri
  
 ## License
 
-TBD
+BSD 3-Clause [License](https://github.com/isi-ies-group/cpvlib/blob/master/LICENSE)
 
 ## Getting support
 
