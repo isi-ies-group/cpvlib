@@ -26,9 +26,7 @@ jobs:
     - name: Install Python 3.7
       run: |
         sudo apt update
-        sudo apt install -y python3.7 python3.7-dev python3.7-venv
-        python3.7 -m venv venv
-        source venv/bin/activate
+        sudo apt install -y python3.7
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
