@@ -9,6 +9,8 @@ cpvlib library is a layer over `pvlib-python
 functions and classes for simulating the performance of concentrator
 photovoltaic energy systems.
 
+``cpvlib is an idependent project not affiliated with pvlib``
+
 The source code for cpvlib python is hosted on `github
 <https://github.com/isi-ies-group/cpvlib/>`_.
 
