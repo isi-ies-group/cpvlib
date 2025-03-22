@@ -20,14 +20,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install Python 3.7
-      run: |
-          sudo apt update
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt install -y python3.7
+    # - name: Install Python 3.7
+    #   run: |
+    #       sudo apt update
+    #       sudo add-apt-repository ppa:deadsnakes/ppa
+    #       sudo apt install -y python3.7
     
     - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.7'
         
@@ -74,5 +74,5 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
+        # repository_url: https://test.pypi.org/legacy/
         skip_existing: true
